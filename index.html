@@ -220,8 +220,21 @@
         .gc-owner { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
         .gc-empty { padding: 22px 8px; text-align: center; color: var(--text-2); font-size: 14px; }
 
-        .gc-item.is-owner { padding-right: 48px; box-sizing: border-box; }
-        .gc-item.is-owner .gc-copy { right: 57px; }
+        .gc-item.is-owner { padding-right: 96px; box-sizing: border-box; }
+        .gc-item.is-owner .gc-copy { right: 105px; }
+        .gc-edit {
+            position: absolute; right: 48px; top: 50%;
+            width: 40px; height: 40px; margin-top: -20px;
+            min-height: 0 !important; aspect-ratio: 1 / 1; padding: 0;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; cursor: pointer;
+            border: 1px solid rgba(110, 140, 255, 0.5);
+            background: rgba(110, 140, 255, 0.16);
+            color: #9db4ff;
+        }
+        .gc-edit svg { display: block; }
+        .gc-edit:active { transform: scale(0.9); }
+        .gc-item.is-editing .gc-edit { background: #5b78ff; border-color: #5b78ff; color: #fff; }
         .gc-del {
             position: absolute; right: 0; top: 50%;
             width: 40px; height: 40px; margin-top: -20px;
@@ -1251,6 +1264,7 @@ const GROUP_POLL_MS = 12 * 1000;
     const ICON_COPY = `<svg ${SVG_ATTR}><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H16"/></svg>`;
     const ICON_CHECK = `<svg ${SVG_ATTR}><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`;
     const ICON_TRASH = `<svg ${SVG_ATTR}><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>`;
+    const ICON_EDIT = `<svg ${SVG_ATTR}><path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3zM14 7l3 3"/></svg>`;
     const ICON_FAIL = `<svg ${SVG_ATTR}><path d="M6 6l12 12M18 6L6 18"/></svg>`;
     
     function refreshGroupStatuses() {
@@ -1319,6 +1333,20 @@ item.appendChild(link);
 item.appendChild(copyBtn);
             if (owner) {
                 item.classList.add("is-owner");
+                const editBtn = document.createElement("button");
+                editBtn.type = "button";
+                editBtn.className = "gc-edit";
+                editBtn.title = "Ubah grup";
+                editBtn.setAttribute("aria-label", "Ubah grup " + group.name);
+                editBtn.innerHTML = ICON_EDIT;
+                editBtn.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    groupListContainer.querySelectorAll(".gc-item.is-editing").forEach(el => el.classList.remove("is-editing"));
+                    item.classList.add("is-editing");
+                    if (window.openGroupEdit) window.openGroupEdit(group);
+                });
+                item.appendChild(editBtn);
                 const delBtn = document.createElement("button");
                 delBtn.type = "button";
                 delBtn.className = "gc-del";
@@ -1430,13 +1458,22 @@ closeGroupModal.addEventListener("click", () => {
         if (groupsFallback) {
             DEFAULT_GROUPS.forEach((g, i) => {
                 if (g.url === opt.removeUrl) return;
-                updates["items/" + ref.child("items").push().key] = { name: g.name, url: cleanGroupUrl(g.url), order: base + i };
+                const edited = opt.edit && g.url === opt.edit.oldUrl;
+                updates["items/" + ref.child("items").push().key] = {
+                    name: edited ? opt.edit.name : g.name,
+                    url: edited ? opt.edit.url : cleanGroupUrl(g.url),
+                    order: base + i
+                };
             });
         }
         if (opt.add) {
             updates["items/" + ref.child("items").push().key] = { name: opt.add.name, url: opt.add.url, order: base + 1000 };
         }
         if (opt.removeKey) updates["items/" + opt.removeKey] = null;
+        if (opt.edit && !groupsFallback && opt.edit.key) {
+            updates["items/" + opt.edit.key + "/name"] = opt.edit.name;
+            updates["items/" + opt.edit.key + "/url"] = opt.edit.url;
+        }
         await ref.update(updates);
     };
 
@@ -1450,14 +1487,38 @@ closeGroupModal.addEventListener("click", () => {
     const urlIn = document.getElementById("gcUrlInput");
     const saveBtn = document.getElementById("gcAddSave");
 
+    let editing = null;
+
+    function clearEditMark() {
+        groupListContainer.querySelectorAll(".gc-item.is-editing").forEach(el => el.classList.remove("is-editing"));
+    }
+
     function closeForm() {
+        editing = null;
+        clearEditMark();
+        saveBtn.textContent = "Simpan";
         form.hidden = true;
         toggle.hidden = false;
         nameIn.value = "";
         urlIn.value = "";
     }
 
+    window.openGroupEdit = function (group) {
+        editing = { key: group.key, oldUrl: group.url };
+        nameIn.value = group.name;
+        urlIn.value = cleanGroupUrl(group.url);
+        saveBtn.textContent = "Simpan Perubahan";
+        form.hidden = false;
+        toggle.hidden = true;
+        ownerMsg("Ubah nama atau link, lalu Simpan Perubahan.", "");
+        try { form.scrollIntoView({ block: "nearest", behavior: "smooth" }); } catch (e) {}
+        nameIn.focus();
+    };
+
     toggle.addEventListener("click", () => {
+        editing = null;
+        clearEditMark();
+        saveBtn.textContent = "Simpan";
         form.hidden = false;
         toggle.hidden = true;
         ownerMsg("", "");
@@ -1470,12 +1531,20 @@ closeGroupModal.addEventListener("click", () => {
         const code = getInviteCode(urlIn.value.trim());
         if (!name) return ownerMsg("Nama grup wajib diisi.", "err");
         if (!code) return ownerMsg("Link harus berupa link undangan chat.whatsapp.com.", "err");
-        if (whatsappGroups.some(g => getInviteCode(g.url) === code)) return ownerMsg("Link grup ini sudah ada.", "err");
+        const newUrl = "https://chat.whatsapp.com/" + code;
+        const self = editing;
+        if (whatsappGroups.some(g => getInviteCode(g.url) === code && !(self && g.url === self.oldUrl))) return ownerMsg("Link grup ini sudah ada.", "err");
         saveBtn.disabled = true;
         try {
-            await commitGroups({ add: { name: name, url: "https://chat.whatsapp.com/" + code } });
-            closeForm();
-            ownerMsg("Grup ditambahkan.", "ok");
+            if (self) {
+                await commitGroups({ edit: { key: self.key, oldUrl: self.oldUrl, name: name, url: newUrl } });
+                closeForm();
+                ownerMsg("Grup diperbarui.", "ok");
+            } else {
+                await commitGroups({ add: { name: name, url: newUrl } });
+                closeForm();
+                ownerMsg("Grup ditambahkan.", "ok");
+            }
         } catch (err) {
             ownerMsg("Gagal menyimpan. Cek rules Firebase / koneksi.", "err");
         } finally {
