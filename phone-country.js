@@ -1,7 +1,6 @@
 (function (global) {
     "use strict";
 
-
     const COUNTRIES = [
         { name: "Indonesia", dial: "62", iso2: "ID", min: 10, max: 13 },
         { name: "Malaysia", dial: "60", iso2: "MY", min: 8, max: 10 },
@@ -67,13 +66,15 @@
         { name: "Selandia Baru", dial: "64", iso2: "NZ", min: 8, max: 9 }
     ];
 
-
-    const COUNTRIES_BY_DIAL_LENGTH = [...COUNTRIES].sort((a, b) => b.dial.length - a.dial.length);
+    const COUNTRIES_BY_DIAL_LENGTH = [...COUNTRIES].sort(
+        (a, b) => b.dial.length - a.dial.length
+    );
 
     const DEFAULT_ISO = "ID";
 
     function findByIso(iso2) {
-        return COUNTRIES.find((c) => c.iso2 === iso2) || COUNTRIES.find((c) => c.iso2 === DEFAULT_ISO);
+        return COUNTRIES.find(c => c.iso2 === iso2) ||
+            COUNTRIES.find(c => c.iso2 === DEFAULT_ISO);
     }
 
     function findByDialPrefix(digits) {
@@ -86,28 +87,31 @@
     function flagEmoji(iso2) {
         if (!iso2 || iso2.length !== 2) return "🌐";
         const base = 0x1f1e6;
-        const chars = iso2.toUpperCase().split("").map((ch) => base + (ch.charCodeAt(0) - 65));
+        const chars = iso2.toUpperCase().split("").map(
+            ch => base + (ch.charCodeAt(0) - 65)
+        );
         return String.fromCodePoint(...chars);
     }
 
-
     function formatGrouped(digits) {
         if (!digits) return "";
+
         if (digits.length <= 3) return digits;
+
         let out = digits.slice(0, 3);
         let rest = digits.slice(3);
+
         while (rest.length > 0) {
             let take = 4;
-            // Kalau sisa setelah ambil 4 digit cuma nyisain 1 digit,
-            // gabungkan aja ke kelompok ini (jadi 5 digit) daripada
-            // bikin kelompok baru isi 1 digit sendirian. Misal 12 digit
-            // jadi 857-9589-22011, bukan 857-9589-2201-1.
+
             if (rest.length - take === 1) {
                 take = 5;
             }
+
             out += "-" + rest.slice(0, take);
             rest = rest.slice(take);
         }
+
         return out;
     }
 
@@ -115,7 +119,6 @@
         return digits.replace(/^0+/, "");
     }
 
-    
     function createPhoneInput(options) {
         const {
             wrapperEl,
@@ -128,15 +131,16 @@
         let country = findByIso(defaultIso);
         let lastDigits = "";
 
-
         const countryBtn = document.createElement("button");
         countryBtn.type = "button";
         countryBtn.className = "country-select-btn";
 
         const flagSpan = document.createElement("span");
         flagSpan.className = "country-select-flag";
+
         const dialSpan = document.createElement("span");
         dialSpan.className = "country-select-dial";
+
         const caretSpan = document.createElement("span");
         caretSpan.className = "country-select-caret";
         caretSpan.textContent = "▾";
@@ -148,13 +152,13 @@
         wrapperEl.classList.add("phone-input-wrapper--with-country");
         wrapperEl.insertBefore(countryBtn, wrapperEl.firstChild);
 
-        // ---- Panel dropdown pencarian negara ----
         const panel = document.createElement("div");
         panel.className = "country-dropdown-panel hidden-element";
         panel.style.display = "none";
         panel.innerHTML =
             '<input type="text" class="country-search-input" placeholder="Cari negara atau kode..." autocomplete="off">' +
             '<div class="country-list"></div>';
+
         document.body.appendChild(panel);
 
         const searchInput = panel.querySelector(".country-search-input");
@@ -163,10 +167,13 @@
         function renderList(filter) {
             const q = (filter || "").trim().toLowerCase();
             listEl.innerHTML = "";
-            const filtered = COUNTRIES.filter((c) => {
+
+            const filtered = COUNTRIES.filter(c => {
                 if (!q) return true;
-                return c.name.toLowerCase().includes(q) || c.dial.includes(q.replace("+", ""));
+                return c.name.toLowerCase().includes(q) ||
+                    c.dial.includes(q.replace("+", ""));
             });
+
             if (filtered.length === 0) {
                 const empty = document.createElement("div");
                 empty.className = "country-list-empty";
@@ -174,37 +181,50 @@
                 listEl.appendChild(empty);
                 return;
             }
-            filtered.forEach((c) => {
+
+            filtered.forEach(c => {
                 const item = document.createElement("div");
                 item.className = "country-item";
-                if (c.iso2 === country.iso2) item.classList.add("active");
+
+                if (c.iso2 === country.iso2) {
+                    item.classList.add("active");
+                }
+
                 item.innerHTML =
                     '<span class="country-item-flag">' + flagEmoji(c.iso2) + "</span>" +
                     '<span class="country-item-name">' + c.name + "</span>" +
                     '<span class="country-item-dial">+' + c.dial + "</span>";
+
                 item.addEventListener("click", () => {
                     setCountry(c.iso2, { refocus: true, keepDigits: true });
                     closePanel();
                 });
+
                 listEl.appendChild(item);
             });
         }
 
         function openPanel() {
             const rect = countryBtn.getBoundingClientRect();
+
             panel.style.position = "fixed";
             panel.style.left = Math.max(8, rect.left) + "px";
+
             let top = rect.bottom + 6;
             const estHeight = 320;
+
             if (top + estHeight > window.innerHeight) {
                 top = Math.max(8, rect.top - estHeight - 6);
             }
+
             panel.style.top = top + "px";
             panel.style.width = Math.max(260, rect.width) + "px";
             panel.classList.remove("hidden-element");
             panel.style.display = "flex";
+
             searchInput.value = "";
             renderList("");
+
             setTimeout(() => searchInput.focus(), 30);
             document.addEventListener("mousedown", onDocClick, true);
         }
@@ -216,86 +236,133 @@
         }
 
         function onDocClick(e) {
-            if (!panel.contains(e.target) && e.target !== countryBtn && !countryBtn.contains(e.target)) {
+            if (
+                !panel.contains(e.target) &&
+                e.target !== countryBtn &&
+                !countryBtn.contains(e.target)
+            ) {
                 closePanel();
             }
         }
 
         countryBtn.addEventListener("click", () => {
-            if (panel.classList.contains("hidden-element")) openPanel();
-            else closePanel();
+            if (panel.classList.contains("hidden-element")) {
+                openPanel();
+            } else {
+                closePanel();
+            }
         });
 
-        searchInput.addEventListener("input", () => renderList(searchInput.value));
-
+        searchInput.addEventListener("input", () => {
+            renderList(searchInput.value);
+        });
 
         function refreshCountryUI() {
             flagSpan.textContent = flagEmoji(country.iso2);
             dialSpan.textContent = "+" + country.dial;
-            countryBtn.setAttribute("aria-label", "Kode negara: " + country.name + " +" + country.dial);
+
+            countryBtn.setAttribute(
+                "aria-label",
+                "Kode negara: " + country.name + " +" + country.dial
+            );
+
             if (hintEl) {
-                const contoh = formatGrouped("8".repeat(Math.max(country.min, 6)).slice(0, Math.min(country.max, 13)));
-                const rangeTxt = country.min === country.max ? country.min + " digit" : country.min + "-" + country.max + " digit";
-                hintEl.textContent = "Contoh format: " + contoh + " (" + rangeTxt + ")";
+                const contoh = formatGrouped(
+                    "8".repeat(Math.max(country.min, 6))
+                        .slice(0, Math.min(country.max, 13))
+                );
+
+                const rangeTxt = country.min === country.max
+                    ? country.min + " digit"
+                    : country.min + "-" + country.max + " digit";
+
+                hintEl.textContent =
+                    "Contoh format: " + contoh + " (" + rangeTxt + ")";
             }
         }
 
         function setCountry(iso2, opts) {
             const o = opts || {};
             const found = findByIso(iso2);
+
             if (!found) return;
+
             country = found;
             refreshCountryUI();
-            if (o.keepDigits) {
 
+            if (o.keepDigits) {
                 applyDigits(lastDigits, { silent: false });
             }
-            if (o.refocus) inputEl.focus();
-        }
 
+            if (o.refocus) {
+                inputEl.focus();
+            }
+        }
 
         function applyDigits(digitsRaw, opts) {
             const o = opts || {};
-            let digits = stripLeadingZeros((digitsRaw || "").replace(/\D/g, ""));
-            if (digits.length > country.max) digits = digits.slice(0, country.max);
+
+            let digits = stripLeadingZeros(
+                (digitsRaw || "").replace(/\D/g, "")
+            );
+
+            if (digits.length > country.max) {
+                digits = digits.slice(0, country.max);
+            }
+
             lastDigits = digits;
             inputEl.value = formatGrouped(digits);
 
-            inputEl.dispatchEvent(new Event("phonechange", { bubbles: true }));
-            if (!o.silent && typeof onChange === "function") onChange(getController());
+            inputEl.dispatchEvent(
+                new Event("phonechange", { bubbles: true })
+            );
+
+            if (!o.silent && typeof onChange === "function") {
+                onChange(getController());
+            }
         }
 
+        inputEl.addEventListener("input", e => {
+            const isBackspace =
+                e.inputType === "deleteContentBackward" ||
+                e.inputType === "deleteContentForward";
 
-        inputEl.addEventListener("input", (e) => {
-            const isBackspace = e.inputType === "deleteContentBackward" || e.inputType === "deleteContentForward";
             const hasPlus = /^\s*\+/.test(inputEl.value);
 
-            // Deteksi negara langsung waktu ngetik (bukan cuma waktu paste).
-            // Kalau user ngetik pakai tanda "+" (mis. "+855..."), begitu digit
-            // yang sudah diketik cocok sama kode dial suatu negara, langsung
-            // ganti negara aktif & sisanya diperlakukan sebagai nomor nasional.
             if (hasPlus && !isBackspace) {
                 const rawWithPlus = inputEl.value.replace(/\D/g, "");
                 const matched = findByDialPrefix(rawWithPlus);
+
                 if (matched) {
-                    const national = stripLeadingZeros(rawWithPlus.slice(matched.dial.length));
+                    const national = stripLeadingZeros(
+                        rawWithPlus.slice(matched.dial.length)
+                    );
+
                     if (matched.iso2 !== country.iso2) {
                         country = matched;
                         refreshCountryUI();
                     }
+
                     applyDigits(national);
                     return;
                 }
             }
 
             let raw = inputEl.value.replace(/\D/g, "");
-            if (isBackspace && raw.length === lastDigits.length && raw.length > 0) {
 
+            if (
+                isBackspace &&
+                raw.length === lastDigits.length &&
+                raw.length > 0
+            ) {
                 raw = raw.slice(0, -1);
             }
 
-
-            if (!isBackspace && raw.length > lastDigits.length && raw.startsWith(country.dial)) {
+            if (
+                !isBackspace &&
+                raw.length > lastDigits.length &&
+                raw.startsWith(country.dial)
+            ) {
                 raw = raw.slice(country.dial.length);
             }
 
@@ -303,18 +370,22 @@
             applyDigits(raw);
         });
 
+        inputEl.addEventListener("paste", e => {
+            const text = (e.clipboardData || window.clipboardData)
+                .getData("text");
 
-        inputEl.addEventListener("paste", (e) => {
-            const text = (e.clipboardData || window.clipboardData).getData("text");
             if (!text) return;
+
             e.preventDefault();
 
             const hasPlus = /^\s*\+/.test(text);
             const digitsAll = text.replace(/\D/g, "");
+
             if (!digitsAll) return;
 
             if (hasPlus) {
                 const matched = findByDialPrefix(digitsAll);
+
                 if (matched) {
                     const national = digitsAll.slice(matched.dial.length);
                     setCountry(matched.iso2, { refocus: false });
@@ -323,42 +394,68 @@
                 }
             }
 
-
-            if (digitsAll.startsWith(country.dial) && digitsAll.length - country.dial.length >= country.min) {
+            if (
+                digitsAll.startsWith(country.dial) &&
+                digitsAll.length - country.dial.length >= country.min
+            ) {
                 applyDigits(digitsAll.slice(country.dial.length));
                 return;
             }
-
 
             applyDigits(digitsAll);
         });
 
         function getController() {
             return {
-                get country() { return country; },
-                get nationalDigits() { return lastDigits; },
-                get fullDigits() { return country.dial + lastDigits; }, 
-                isValid() { return lastDigits.length >= country.min && lastDigits.length <= country.max; },
+                get country() {
+                    return country;
+                },
 
-                isFull() { return lastDigits.length === country.max; },
+                get nationalDigits() {
+                    return lastDigits;
+                },
+
+                get fullDigits() {
+                    return country.dial + lastDigits;
+                },
+
+                isValid() {
+                    return (
+                        lastDigits.length >= country.min &&
+                        lastDigits.length <= country.max
+                    );
+                },
+
+                isDetecting() {
+    return lastDigits.length >= country.min &&
+           lastDigits.length < country.max;
+},
+
                 setCountry,
-                setFromFullDigits, 
+                setFromFullDigits,
                 inputEl,
                 countryBtn
             };
         }
 
-   
         function setFromFullDigits(fullDigits) {
             const digits = (fullDigits || "").replace(/\D/g, "");
+
             if (!digits) {
                 refreshCountryUI();
                 return;
             }
-            const matched = findByDialPrefix(digits) || findByIso(DEFAULT_ISO);
+
+            const matched =
+                findByDialPrefix(digits) || findByIso(DEFAULT_ISO);
+
             country = matched;
             refreshCountryUI();
-            applyDigits(digits.slice(matched.dial.length), { silent: true });
+
+            applyDigits(
+                digits.slice(matched.dial.length),
+                { silent: true }
+            );
         }
 
         refreshCountryUI();
@@ -374,4 +471,5 @@
         findByDialPrefix,
         createPhoneInput
     };
+
 })(window);
