@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Downloader - DanzClean</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="config.js"></script>
+</head>
+<body>
+    <div class="topbar">
+        <div class="menu-btn" onclick="toggleMenu()">☰</div>
+    </div>
+
+<div class="sidebar" id="sidebar"></div>
+<script src="sidebar.js"></script>
+
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <div class="container dl-page">
+        <div class="dl-panel">
+            <h2 class="dl-title">TikTok Downloader</h2>
+            <p class="dl-lead">Tempel link TikTok, lalu tekan Cari Media.</p>
+            
+            <input type="url" id="ttUrlInput" class="dl-input" placeholder="Masukkan Link TikTok..." inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Masukkan Link TikTok...">
+            
+            <button onclick="processTikTokDownload()" class="dl-cta"><svg class="btn-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Cari Media</span></button>
+            
+            <div id="ttResult" class="dl-result" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <div class="custom-popup" id="customPopup">
+        <div class="custom-popup-card">
+            <div class="custom-popup-text" id="customPopupText"></div>
+            <button class="custom-popup-btn" onclick="closeCustomPopup()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        function showCustomPopup(message) {
+            document.getElementById("customPopupText").innerText = message;
+            document.getElementById("customPopup").classList.add("show");
+        }
+
+        function closeCustomPopup() {
+            document.getElementById("customPopup").classList.remove("show");
+        }
+        function toggleMenu(){
+            document.getElementById("sidebar").classList.toggle("active");
+            document.getElementById("overlay").classList.toggle("active");
+        }
+
+        function extractFilename(url) {
+            try {
+                return new URL(url).searchParams.get('n') || 'danzclean_file';
+            } catch {
+                return 'danzclean_file';
+            }
+        }
+
+
+        function forceDownload(fileUrl, fileName, btnElement) {
+            if (!fileName) fileName = extractFilename(fileUrl);
+            const originalText = btnElement.innerText;
+            btnElement.innerText = "Membuka unduhan...";
+            btnElement.style.opacity = "0.7";
+
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = fileUrl;
+            a.download = fileName;
+            a.rel = 'noopener';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            setTimeout(() => {
+                btnElement.innerText = originalText;
+                btnElement.style.opacity = "1";
+            }, 1200);
+        }
+
+        function isValidTikTokUrl(url) {
+            return /tiktok\.com|vt\.tiktok|vm\.tiktok/i.test(url);
+        }
+
+        async function processTikTokDownload() {
+            const url = document.getElementById("ttUrlInput").value.trim();
+            const resultDiv = document.getElementById("ttResult");
+            
+            if (!url) {
+                alert("Masukkan URL TikTok terlebih dahulu!");
+                return;
+            }
+
+            if (!isValidTikTokUrl(url)) {
+                showCustomPopup("Itu bukan link TikTok!");
+                return;
+            }
+
+            resultDiv.innerHTML = '<p class="dl-msg">Mengambil data media...</p>';
+
+            try {
+                const targetApi = `${DOWNLOAD_API}/api/tiktok?url=${encodeURIComponent(url)}`;
+                const response = await fetch(targetApi);
+                const data = await response.json();
+
+                if (!data.status || !data.result) {
+                    resultDiv.innerHTML = `<p class="dl-msg dl-err">Gagal mengambil data dari URL tersebut.<br><span class="dl-msg-detail">${data.error || data.message || ''}</span></p>`;
+                    return;
+                }
+
+                const res = data.result;
+                let mediaHtml = '';
+
+                if (res.images && res.images.length > 0) {
+                    mediaHtml += `<div class="dl-strip">`;
+                    res.images.forEach((img, idx) => {
+                        mediaHtml += `
+                            <div class="dl-strip-item">
+                                <img src="${img}" class="dl-thumb">
+                                <button onclick="forceDownload('${img}', null, this)" class="dl-btn dl-btn-sm">DOWNLOAD FOTO ${idx+1}</button>
+                            </div>
+                        `;
+                    });
+                    mediaHtml += `</div>`;
+                } else if (res.url) {
+                    mediaHtml += `<video src="${res.url}" controls poster="${res.cover || ''}" class="dl-media"></video>`;
+                }
+
+                resultDiv.innerHTML = `
+                    <div class="dl-card">
+                        <p class="dl-caption">${res.title || 'TikTok Media'}</p>
+                        ${mediaHtml}
+                        <div class="dl-actions">
+                            ${res.url && (!res.images || res.images.length === 0) ? `<button onclick="forceDownload('${res.url}', null, this)" class="dl-btn">DOWNLOAD VIDEO</button>` : ''}
+                            ${res.audio ? `<button onclick="forceDownload('${res.audio}', null, this)" class="dl-btn dl-btn-alt">DOWNLOAD AUDIO (MP3)</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            } catch (e) {
+                console.error(e);
+                resultDiv.innerHTML = `<p class="dl-msg dl-err">Terjadi kesalahan koneksi.<br><span class="dl-msg-detail">${e.message}</span></p>`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistik - DanzClean</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+
+<body>
+
+    <div class="topbar">
+    
+
+</a>
+        <div class="menu-btn dashboard-menu" onclick="toggleMenu()">☰</div>
+    </div>
+
+    <div class="sidebar" id="sidebar"></div>
+    <script src="sidebar.js"></script>
+
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <div class="container">
+        <div class="logo">
+            <h1>Statistik</h1>
+            <p>Data Pengunjung Website</p>
+        </div>
+
+        <div class="upload-box stat-card">
+            <div class="icon stat-ico"><svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <h2 id="visitor-count" class="stat-num">...</h2>
+            <p class="stat-label">Total Orang Yang Masuk</p>
+        </div>
+
+        <div id="status">
+            Status Sistem: <span class="stat-ok">Aktif & Real-time</span>
+        </div>
+
+        <div class="footer">
+            DanzClean
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        function toggleMenu() {
+            document.getElementById("sidebar").classList.toggle("active");
+            document.getElementById("overlay").classList.toggle("active");
+            document.body.classList.toggle("sidebar-open"); 
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCEj9USiCvQbbwvaZiFDN4lkLitPXWzew4",
+            authDomain: "danzzclean.firebaseapp.com",
+            databaseURL: "https://danzzclean-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "danzzclean",
+            storageBucket: "danzzclean.firebasestorage.app",
+            messagingSenderId: "254872462958",
+            appId: "1:254872462958:web:a7964353bb5afa6678287f",
+            measurementId: "G-HCR72KT3X0"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const visitorRef = database.ref("total_visitors");
+
+        function trackUniqueVisitorWithFirebase() {
+            const storageKey = "danzclean_permanent_hit";
+            const hasVisited = localStorage.getItem(storageKey);
+
+            if (!hasVisited) {
+                visitorRef.transaction((currentValue) => {
+                    return (currentValue || 0) + 1;
+                }, (error, committed, snapshot) => {
+                    if (committed) {
+                        localStorage.setItem(storageKey, "true");
+                    }
+                });
+            }
+
+            visitorRef.on("value", (snapshot) => {
+                const count = snapshot.val() || 0;
+                document.getElementById('visitor-count').innerText = count.toLocaleString('id-ID');
+            }, (error) => {
+                document.getElementById('visitor-count').innerText = "0";
+            });
+        }
+
+        window.onload = trackUniqueVisitorWithFirebase;
+    </script>
+
+</body>
+</html>

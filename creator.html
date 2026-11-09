@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Creator - DanzClean</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+
+<link
+href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap"
+rel="stylesheet">
+
+<link
+rel="stylesheet"
+href="style.css">
+
+<style>
+
+.creator-page{
+    --cr-gold:#d9c493;
+    --cr-ivory:#f4eddc;
+    --cr-mute:#98a1c6;
+    --cr-line:rgba(217,196,147,.2);
+
+    height:100vh;
+    height:100dvh;
+    background:
+        radial-gradient(600px 380px at 50% -4%, rgba(217,196,147,.09), transparent 70%),
+        radial-gradient(520px 360px at 100% 40%, rgba(61,108,255,.10), transparent 70%),
+        linear-gradient(180deg, #060b22 0%, #030618 55%, #02040f 100%);
+    -webkit-overflow-scrolling:touch;
+}
+
+.cr-serif,
+.cr-serif *{
+    font-family:var(--font);
+}
+
+.cr-wrap{
+    width:100%;
+    max-width:560px;
+    margin:0 auto;
+    padding:140px 0 calc(170px + env(safe-area-inset-bottom, 0px));
+    box-sizing:border-box;
+}
+
+/* ============ HERO ============ */
+
+.cr-hero{
+    position:relative;
+}
+
+.cr-frame{
+    position:relative;
+    min-height:190px;
+}
+
+.cr-photo{
+    position:relative;
+    overflow:hidden;
+    -webkit-mask-image:linear-gradient(180deg, transparent 0, #000 5%, #000 93%, transparent 100%);
+    mask-image:linear-gradient(180deg, transparent 0, #000 5%, #000 93%, transparent 100%);
+}
+
+.cr-photo img{
+    display:block;
+    width:100%;
+    height:auto;
+    opacity:0;
+    transform:scale(1.07);
+    animation:crImg 2s cubic-bezier(.2,.7,.2,1) .1s forwards;
+}
+
+.cr-frame::after{
+    content:"";
+    position:absolute;
+    inset:16px 18px;
+    border:1px solid rgba(217,196,147,.38);
+    pointer-events:none;
+    opacity:0;
+    animation:crFade 1.2s ease .9s forwards;
+}
+
+@keyframes crImg{
+    to{ opacity:1; transform:scale(1); }
+}
+
+@keyframes crFade{
+    to{ opacity:1; }
+}
+
+.cr-intro{
+    position:relative;
+    margin-top:18px;
+    padding:0 24px;
+    text-align:center;
+}
+
+.cr-kicker{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.38em;
+    text-transform:uppercase;
+    color:var(--cr-gold);
+}
+
+.cr-kicker i{
+    font-style:normal;
+    font-size:8px;
+    letter-spacing:0;
+}
+
+.cr-h1{
+    margin:14px 0 0;
+    font-size:clamp(36px, 11vw, 48px);
+    font-weight:500;
+    line-height:1.04;
+    letter-spacing:.005em;
+    color:var(--cr-ivory);
+}
+
+.cr-h1 em{
+    font-style:italic;
+    font-weight:500;
+    color:var(--cr-gold);
+}
+
+.cr-sub{
+    margin-top:14px;
+    font-size:12px;
+    font-weight:500;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    color:var(--cr-mute);
+}
+
+/* ============ SECTION ============ */
+
+.cr-sec{
+    padding:0 24px;
+    margin-top:58px;
+}
+
+.cr-head{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-bottom:6px;
+}
+
+.cr-head span{
+    flex:0 0 auto;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.32em;
+    text-transform:uppercase;
+    color:var(--cr-gold);
+}
+
+.cr-head i{
+    flex:1 1 auto;
+    height:1px;
+    background:linear-gradient(90deg, var(--cr-line), transparent);
+}
+
+/* ============ KEUNGGULAN ============ */
+
+.cr-list{
+    list-style:none;
+    margin:0;
+    padding:0;
+}
+
+.cr-item{
+    display:grid;
+    grid-template-columns:58px 1fr;
+    align-items:start;
+    padding:24px 0;
+    border-bottom:1px solid var(--cr-line);
+}
+
+.cr-num{
+    font-size:38px;
+    font-style:italic;
+    font-weight:500;
+    line-height:.95;
+    color:var(--cr-gold);
+}
+
+.cr-item h3{
+    margin:0;
+    font-size:16px;
+    font-weight:600;
+    line-height:1.4;
+    color:var(--cr-ivory);
+}
+
+.cr-item p{
+    margin:6px 0 0;
+    font-size:13px;
+    font-weight:400;
+    line-height:1.7;
+    color:var(--cr-mute);
+}
+
+/* ============ MEDIA ============ */
+
+.cr-link{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+    padding:24px 0;
+    border-bottom:1px solid var(--cr-line);
+    text-decoration:none;
+    color:inherit;
+    -webkit-tap-highlight-color:transparent;
+}
+
+.cr-link-main{
+    min-width:0;
+    transition:transform .35s cubic-bezier(.2,.8,.2,1);
+}
+
+.cr-link-name{
+    display:block;
+    font-size:32px;
+    font-weight:500;
+    line-height:1.08;
+    color:var(--cr-ivory);
+    transition:color .3s ease;
+}
+
+.cr-link-handle{
+    display:block;
+    margin-top:7px;
+    font-size:12.5px;
+    letter-spacing:.03em;
+    color:var(--cr-mute);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.cr-link-go{
+    flex:0 0 auto;
+    width:44px;
+    height:44px;
+    border-radius:50%;
+    border:1px solid var(--cr-line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--cr-gold);
+    transition:background .3s ease, color .3s ease, border-color .3s ease, transform .35s cubic-bezier(.2,.8,.2,1);
+}
+
+.cr-link-go svg{
+    width:16px;
+    height:16px;
+}
+
+.cr-link:hover .cr-link-main,
+.cr-link:active .cr-link-main{
+    transform:translateX(5px);
+}
+
+.cr-link:hover .cr-link-name,
+.cr-link:active .cr-link-name{
+    color:var(--cr-gold);
+}
+
+.cr-link:hover .cr-link-go,
+.cr-link:active .cr-link-go{
+    background:var(--cr-gold);
+    border-color:var(--cr-gold);
+    color:#070a13;
+    transform:rotate(45deg);
+}
+
+/* ============ FOOTER ============ */
+
+.cr-foot{
+    margin-top:56px;
+    text-align:center;
+}
+
+.cr-mono{
+    width:54px;
+    height:54px;
+    margin:0 auto;
+    border-radius:50%;
+    border:1px solid var(--cr-line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:21px;
+    font-style:italic;
+    font-weight:600;
+    letter-spacing:.04em;
+    color:var(--cr-gold);
+}
+
+.cr-foot p{
+    margin-top:14px;
+    font-size:12px;
+    font-weight:500;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    color:#5d668f;
+}
+
+/* ============ MOTION ============ */
+
+.cr-rise{
+    opacity:0;
+    transform:translateY(14px);
+    animation:crRise .9s cubic-bezier(.2,.8,.2,1) forwards;
+    animation-delay:var(--d, 0ms);
+}
+
+@keyframes crRise{
+    to{ opacity:1; transform:none; }
+}
+
+.cr-rv{
+    opacity:0;
+    transform:translateY(18px);
+    transition:opacity .8s ease, transform .8s cubic-bezier(.2,.8,.2,1);
+    transition-delay:var(--d, 0ms);
+}
+
+.cr-rv.in{
+    opacity:1;
+    transform:none;
+}
+
+.cr-head i{
+    transform:scaleX(0);
+    transform-origin:left center;
+    transition:transform 1.1s cubic-bezier(.2,.8,.2,1) .15s;
+}
+
+.cr-sec.in .cr-head i{
+    transform:scaleX(1);
+}
+
+@media (prefers-reduced-motion:reduce){
+    .cr-photo img{ animation:none; opacity:1; transform:none; }
+    .cr-frame::after{ animation:none; opacity:1; }
+    .cr-rise{ animation:none; opacity:1; transform:none; }
+    .cr-rv{ opacity:1; transform:none; transition:none; }
+    .cr-head i{ transform:none; transition:none; }
+}
+
+
+/* ===== v2: ganti serif ke Plus Jakarta Sans, angka pakai mono ===== */
+.cr-h1{font-weight:800;letter-spacing:-.035em;line-height:1.05}
+.cr-h1 em{font-style:normal;background:linear-gradient(120deg,#9db8ff,#4d7cff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.cr-num{font-family:var(--font-mono) !important;font-weight:600;font-size:15px;letter-spacing:0;color:var(--primary-300)}
+.cr-kicker,.cr-head span{font-family:var(--font);letter-spacing:.18em}
+.cr-item h3{font-size:16px;font-weight:700}
+.cr-item p{font-size:14px}
+@media (min-width:960px){.cr-wrap{max-width:680px}}
+</style>
+
+</head>
+
+<body>
+
+<div
+class="sidebar"
+id="sidebar"></div>
+<script src="sidebar.js"></script>
+
+<div class="topbar">
+
+    <div class="menu-btn" onclick="toggleMenu()">☰</div>
+
+</div>
+
+<div
+class="overlay"
+id="overlay"
+onclick="toggleMenu()">
+</div>
+
+<div class="creator-page active">
+
+<div class="cr-wrap">
+
+<!-- HERO -->
+<header class="cr-hero">
+
+<div class="cr-frame">
+<div class="cr-photo">
+<img
+src="https://raw.githubusercontent.com/xyron11/DB-PHOTO/main/Proyek%20Baru%20226%20%5BBCD92D5%5D.png"
+alt="Danz Tsuyoi"
+fetchpriority="high"
+decoding="async"
+onerror="this.style.display='none'">
+</div>
+</div>
+
+<div class="cr-intro">
+
+<div class="cr-kicker cr-rise" style="--d:500ms"><i>♦</i> Creator <i>♦</i></div>
+
+<h1 class="cr-h1 cr-serif cr-rise" style="--d:650ms">
+Pembuat <em>DanzClean</em>
+</h1>
+
+<div class="cr-sub cr-rise" style="--d:800ms">HD Status Uploader</div>
+
+</div>
+
+</header>
+
+<!-- KEUNGGULAN -->
+<section class="cr-sec cr-rv">
+
+<div class="cr-head"><span>Keunggulan</span><i></i></div>
+
+<ol class="cr-list">
+
+<li class="cr-item cr-rv" style="--d:60ms">
+<div class="cr-num cr-serif">01</div>
+<div>
+<h3>Video WA tidak pecah atau blur</h3>
+<p>Status tetap jernih dalam kualitas HD.</p>
+</div>
+</li>
+
+<li class="cr-item cr-rv" style="--d:120ms">
+<div class="cr-num cr-serif">02</div>
+<div>
+<h3>Mudah digunakan</h3>
+<p>Tampilan simpel, cukup beberapa langkah saja.</p>
+</div>
+</li>
+
+<li class="cr-item cr-rv" style="--d:180ms">
+<div class="cr-num cr-serif">03</div>
+<div>
+<h3>Dan masih banyak lagi</h3>
+<p>Termasuk downloader TikTok, Instagram, YouTube, dan Pinterest.</p>
+</div>
+</li>
+
+</ol>
+
+</section>
+
+<!-- MEDIA -->
+<section class="cr-sec cr-rv">
+
+<div class="cr-head"><span>Media</span><i></i></div>
+
+<a
+href="https://tiktok.com/@nzzrn21dani_editzzz"
+target="_blank"
+rel="noopener noreferrer"
+class="cr-link cr-rv"
+style="--d:60ms">
+
+<span class="cr-link-main">
+<span class="cr-link-name cr-serif">TikTok</span>
+<span class="cr-link-handle">@nzzrn21dani_editzzz</span>
+</span>
+
+<span class="cr-link-go">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+</span>
+
+</a>
+
+<a
+href="https://youtube.com/@danzzthumbnail?si=aKcth1NSqcyHdX-H"
+target="_blank"
+rel="noopener noreferrer"
+class="cr-link cr-rv"
+style="--d:120ms">
+
+<span class="cr-link-main">
+<span class="cr-link-name cr-serif">YouTube</span>
+<span class="cr-link-handle">@danzzthumbnail</span>
+</span>
+
+<span class="cr-link-go">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+</span>
+
+</a>
+
+<a
+href="https://t.me/DanzTsu"
+target="_blank"
+rel="noopener noreferrer"
+class="cr-link cr-rv"
+style="--d:180ms">
+
+<span class="cr-link-main">
+<span class="cr-link-name cr-serif">Telegram</span>
+<span class="cr-link-handle">@DanzTsu</span>
+</span>
+
+<span class="cr-link-go">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+</span>
+
+</a>
+
+</section>
+
+<footer class="cr-foot cr-rv">
+<div class="cr-mono cr-serif">DT</div>
+<p>DanzClean</p>
+</footer>
+
+</div>
+
+</div>
+
+<script>
+
+function toggleMenu(){
+
+    const sidebar = document.getElementById("sidebar")
+    const overlay = document.getElementById("overlay")
+
+    sidebar.classList.toggle("active")
+    overlay.classList.toggle("active")
+
+    document.body.classList.toggle("sidebar-open")
+
+}
+
+;(function(){
+
+    const els = document.querySelectorAll(".cr-rv, .cr-sec")
+
+    if(!("IntersectionObserver" in window)){
+        els.forEach(el => el.classList.add("in"))
+        return
+    }
+
+    const io = new IntersectionObserver((list) => {
+        list.forEach(entry => {
+            if(entry.isIntersecting){
+                entry.target.classList.add("in")
+                io.unobserve(entry.target)
+            }
+        })
+    }, { threshold: 0.12 })
+
+    els.forEach(el => io.observe(el))
+
+})()
+
+</script>
+
+</body>
+</html>

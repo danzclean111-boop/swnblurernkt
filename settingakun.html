@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DanzClean - Pengaturan Akun</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="topbar">
+        <div class="menu-btn dashboard-menu" onclick="toggleMenu()">☰</div>
+    </div>
+
+    <div class="sidebar" id="sidebar"></div>
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <div class="setting-container">
+        <div class="setting-card">
+            <h2 class="setting-title">Pengaturan Akun</h2>
+
+            <div class="profile-upload-section">
+                <div class="profile-avatar-wrapper">
+                    <img id="avatarPreview" src="https://ui-avatars.com/api/?name=User&background=4c7dff&color=fff" alt="Avatar">
+                    <label for="inputAvatar">Ubah</label>
+                    <input type="file" id="inputAvatar" accept="image/*" hidden>
+                </div>
+                <span id="userTypeBadge" class="account-badge">Manual Account</span>
+            </div>
+
+            <form id="settingForm" novalidate>
+                <div class="form-group-setting">
+                    <label>Username</label>
+                    <div class="phone-input-wrapper">
+                        <input type="text" id="setUsername" placeholder="Masukkan Username baru" required>
+                        <span class="phone-status-icon" id="setUsernameStatusIcon"></span>
+                    </div>
+                </div>
+
+                <div class="form-group-setting">
+                    <label>Nomor WhatsApp/HP</label>
+                    <div class="phone-input-wrapper" id="setPhoneWrapper">
+                        <input type="tel" id="setPhone" placeholder="858-0743-8758" inputmode="numeric" autocomplete="off" required>
+                        <span class="phone-status-icon" id="setPhoneStatusIcon"></span>
+                    </div>
+                    <div class="phone-format-hint" id="setPhoneFormatHint"></div>
+                    <div class="phone-format-warning" id="setPhoneFormatWarning">
+                        Jumlah digit nomor tidak sesuai untuk negara yang dipilih. Cek kembali nomornya.
+                    </div>
+                </div>
+
+                <div class="form-group-setting" id="passwordGroup">
+                    <label>Password Baru (Kosongkan jika tidak mau ubah)</label>
+                    <input type="password" id="setPassword" placeholder="••••••••">
+                </div>
+
+                <button type="submit" class="btn-save" id="btnSaveSetting"><span id="btnSaveSettingText">SIMPAN PERUBAHAN</span></button>
+            </form>
+
+            <div class="danger-divider"><span>Zona Berbahaya</span></div>
+            <button type="button" class="btn-danger-zone" id="btnDeleteAccount">HAPUS AKUN</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="customModal">
+        <div class="modal-card">
+            <div class="modal-icon" id="modalIcon" data-tone="warn"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></div>
+            <div class="modal-title" id="modalTitle">Info</div>
+            <div class="modal-text" id="modalText">Pesan sistem...</div>
+            <div id="modalActionContainer">
+                <button class="modal-btn" onclick="closeModal()">Kembali</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="Akun.js"></script>
+    <script src="sidebar.js"></script>
+    <script src="phone-country.js"></script>
+
+    <script>
+        if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG_AUTH);
+        const db = firebase.database();
+
+        let loggedUser = JSON.parse(localStorage.getItem("danzclean_logged_user"));
+        if (!loggedUser) window.location.replace("/login.html");
+
+        function toggleMenu() {
+            document.getElementById("sidebar").classList.toggle("active");
+            document.getElementById("overlay").classList.toggle("active");
+            document.body.classList.toggle("sidebar-open");
+        }
+
+        function setModalTone(el, type) {
+            const t = type === "success" ? "success" : (type === "error" ? "error" : "warn");
+            const ic = {
+                success: '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="m8 12.5 2.8 2.8L16.5 9.5"/></svg>',
+                error:   '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="m9 9 6 6M15 9l-6 6"/></svg>',
+                warn:    '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>'
+            };
+            el.dataset.tone = t;
+            el.innerHTML = ic[t];
+        }
+
+        function showModal(type, title, msg, onConfirm = null) {
+            const modal = document.getElementById("customModal");
+            setModalTone(document.getElementById("modalIcon"), type);
+            document.getElementById("modalTitle").innerText = title;
+            document.getElementById("modalText").innerText = msg;
+            
+            const action = document.getElementById("modalActionContainer");
+            if(onConfirm) {
+                action.innerHTML = `
+                    <button class="modal-btn modal-btn-danger" id="btnConfirmAction">Ya, Hapus</button>
+                    <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Batal</button>
+                `;
+                document.getElementById("btnConfirmAction").onclick = onConfirm;
+            } else {
+                action.innerHTML = `<button class="modal-btn" onclick="closeModal()">Tutup</button>`;
+            }
+
+            modal.classList.add("active");
+        }
+
+        function closeModal() {
+            document.getElementById("customModal").classList.remove("active");
+        }
+
+        const avatarPreview = document.getElementById("avatarPreview");
+        const setUsername = document.getElementById("setUsername");
+        const setPhone = document.getElementById("setPhone");
+        const passwordGroup = document.getElementById("passwordGroup");
+        const userTypeBadge = document.getElementById("userTypeBadge");
+
+        setUsername.value = loggedUser.username || "";
+        const setPhoneCtrl = PhoneCountryModule.createPhoneInput({
+            wrapperEl: document.getElementById("setPhoneWrapper"),
+            inputEl: setPhone,
+            hintEl: document.getElementById("setPhoneFormatHint")
+        });
+        setPhoneCtrl.setFromFullDigits(loggedUser.phone || "");
+        if (loggedUser.photo) avatarPreview.src = loggedUser.photo;
+        
+        if (loggedUser.loginType === "google") {
+            passwordGroup.style.display = "none";
+            userTypeBadge.innerText = "Google Account";
+        }
+
+        document.getElementById("inputAvatar").addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                if(file.size > 2 * 1024 * 1024) {
+                    showModal("warning", "Ukuran Gambar", "Maksimal ukuran foto adalah 2MB.");
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function (evt) {
+                    avatarPreview.src = evt.target.result;
+                    loggedUser.photo = evt.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        async function hashPassword(pw) {
+            const enc = new TextEncoder().encode(pw);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', enc);
+            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        
+        const ICON_CHECK_SVG = '<svg viewBox="0 0 24 24" width="14" height="14"><polyline points="20 6 9 17 4 12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        const ICON_CROSS_SVG = '<svg viewBox="0 0 24 24" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>';
+
+        
+
+        function togglePhoneFormatWarning(warningId, show) {
+            const warningEl = document.getElementById(warningId);
+            if (!warningEl) return;
+            warningEl.classList.toggle("show", show);
+        }
+
+        
+        async function checkUsernameTaken(username, excludeUid) {
+            const [usersSnap, manualSnap] = await Promise.all([
+                db.ref("users").orderByChild("username").equalTo(username).once("value"),
+                db.ref("manual_users").orderByChild("username").equalTo(username).once("value")
+            ]);
+            let taken = false;
+            usersSnap.forEach(child => { if (child.key !== excludeUid) taken = true; });
+            manualSnap.forEach(child => { if (child.key !== excludeUid) taken = true; });
+            return taken;
+        }
+
+        async function checkPhoneTaken(phone, excludeUid) {
+            const [usersSnap, manualSnap] = await Promise.all([
+                db.ref("users").orderByChild("phone").equalTo(phone).once("value"),
+                db.ref("manual_users").orderByChild("phone").equalTo(phone).once("value")
+            ]);
+            let taken = false;
+            usersSnap.forEach(child => { if (child.key !== excludeUid) taken = true; });
+            manualSnap.forEach(child => { if (child.key !== excludeUid) taken = true; });
+            return taken;
+        }
+
+        const settingBlockState = { usernameInvalid: false, phoneInvalid: false };
+        function updateSaveButtonState() {
+            const btn = document.getElementById("btnSaveSetting");
+            if (btn) btn.disabled = settingBlockState.usernameInvalid || settingBlockState.phoneInvalid;
+        }
+
+        function setupUsernameChecker(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (!input || !icon) return;
+
+            let debounceTimer = null;
+            let requestId = 0;
+
+            input.addEventListener("input", () => {
+                clearTimeout(debounceTimer);
+                icon.className = "phone-status-icon";
+                icon.textContent = "";
+                settingBlockState.usernameInvalid = false;
+                updateSaveButtonState();
+                requestId++;
+                const currentRequest = requestId;
+
+                const value = input.value.trim();
+                if (!value || value.length < 3) return;
+
+                icon.className = "phone-status-icon loading";
+
+                debounceTimer = setTimeout(async () => {
+                    try {
+                        const taken = await checkUsernameTaken(value, loggedUser.uid);
+                        if (currentRequest !== requestId) return;
+                        icon.className = "phone-status-icon " + (taken ? "invalid" : "valid");
+                        icon.innerHTML = taken ? ICON_CROSS_SVG : ICON_CHECK_SVG;
+                        settingBlockState.usernameInvalid = taken;
+                        updateSaveButtonState();
+                    } catch (err) {
+                        if (currentRequest !== requestId) return;
+                        icon.className = "phone-status-icon";
+                        icon.textContent = "";
+                        settingBlockState.usernameInvalid = false;
+                        updateSaveButtonState();
+                    }
+                }, 700);
+            });
+        }
+
+        function setupPhoneChecker(ctrl, iconId, warningId) {
+            const input = ctrl.inputEl;
+            const icon = document.getElementById(iconId);
+            if (!input || !icon) return;
+
+            let debounceTimer = null;
+            let requestId = 0;
+
+            const runCheck = () => {
+                clearTimeout(debounceTimer);
+                icon.className = "phone-status-icon";
+                icon.textContent = "";
+                settingBlockState.phoneInvalid = false;
+                updateSaveButtonState();
+                requestId++;
+                const currentRequest = requestId;
+
+                if (!ctrl.nationalDigits) {
+                    togglePhoneFormatWarning(warningId, false);
+                    return;
+                }
+
+                if (!ctrl.isValid()) {
+                    togglePhoneFormatWarning(warningId, true);
+                    return;
+                }
+                togglePhoneFormatWarning(warningId, false);
+
+                
+                if (!ctrl.isFull()) {
+                    return;
+                }
+
+                const cleaned = ctrl.fullDigits;
+
+                icon.className = "phone-status-icon loading";
+
+                debounceTimer = setTimeout(async () => {
+                    try {
+                        const taken = await checkPhoneTaken(cleaned, loggedUser.uid);
+                        if (currentRequest !== requestId) return;
+                        icon.className = "phone-status-icon " + (taken ? "invalid" : "valid");
+                        icon.innerHTML = taken ? ICON_CROSS_SVG : ICON_CHECK_SVG;
+                        settingBlockState.phoneInvalid = taken;
+                        updateSaveButtonState();
+                    } catch (err) {
+                        if (currentRequest !== requestId) return;
+                        icon.className = "phone-status-icon";
+                        icon.textContent = "";
+                        settingBlockState.phoneInvalid = false;
+                        updateSaveButtonState();
+                    }
+                }, 700);
+            };
+
+            input.addEventListener("input", runCheck);
+            input.addEventListener("phonechange", runCheck);
+        }
+
+        setupUsernameChecker("setUsername", "setUsernameStatusIcon");
+        setupPhoneChecker(setPhoneCtrl, "setPhoneStatusIcon", "setPhoneFormatWarning");
+
+        document.getElementById("settingForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const newUsername = setUsername.value.trim();
+            const newPassword = document.getElementById("setPassword").value;
+
+            if(!newUsername || !setPhoneCtrl.nationalDigits) {
+                showModal("warning", "Lengkapi Data", "Username dan Nomor WhatsApp wajib diisi.");
+                return;
+            }
+
+            if (!setPhoneCtrl.isValid()) {
+                showModal("warning", "Nomor Tidak Valid", "Silakan masukkan nomor WhatsApp/HP yang valid.");
+                return;
+            }
+
+            if (settingBlockState.usernameInvalid) {
+                showModal("warning", "Username Sudah Dipakai", "Username tersebut sudah digunakan akun lain. Silakan pilih username lain.");
+                return;
+            }
+
+            if (settingBlockState.phoneInvalid) {
+                showModal("warning", "Nomor Sudah Terdaftar", "Nomor WhatsApp/HP tersebut sudah digunakan akun lain. Silakan gunakan nomor lain.");
+                return;
+            }
+
+            const newPhone = setPhoneCtrl.fullDigits;
+
+            const saveBtnPre = document.getElementById("btnSaveSetting");
+            saveBtnPre.disabled = true;
+            const finalPhoneTaken = await checkPhoneTaken(newPhone, loggedUser.uid);
+            if (finalPhoneTaken) {
+                saveBtnPre.disabled = false;
+                showModal("warning", "Nomor Sudah Terdaftar", "Nomor WhatsApp/HP tersebut baru saja digunakan akun lain. Silakan gunakan nomor lain.");
+                return;
+            }
+
+            const dbPath = loggedUser.loginType === "google" ? "users/" + loggedUser.uid : "manual_users/" + loggedUser.uid;
+            
+            let updateData = {
+                username: newUsername,
+                phone: newPhone,
+                photo: loggedUser.photo || ""
+            };
+
+            if (loggedUser.loginType !== "google" && newPassword) {
+                if(newPassword.length < 6) {
+                    showModal("warning", "Password Lemah", "Password baru minimal 6 karakter.");
+                    saveBtnPre.disabled = false;
+                    return;
+                }
+                updateData.passwordHash = await hashPassword(newPassword);
+            }
+
+            const saveBtn = document.getElementById("btnSaveSetting");
+            const saveBtnText = document.getElementById("btnSaveSettingText");
+            saveBtn.disabled = true;
+            const originalText = saveBtnText.textContent;
+            saveBtnText.textContent = "MENYIMPAN...";
+
+            try {
+                await db.ref(dbPath).update(updateData);
+                
+                loggedUser.username = newUsername;
+                loggedUser.phone = newPhone;
+                localStorage.setItem("danzclean_logged_user", JSON.stringify(loggedUser));
+
+                showModal("success", "Berhasil!", "Data profil berhasil diperbarui.");
+            } catch (err) {
+                showModal("error", "Gagal Memperbarui", err.message);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtnText.textContent = originalText;
+            }
+        });
+
+        document.getElementById("btnDeleteAccount").addEventListener("click", () => {
+            showModal("warning", "Hapus Akun?", "Apakah Anda yakin ingin menghapus akun ini secara permanen? Tindakan ini tidak bisa dibatalkan.", async () => {
+                const confirmBtn = document.getElementById("btnConfirmAction");
+                if (confirmBtn) {
+                    confirmBtn.disabled = true;
+                    confirmBtn.textContent = "MENGHAPUS...";
+                }
+                const dbPath = loggedUser.loginType === "google" ? "users/" + loggedUser.uid : "manual_users/" + loggedUser.uid;
+                try {
+                    await db.ref(dbPath).remove();
+                    localStorage.removeItem("danzclean_logged_user");
+                    localStorage.removeItem("isOwner");
+                    window.location.replace("/login.html");
+                } catch (err) {
+                    showModal("error", "Gagal Hapus", err.message);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

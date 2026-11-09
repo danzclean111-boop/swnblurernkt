@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+<meta name="robots" content="noindex, nofollow">
+<script>
+    (function() {
+        const loggedUser = localStorage.getItem("danzclean_logged_user");
+        if (!loggedUser) {
+            window.location.replace("/danzclean.html");
+        }
+    })();
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+<title>Customer Service - DanzClean</title>
+<link rel="icon" href="/favicon.png" type="image/png">
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+
+<style>
+
+    :root {
+        --cs-bg: #04060e;
+        --cs-panel: rgba(13, 18, 42, 0.7);
+        --cs-panel-strong: rgba(11, 15, 36, 0.94);
+        --cs-edge: rgba(255, 255, 255, 0.07);
+        --cs-edge-soft: rgba(255, 255, 255, 0.045);
+        --cs-primary: var(--primary-mid);
+        --cs-primary-2: #7fa3ff;
+        --cs-accent: #36e2a8;
+        --cs-danger: #ff5470;
+        --cs-text: #f2f4ff;
+        --cs-muted: #838cc0;
+        --cs-mono: 'JetBrains Mono', monospace;
+    }
+
+    html, body { background: var(--cs-bg); }
+
+    .cs-page {
+        max-width: 620px;
+        margin: 0 auto;
+        padding: 124px 14px calc(16px + env(safe-area-inset-bottom));
+        height: 100vh;
+        height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        gap: 12px;
+    }
+
+    /* Halaman CS: tanpa dock navigasi, cukup tombol kembali */
+    #mnNav, #mnScrim, [id^="mnPop-"] { display: none !important; }
+    .cs-back-btn {
+        flex: none;
+        width: 44px; height: 44px; min-height: 0;
+        aspect-ratio: 1 / 1;
+        display: grid; place-items: center;
+        padding: 0;
+        border-radius: 50%;
+        color: var(--text-main);
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--cs-edge);
+        box-shadow: none;
+        cursor: pointer;
+    }
+    .cs-back-btn:hover { background: rgba(255, 255, 255, 0.1); transform: none; }
+    .cs-back-btn:active { transform: scale(.94); }
+
+    /* ---------- Agent status card (signature element) ---------- */
+    .cs-agent-card {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 12px;
+        background: linear-gradient(155deg, var(--cs-panel-strong), rgba(9, 12, 30, 0.9));
+        border: 1px solid var(--cs-edge);
+        border-radius: 20px;
+        overflow: hidden;
+        flex-shrink: 0;
+        box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .cs-agent-card::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--cs-primary-2), var(--cs-accent), transparent);
+        background-size: 200% 100%;
+        animation: csScan 5s linear infinite;
+    }
+
+    @keyframes csScan {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    .cs-agent-avatar {
+        position: relative;
+        width: 46px;
+        height: 46px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .cs-agent-avatar::before {
+        content: "";
+        position: absolute;
+        inset: -4px;
+        border-radius: 50%;
+        background: conic-gradient(from 0deg, var(--cs-primary), var(--cs-accent), var(--cs-primary));
+        opacity: 0.55;
+        filter: blur(3px);
+        animation: csSpin 6s linear infinite;
+    }
+
+    @keyframes csSpin {
+        to { transform: rotate(360deg); }
+    }
+
+    .cs-agent-avatar img {
+        position: relative;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #0a0f2b;
+        border: 2px solid #0a0f2b;
+        display: block;
+    }
+
+    .cs-agent-fallback {
+        position: relative;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: #0a0f2b;
+        border: 2px solid #0a0f2b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+
+    .cs-agent-info { min-width: 0; flex: 1; }
+    .cs-agent-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .cs-agent-name {
+        font-size: 15.5px;
+        font-weight: 700;
+        color: var(--cs-text);
+        letter-spacing: 0.1px;
+    }
+
+    .cs-agent-status {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 3px;
+        font-family: var(--cs-mono);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        color: var(--cs-muted);
+    }
+
+    .cs-agent-status span:last-child { line-height: 1.3; }
+
+    .cs-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--cs-accent);
+        box-shadow: 0 0 8px var(--cs-accent);
+        flex-shrink: 0;
+        animation: csPulseDot 1.8s ease-in-out infinite;
+    }
+
+    @keyframes csPulseDot {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.45; transform: scale(0.8); }
+    }
+
+    .cs-clear-chat-btn {
+        margin-left: auto;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 1px solid var(--cs-edge);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--cs-muted);
+        cursor: pointer;
+        transition: .2s ease;
+    }
+
+    .cs-clear-chat-btn img {
+        width: 24px;
+        height: 24px;
+        object-fit: contain;
+        pointer-events: none;
+    }
+
+    .cs-clear-chat-btn:hover {
+        color: var(--danger);
+        border-color: rgba(255, 107, 107, 0.4);
+        background: rgba(255, 107, 107, 0.08);
+        transform: scale(1.06);
+    }
+
+    .cs-clear-chat-btn:active {
+        transform: scale(0.94);
+    }
+
+    /* ---------- Quick-issue shortcuts (muncul di bawah pesan sambutan) ---------- */
+    .cs-quick-replies {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        max-width: 78%;
+        margin-left: 36px; /* sejajar dengan bubble bot (lebar avatar + gap) */
+        animation: csRise .3s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    .cs-chip {
+        flex-shrink: 0;
+        width: auto;
+        padding: 8px 13px;
+        border-radius: 11px;
+        background: var(--cs-panel-strong);
+        border: 1px solid var(--cs-edge);
+        color: var(--cs-primary-2);
+        font-family: var(--cs-mono);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        cursor: pointer;
+        box-shadow: none;
+        transition: border-color .2s ease, color .2s ease, background .2s ease, transform .15s ease;
+    }
+
+    .cs-chip:hover {
+        border-color: rgba(61, 108, 255, 0.45);
+        color: var(--cs-primary-2);
+        background: rgba(61, 108, 255, 0.08);
+        transform: translateY(-1px);
+    }
+
+    .cs-chip:active { transform: translateY(0); }
+
+    /* ---------- Chat window ---------- */
+    .cs-chat-window {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        background: var(--cs-panel);
+        border: 1px solid var(--cs-edge);
+        border-radius: 20px;
+        padding: 16px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        scroll-behavior: smooth;
+    }
+
+    .cs-chat-window::-webkit-scrollbar { width: 5px; }
+    .cs-chat-window::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 10px;
+    }
+
+    .cs-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        max-width: 100%;
+        animation: csRise .3s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    @keyframes csRise {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .cs-row.user { justify-content: flex-end; }
+
+    .cs-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--cs-primary), #1e45c7);
+        font-family: var(--cs-mono);
+        font-size: 10px;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .cs-avatar.err { background: linear-gradient(135deg, var(--cs-danger), #8a1030); }
+
+    .cs-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        display: block;
+    }
+
+    .cs-bubble-col {
+        display: flex;
+        flex-direction: column;
+        max-width: 78%;
+    }
+
+    .cs-row.user .cs-bubble-col { align-items: flex-end; }
+
+    .cs-bubble {
+        padding: 11px 14px;
+        border-radius: 16px;
+        font-size: 13.5px;
+        line-height: 1.55;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+        color: var(--cs-text);
+    }
+
+    .cs-bubble img {
+        max-width: 100%;
+        border-radius: 12px;
+        margin-top: 8px;
+        display: block;
+    }
+
+    .cs-row.bot .cs-bubble {
+        background: rgba(255, 255, 255, 0.055);
+        border: 1px solid var(--cs-edge-soft);
+        border-bottom-left-radius: 4px;
+    }
+
+    .cs-row.user .cs-bubble {
+        background: linear-gradient(135deg, var(--cs-primary), #1e45c7);
+        border-bottom-right-radius: 4px;
+        color: #fff;
+    }
+
+    .cs-bubble.error {
+        background: rgba(255, 84, 112, 0.1);
+        border: 1px solid rgba(255, 84, 112, 0.3);
+        color: #ffb6c4;
+    }
+
+    .cs-time {
+        margin-top: 4px;
+        font-family: var(--cs-mono);
+        font-size: 12px;
+        letter-spacing: 0.3px;
+        color: var(--cs-muted);
+        padding: 0 2px;
+    }
+
+    .cs-bubble.typing {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+        padding: 13px 15px;
+    }
+
+    .cs-bubble.typing span {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--cs-muted);
+        animation: csBounce 1.2s infinite ease-in-out;
+    }
+
+    .cs-bubble.typing span:nth-child(2) { animation-delay: 0.15s; }
+    .cs-bubble.typing span:nth-child(3) { animation-delay: 0.3s; }
+
+    @keyframes csBounce {
+        0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+        30% { transform: translateY(-4px); opacity: 1; }
+    }
+
+    /* ---------- Image preview before send ---------- */
+    .cs-image-preview {
+        position: relative;
+        display: inline-flex;
+        flex-shrink: 0;
+    }
+
+    .cs-image-preview img {
+        width: 58px;
+        height: 58px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 1px solid var(--cs-edge);
+    }
+
+    .cs-image-preview .cs-remove-img {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 19px;
+        height: 19px;
+        border-radius: 50%;
+        background: var(--cs-danger);
+        color: #fff;
+        border: 2px solid var(--cs-bg);
+        font-size: 12px;
+        line-height: 15px;
+        text-align: center;
+        cursor: pointer;
+        padding: 0;
+        box-shadow: none;
+    }
+
+    /* ---------- Composer ---------- */
+    .cs-composer {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        background: var(--cs-panel-strong);
+        border: 1px solid var(--cs-edge);
+        border-radius: 18px;
+        padding: 7px 7px 7px 16px;
+        flex-shrink: 0;
+    }
+
+    .cs-composer textarea {
+        flex: 1;
+        background: transparent;
+        border: none;
+        padding: 12px 0;
+        margin: 0;
+        text-align: left;
+        font-family: inherit;
+        font-size: 14px;
+        line-height: 1.4;
+        color: var(--cs-text);
+        resize: none;
+        overflow-y: auto;
+        max-height: 120px;
+        min-height: 20px;
+    }
+
+    .cs-composer textarea::-webkit-scrollbar { width: 4px; }
+    .cs-composer textarea::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+    }
+
+    .cs-composer textarea::placeholder { color: var(--cs-muted); }
+
+    .cs-composer textarea:focus {
+        box-shadow: none;
+        background: transparent;
+        outline: none;
+    }
+
+    .cs-icon-btn, .cs-send-btn {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+        border-radius: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 0;
+        box-shadow: none;
+    }
+
+    .cs-icon-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--cs-edge);
+        color: var(--cs-muted);
+        transition: .2s;
+    }
+
+    .cs-icon-btn:hover {
+        background: rgba(61, 108, 255, 0.14);
+        color: var(--cs-primary-2);
+        transform: none;
+        box-shadow: none;
+    }
+
+    .cs-send-btn {
+        background: linear-gradient(135deg, var(--cs-primary), #1e45c7);
+        border: none;
+        color: #fff;
+        box-shadow: 0 4px 16px rgba(61, 108, 255, 0.4);
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .cs-send-btn:hover { transform: none; filter: brightness(1.08); }
+    .cs-send-btn:active { transform: scale(0.94); }
+
+    .cs-send-btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        filter: none;
+    }
+
+    .cs-icon-btn svg, .cs-send-btn svg { width: 17px; height: 17px; }
+
+    @media (max-width: 380px) {
+        .cs-agent-name { font-size: 14.5px; }
+        .cs-bubble-col { max-width: 84%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .cs-agent-card::before,
+        .cs-agent-avatar::before,
+        .cs-dot,
+        .cs-row,
+        .cs-bubble.typing span { animation: none; }
+    }
+</style>
+</head>
+
+<body>
+
+    <div class="topbar">
+        <div class="menu-btn dashboard-menu" onclick="toggleMenu()">☰</div>
+    </div>
+
+    <div class="sidebar" id="sidebar"></div>
+    <script src="Akun.js"></script>
+    <script src="sidebar.js"></script>
+
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <div class="cs-page">
+
+        <header class="cs-agent-card">
+            <button type="button" class="cs-back-btn" id="csBackBtn" aria-label="Kembali">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+            </button>
+            <div class="cs-agent-avatar">
+                <img src="./media/meta.png" alt="DanzClean" onerror="this.replaceWith(Object.assign(document.createElement('span'), {className:'cs-agent-fallback', textContent:'💬'}));">
+            </div>
+            <div class="cs-agent-info">
+                <div class="cs-agent-name">DanzClean Support</div>
+                <div class="cs-agent-status"><span class="cs-dot"></span><span>Online</span></div>
+            </div>
+            <button type="button" class="cs-clear-chat-btn" id="csClearChatBtn" title="Hapus obrolan">
+                <img src="./media/del.png" alt="Hapus" onerror="this.style.display='none';">
+            </button>
+        </header>
+
+        <div class="cs-chat-window" id="csChatWindow"></div>
+
+        <div id="csImagePreviewWrap"></div>
+
+        <div class="cs-composer">
+            <button type="button" class="cs-icon-btn" id="csAttachBtn" title="Kirim gambar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+            </button>
+            <input type="file" id="csImageInput" accept="image/*" hidden>
+            <textarea id="csTextInput" placeholder="Tulis pesan kamu..." rows="1" autocomplete="off"></textarea>
+            <button type="button" class="cs-send-btn" id="csSendBtn" title="Kirim">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            document.getElementById("sidebar").classList.toggle("active");
+            document.getElementById("overlay").classList.toggle("active");
+            document.body.classList.toggle("sidebar-open");
+        }
+    </script>
+
+    <script src="config.js"></script>
+    <script>
+        const csChatWindow = document.getElementById("csChatWindow");
+        const csTextInput = document.getElementById("csTextInput");
+        const csSendBtn = document.getElementById("csSendBtn");
+        const csAttachBtn = document.getElementById("csAttachBtn");
+        const csImageInput = document.getElementById("csImageInput");
+        const csImagePreviewWrap = document.getElementById("csImagePreviewWrap");
+
+        const CS_QUICK_REPLIES = [
+            { label: "Upload gagal", q: "Upload video/foto saya gagal terus ada muncul masalah jaringan, kenapa ya?" },
+            { label: "Hasil blur", q: "Hasil status WA saya jadi blur/pecah, gimana solusinya?" },
+            { label: "Akun bermasalah", q: "Akun saya bermasalah / kena blokir, bisa dibantu?" },
+                        { label: "nomor bermasalah", q: "kenapa ya kok muncul nomor lu gada di group" },
+            { label: "Lainnya", q: "Saya mau tanya hal lain di luar itu" },
+        ];
+
+        let csHistory = [];
+        let csDisplayLog = []; // untuk render ulang chat setelah reload
+        let pendingImage = null; // { base64, mimeType, dataUrl }
+        let isSending = false;
+
+        const CS_STORAGE_KEY = "danzclean_cs_chat_v1";
+        const CS_STORAGE_TTL = 24 * 60 * 60 * 1000; // obrolan disimpan 1 hari
+
+        function csSaveStorage() {
+            try {
+                localStorage.setItem(CS_STORAGE_KEY, JSON.stringify({
+                    savedAt: Date.now(),
+                    history: csHistory,
+                    log: csDisplayLog
+                }));
+            } catch (e) {
+            }
+        }
+
+        function csLoadStorage() {
+            try {
+                const raw = localStorage.getItem(CS_STORAGE_KEY);
+                if (!raw) return null;
+                const data = JSON.parse(raw);
+                if (!data || !data.savedAt) return null;
+                if (Date.now() - data.savedAt > CS_STORAGE_TTL) {
+                    localStorage.removeItem(CS_STORAGE_KEY);
+                    return null;
+                }
+                return data;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function csNowTime() {
+            return new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+        }
+
+        function csScrollToBottom() {
+            csChatWindow.scrollTop = csChatWindow.scrollHeight;
+        }
+
+        function csBuildAvatar(isError) {
+            const avatar = document.createElement("div");
+            avatar.className = "cs-avatar" + (isError ? " err" : "");
+            if (isError) {
+                avatar.textContent = "!";
+            } else {
+                const img = document.createElement("img");
+                img.src = "./media/meta.png";
+                img.alt = "";
+                img.onerror = function () {
+                    this.replaceWith(document.createTextNode("💬"));
+                };
+                avatar.appendChild(img);
+            }
+            return avatar;
+        }
+
+        function csFormatText(text) {
+            let safe = text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+
+            safe = safe.replace(/\*\*([^\n*]+)\*\*/g, "<strong>$1</strong>");
+            safe = safe.replace(/^#{1,6}\s*(.+)$/gm, "<strong>$1</strong>");
+            safe = safe.replace(/^[-*]\s+/gm, "• ");
+
+            return safe;
+        }
+
+        function csRenderMessage(role, text, imageDataUrl, time) {
+            const row = document.createElement("div");
+            row.className = "cs-row " + (role === "user" ? "user" : "bot");
+
+            if (role !== "user") {
+                row.appendChild(csBuildAvatar(role === "error"));
+            }
+
+            const col = document.createElement("div");
+            col.className = "cs-bubble-col";
+
+            const bubble = document.createElement("div");
+            bubble.className = "cs-bubble" + (role === "error" ? " error" : "");
+            if (text) {
+                const textSpan = document.createElement("span");
+                textSpan.innerHTML = csFormatText(text);
+                bubble.appendChild(textSpan);
+            }
+            if (imageDataUrl) {
+                const img = document.createElement("img");
+                img.src = imageDataUrl;
+                bubble.appendChild(img);
+            }
+            col.appendChild(bubble);
+
+            const timeEl = document.createElement("div");
+            timeEl.className = "cs-time";
+            timeEl.textContent = time;
+            col.appendChild(timeEl);
+
+            row.appendChild(col);
+            csChatWindow.appendChild(row);
+            csScrollToBottom();
+            return row;
+        }
+
+        function csAddMessage(role, text, imageDataUrl) {
+            const time = csNowTime();
+            const row = csRenderMessage(role, text, imageDataUrl, time);
+            csDisplayLog.push({ role, text: text || "", imageDataUrl: imageDataUrl || null, time });
+            csSaveStorage();
+            return row;
+        }
+
+        function csShowTyping() {
+            const row = document.createElement("div");
+            row.className = "cs-row bot";
+            row.id = "csTypingIndicator";
+            row.appendChild(csBuildAvatar(false));
+
+            const bubble = document.createElement("div");
+            bubble.className = "cs-bubble typing";
+            bubble.innerHTML = "<span></span><span></span><span></span>";
+            row.appendChild(bubble);
+
+            csChatWindow.appendChild(row);
+            csScrollToBottom();
+        }
+
+        function csRenderQuickReplies() {
+            const wrap = document.createElement("div");
+            wrap.className = "cs-quick-replies";
+            wrap.id = "csQuickReplies";
+
+            CS_QUICK_REPLIES.forEach(opt => {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "cs-chip";
+                btn.textContent = opt.label;
+                btn.addEventListener("click", () => {
+                    csTextInput.value = opt.q;
+                    csSendMessage();
+                });
+                wrap.appendChild(btn);
+            });
+
+            csChatWindow.appendChild(wrap);
+            csScrollToBottom();
+        }
+
+        function csRemoveQuickReplies() {
+            const el = document.getElementById("csQuickReplies");
+            if (el) el.remove();
+        }
+
+        function csHideTyping() {
+            const el = document.getElementById("csTypingIndicator");
+            if (el) el.remove();
+        }
+
+        function csClearChat() {
+            try {
+                localStorage.removeItem(CS_STORAGE_KEY);
+            } catch (e) {}
+
+            csHistory = [];
+            csDisplayLog = [];
+            pendingImage = null;
+            csImagePreviewWrap.innerHTML = "";
+            csImageInput.value = "";
+            csChatWindow.innerHTML = "";
+
+            csAddMessage("bot", "Halo! 👋 Saya CS DanzClean. Ceritain masalah kamu di web ini, atau kirim screenshot-nya kalau perlu.");
+            csRenderQuickReplies();
+        }
+
+        document.getElementById("csClearChatBtn").addEventListener("click", csClearChat);
+
+        const csSaved = csLoadStorage();
+        if (csSaved && csSaved.log && csSaved.log.length) {
+            csHistory = csSaved.history || [];
+            csDisplayLog = csSaved.log;
+            csDisplayLog.forEach(entry => csRenderMessage(entry.role, entry.text, entry.imageDataUrl, entry.time));
+            if (csHistory.length === 0) csRenderQuickReplies();
+        } else {
+            csAddMessage("bot", "Halo! 👋 Saya CS DanzClean. Ceritain masalah kamu di web ini, atau kirim screenshot-nya kalau perlu.");
+            csRenderQuickReplies();
+        }
+
+        csAttachBtn.addEventListener("click", () => csImageInput.click());
+
+        csImageInput.addEventListener("change", () => {
+            const file = csImageInput.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                const dataUrl = reader.result;
+                const base64 = dataUrl.split(",")[1];
+                pendingImage = { base64, mimeType: file.type, dataUrl };
+
+                csImagePreviewWrap.innerHTML = `
+                    <div class="cs-image-preview">
+                        <img src="${dataUrl}">
+                        <button type="button" class="cs-remove-img" id="csRemoveImgBtn">&times;</button>
+                    </div>
+                `;
+                document.getElementById("csRemoveImgBtn").addEventListener("click", () => {
+                    pendingImage = null;
+                    csImagePreviewWrap.innerHTML = "";
+                    csImageInput.value = "";
+                });
+            };
+            reader.readAsDataURL(file);
+        });
+
+        async function csSendMessage() {
+            if (isSending) return;
+
+            const text = csTextInput.value.trim();
+            if (!text && !pendingImage) return;
+
+            csRemoveQuickReplies();
+
+            isSending = true;
+            csSendBtn.disabled = true;
+
+            const userParts = [];
+            if (text) userParts.push({ text });
+            if (pendingImage) {
+                userParts.push({
+                    inline_data: { mime_type: pendingImage.mimeType, data: pendingImage.base64 }
+                });
+            }
+
+            csAddMessage("user", text, pendingImage ? pendingImage.dataUrl : null);
+            csHistory.push({ role: "user", parts: userParts });
+
+            csTextInput.value = "";
+            csTextInput.style.height = "auto";
+            pendingImage = null;
+            csImagePreviewWrap.innerHTML = "";
+            csImageInput.value = "";
+
+            csShowTyping();
+
+            try {
+                const body = { contents: csHistory };
+                if (CS_SYSTEM_PROMPT.trim()) {
+                    body.systemInstruction = { parts: [{ text: CS_SYSTEM_PROMPT }] };
+                }
+
+                const csAbortCtrl = new AbortController();
+                const csTimeoutId = setTimeout(() => csAbortCtrl.abort(), 25000);
+
+                const res = await fetch(CS_API, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body),
+                    signal: csAbortCtrl.signal
+                });
+
+                clearTimeout(csTimeoutId);
+
+                const data = await res.json();
+                csHideTyping();
+
+                if (!res.ok) {
+                    const msg = (data && data.error && data.error.message) || "Terjadi kesalahan saat menghubungi AI.";
+                    csAddMessage("error", "Gagal: " + msg);
+                    csHistory.pop();
+                    csSaveStorage();
+                    isSending = false;
+                    csSendBtn.disabled = false;
+                    return;
+                }
+
+                const candidate = data.candidates && data.candidates[0];
+                const replyParts = (candidate && candidate.content && candidate.content.parts) || [];
+                const replyText = replyParts.map(p => p.text || "").join("").trim() || "Maaf, saya belum bisa menjawab itu.";
+
+                csHistory.push({ role: "model", parts: [{ text: replyText }] });
+                csAddMessage("bot", replyText);
+
+            } catch (err) {
+                csHideTyping();
+                if (err && err.name === "AbortError") {
+                    csAddMessage("error", "Server AI kelamaan jawab (timeout). Coba kirim ulang ya.");
+                } else {
+                    csAddMessage("error", "Gagal terhubung ke server AI. Cek koneksi internet kamu.");
+                }
+                csHistory.pop();
+                csSaveStorage();
+            }
+
+            isSending = false;
+            csSendBtn.disabled = false;
+        }
+
+        csSendBtn.addEventListener("click", csSendMessage);
+        csTextInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                csSendMessage();
+            }
+        });
+
+        function csAutoGrowInput() {
+            csTextInput.style.height = "auto";
+            csTextInput.style.height = Math.min(csTextInput.scrollHeight, 120) + "px";
+        }
+        csTextInput.addEventListener("input", csAutoGrowInput);
+
+        window.visualViewport && window.visualViewport.addEventListener("resize", csScrollToBottom);
+    </script>
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function() {
+          navigator.serviceWorker.register("/sw.js").then(function(reg) {
+            console.log("Service Worker terdaftar aman bre!", reg.scope);
+          }).catch(function(err) {
+            console.log("Gagal daftar Service Worker:", err);
+          });
+        });
+      }
+    </script>
+
+<script>
+document.getElementById("csBackBtn").addEventListener("click", function () {
+    var sameSite = document.referrer && new URL(document.referrer).origin === location.origin;
+    if (sameSite && history.length > 1) history.back(); else location.href = "/";
+});
+</script>
+</body>
+</html>

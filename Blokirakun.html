@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Blokir Akun - danzclean</title>
+
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link
+href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap"
+rel="stylesheet">
+
+<link
+rel="stylesheet"
+href="style.css">
+
+<style>
+.block-page{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:120px 16px 60px;
+    box-sizing:border-box;
+}
+.block-card{
+    width:100%;
+    max-width:560px;
+    padding:28px 24px;
+    border-radius:32px;
+    background:linear-gradient(145deg, rgba(14,18,45,.94), rgba(6,9,24,.92));
+    border:1px solid rgba(255,255,255,.06);
+    backdrop-filter:blur(16px);
+    box-shadow:0 10px 40px rgba(0,0,0,.35), 0 0 40px rgba(76,125,255,.08);
+    box-sizing:border-box;
+}
+.block-card-icon{
+    font-size:44px;
+    margin-bottom:8px;
+    text-align:center;
+}
+.block-card-title{
+    font-size:26px;
+    font-weight:800;
+    margin-bottom:4px;
+    text-align:center;
+    background:linear-gradient(135deg, #ffffff, #73a5ff);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+.block-card-desc{
+    color:#aeb8e8;
+    font-size:13px;
+    margin-bottom:20px;
+    text-align:center;
+}
+.block-search{
+    width:100%;
+    padding:13px 16px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.1);
+    background:rgba(255,255,255,.04);
+    color:#fff;
+    font-size:14px;
+    margin-bottom:14px;
+    box-sizing:border-box;
+    outline:none;
+}
+.block-search::placeholder{ color:#7a84ad; }
+.block-count{
+    color:#7a84ad;
+    font-size:12px;
+    margin-bottom:14px;
+}
+.block-list{
+    max-height:60vh;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+.block-row{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px 12px;
+    padding:14px;
+    border-radius:16px;
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.05);
+}
+.block-avatar{
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    background:linear-gradient(135deg,var(--primary),#36e2a8);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    color:#0a0e1a;
+    flex-shrink:0;
+    font-size:15px;
+    overflow:hidden;
+}
+.block-avatar img{ width:100%; height:100%; object-fit:cover; }
+.block-info{
+    flex:1 1 140px;
+    min-width:0;
+}
+.block-username{
+    color:#fff;
+    font-weight:600;
+    font-size:14px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+.block-meta{
+    color:#7a84ad;
+    font-size:12px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+.block-phone{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-top:2px;
+    flex-wrap:nowrap;
+}
+.block-phone-text{
+    color:#7a84ad;
+    font-size:12px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    flex:1 1 auto;
+    min-width:0;
+}
+.block-edit-phone{
+    border:none;
+    background:rgba(76,125,255,.15);
+    color:#73a5ff;
+    font-size:12px;
+    padding:4px 10px;
+    border-radius:8px;
+    cursor:pointer;
+    flex:0 0 auto;
+    width:auto;
+    box-shadow:none;
+    letter-spacing:normal;
+    line-height:1.6;
+}
+.block-edit-phone:hover{
+    background:rgba(76,125,255,.28);
+    transform:none;
+    box-shadow:none;
+    filter:none;
+}
+.block-password{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-top:2px;
+    flex-wrap:nowrap;
+}
+.block-password-text{
+    color:#7a84ad;
+    font-size:12px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    flex:1 1 auto;
+    min-width:0;
+    font-family:monospace;
+    letter-spacing:1px;
+}
+.block-eye-btn{
+    border:none;
+    background:rgba(255,255,255,.06);
+    color:#aeb8e8;
+    font-size:12px;
+    padding:4px 8px;
+    border-radius:8px;
+    cursor:pointer;
+    flex:0 0 auto;
+    width:auto;
+    box-shadow:none;
+    letter-spacing:normal;
+    line-height:1.6;
+}
+.block-eye-btn:hover{
+    background:rgba(255,255,255,.12);
+    transform:none;
+    box-shadow:none;
+    filter:none;
+}
+.block-edit-password{
+    border:none;
+    background:rgba(76,125,255,.15);
+    color:#73a5ff;
+    font-size:12px;
+    padding:4px 10px;
+    border-radius:8px;
+    cursor:pointer;
+    flex:0 0 auto;
+    width:auto;
+    box-shadow:none;
+    letter-spacing:normal;
+    line-height:1.6;
+}
+.block-edit-password:hover{
+    background:rgba(76,125,255,.28);
+    transform:none;
+    box-shadow:none;
+    filter:none;
+}
+.block-tabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+}
+.block-tab{
+    border:none;
+    background:rgba(255,255,255,.04);
+    color:#aeb8e8;
+    font-size:12px;
+    font-weight:600;
+    padding:8px 14px;
+    border-radius:20px;
+    cursor:pointer;
+    width:auto;
+    box-shadow:none;
+    letter-spacing:normal;
+    line-height:1.4;
+    transition:.2s;
+}
+.block-tab:hover{
+    background:rgba(255,255,255,.08);
+    transform:none;
+    box-shadow:none;
+    filter:none;
+}
+.block-tab.active{
+    background:linear-gradient(135deg, var(--primary-mid), var(--violet));
+    color:#fff;
+}
+.block-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-left:auto;
+    flex-shrink:0;
+}
+.block-status{
+    font-size:12px;
+    font-weight:700;
+    padding:4px 10px;
+    border-radius:20px;
+    white-space:nowrap;
+    flex-shrink:0;
+}
+.block-status.aktif{ color:#36e2a8; background:rgba(54,226,168,.1); }
+.block-status.blocked{ color:var(--danger); background:rgba(255,77,77,.12); }
+.block-btn{
+    border:none;
+    padding:8px 14px;
+    border-radius:12px;
+    font-size:12px;
+    font-weight:700;
+    cursor:pointer;
+    flex-shrink:0;
+    white-space:nowrap;
+    width:auto;
+}
+.block-btn.do-block{ background:var(--danger); color:#fff; }
+.block-btn.do-unblock{ background:#36e2a8; color:#0a0e1a; }
+.block-btn.do-delete{ background:rgba(255,77,77,.14); color:var(--danger); }
+.block-btn.do-delete:hover{ background:var(--danger); color:#fff; }
+.block-empty{
+    text-align:center;
+    color:#7a84ad;
+    font-size:13px;
+    padding:20px 0;
+}
+.modal-input{
+    width:100%;
+    padding:13px 16px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.1);
+    background:rgba(255,255,255,.04);
+    color:#fff;
+    font-size:14px;
+    margin-bottom:18px;
+    box-sizing:border-box;
+    outline:none;
+    text-align:left;
+}
+.modal-input::placeholder{ color:#7a84ad; }
+.modal-btn-row{
+    display:flex;
+    gap:10px;
+}
+.modal-btn-row .modal-btn{
+    width:100%;
+}
+.modal-btn.secondary{
+    background:rgba(255,255,255,.06);
+    color:#aeb8e8;
+}
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script src="firebase-config.js"></script>
+
+</head>
+
+<body>
+
+<div class="sidebar" id="sidebar"></div>
+<script src="Akun.js"></script>
+<script src="sidebar.js"></script>
+
+<div class="topbar">
+
+<div
+class="menu-btn"
+onclick="toggleMenu()">
+
+☰
+
+</div>
+
+</div>
+
+<div
+class="overlay"
+id="overlay"
+onclick="toggleMenu()">
+</div>
+
+<div class="block-page">
+
+<div class="block-card">
+
+<div class="block-card-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="m5.3 5.3 13.4 13.4"/></svg></div>
+
+<div class="block-card-title">
+Blokir Akun
+</div>
+
+<div class="block-card-desc">
+Cari akun berdasarkan username / email / no HP, lalu blokir atau buka blokir.
+</div>
+
+<input
+type="text"
+id="blockSearch"
+class="block-search"
+placeholder="Cari username, email, atau nomor HP (+62 838-3386-8943)..."
+autocomplete="off"
+autocapitalize="off"
+spellcheck="false">
+
+<div class="block-tabs">
+<button class="block-tab active" id="tabSemua" onclick="setBlockFilter('semua')">Semua</button>
+<button class="block-tab" id="tabAktif" onclick="setBlockFilter('aktif')">Aktif</button>
+<button class="block-tab" id="tabBlokir" onclick="setBlockFilter('blokir')">Diblokir</button>
+<button class="block-tab" id="tabManual" onclick="setBlockFilter('manual')">Login Manual</button>
+<button class="block-tab" id="tabDuplikat" onclick="setBlockFilter('duplikat')">Duplikat</button>
+</div>
+
+<button
+id="hapusSemuaDuplikatBtn"
+class="block-btn do-block"
+style="display:none; width:100%; margin-bottom:14px; padding:11px 14px; font-size:13px;"
+onclick="hapusSemuaDuplikatAkun()">
+<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 6.5h17M9 6.5V4h6v2.5M6 6.5l1 13.5h10l1-13.5M10 11v5M14 11v5"/></svg> Hapus Semua Akun Duplikat
+</button>
+
+<div id="blockCount" class="block-count">Memuat data akun...</div>
+
+<div id="blockList" class="block-list">
+<div class="block-empty">Memuat data akun...</div>
+</div>
+
+</div>
+
+</div>
+
+<div class="modal-overlay" id="popupModal">
+
+<div class="modal-card">
+
+<div class="modal-icon" data-tone="success"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="m8 12.5 2.8 2.8L16.5 9.5"/></svg></div>
+
+<div
+class="modal-title"
+id="popupTitle">
+
+Berhasil
+
+</div>
+
+<div
+class="modal-text"
+id="popupText">
+
+Berhasil
+
+</div>
+
+<button
+class="modal-btn"
+onclick="closePopup()">
+
+OKE
+
+</button>
+
+</div>
+
+</div>
+
+<div class="modal-overlay" id="phoneModal">
+
+<div class="modal-card">
+
+<div class="modal-icon" data-tone="info"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></div>
+
+<div class="modal-title">Ubah Nomor HP</div>
+
+<div class="modal-text" id="phoneModalName">Masukkan nomor HP baru.</div>
+
+<input
+type="text"
+id="phoneModalInput"
+class="modal-input"
+placeholder="Contoh: 6281234567890">
+
+<div class="modal-btn-row">
+<button class="modal-btn secondary" onclick="closePhoneModal()">Batal</button>
+<button class="modal-btn" onclick="simpanNomorAkun()">Simpan</button>
+</div>
+
+</div>
+
+</div>
+
+<div class="modal-overlay" id="passwordModal">
+
+<div class="modal-card">
+
+<div class="modal-icon" data-tone="info"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M16 7l3 3M14 9l2 2"/></svg></div>
+
+<div class="modal-title">Ubah Password</div>
+
+<div class="modal-text" id="passwordModalName">Masukkan password baru.</div>
+
+<input
+type="text"
+id="passwordModalInput"
+class="modal-input"
+placeholder="Password baru">
+
+<div class="modal-btn-row">
+<button class="modal-btn secondary" onclick="closePasswordModal()">Batal</button>
+<button class="modal-btn" onclick="simpanPasswordAkun()">Simpan</button>
+</div>
+
+</div>
+
+</div>
+
+<div class="modal-overlay" id="blockModal">
+
+<div class="modal-card">
+
+<div class="modal-icon" data-tone="error"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="m5.3 5.3 13.4 13.4"/></svg></div>
+
+<div class="modal-title">Blokir Akun</div>
+
+<div class="modal-text" id="blockModalName">Berikan alasan blokir (opsional).</div>
+
+<input
+type="text"
+id="blockModalInput"
+class="modal-input"
+placeholder="Alasan blokir (opsional)">
+
+<div class="modal-btn-row">
+<button class="modal-btn secondary" onclick="closeBlockModal()">Batal</button>
+<button class="modal-btn" onclick="konfirmasiBlokirAkun()">Blokir</button>
+</div>
+
+</div>
+
+</div>
+
+<div class="modal-overlay" id="deleteModal">
+
+<div class="modal-card">
+
+<div class="modal-icon" data-tone="error"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6.5h17M9 6.5V4h6v2.5M6 6.5l1 13.5h10l1-13.5M10 11v5M14 11v5"/></svg></div>
+
+<div class="modal-title">Hapus Akun</div>
+
+<div class="modal-text" id="deleteModalName">Yakin ingin menghapus akun ini?</div>
+
+<div class="modal-btn-row">
+<button class="modal-btn secondary" onclick="closeDeleteModal()">Batal</button>
+<button class="modal-btn modal-btn-danger" onclick="konfirmasiHapusAkun()">Hapus</button>
+</div>
+
+</div>
+
+</div>
+
+<div class="modal-overlay" id="dupModal">
+
+<div class="modal-card">
+
+<div class="modal-icon" data-tone="error"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6.5h17M9 6.5V4h6v2.5M6 6.5l1 13.5h10l1-13.5M10 11v5M14 11v5"/></svg></div>
+
+<div class="modal-title">Hapus Semua Duplikat</div>
+
+<div class="modal-text" id="dupModalName">Yakin ingin menghapus semua akun duplikat?</div>
+
+<div class="modal-btn-row">
+<button class="modal-btn secondary" onclick="closeDupModal()">Batal</button>
+<button class="modal-btn modal-btn-danger" onclick="konfirmasiHapusDuplikat()">Hapus Semua</button>
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+if (localStorage.getItem("isOwner") !== "true") {
+    location.href = "/"
+}
+
+function toggleMenu(){
+
+const sidebar =
+document.getElementById("sidebar")
+
+const overlay =
+document.getElementById("overlay")
+
+sidebar.classList.toggle("active")
+
+overlay.classList.toggle("active")
+
+document.body.classList.toggle("sidebar-open")
+
+}
+
+function showPopup(title,text){
+
+document.getElementById("popupTitle").innerText = title
+
+document.getElementById("popupText").innerText = text
+
+document
+.getElementById("popupModal")
+.classList.add("active")
+
+}
+
+function closePopup(){
+
+document
+.getElementById("popupModal")
+.classList.remove("active")
+
+}
+
+if (!firebase.apps.length) {
+    firebase.initializeApp(FIREBASE_CONFIG_AUTH)
+}
+
+const db =
+firebase.database()
+
+
+const usersRef = db.ref("users")
+const manualUsersRef = db.ref("manual_users")
+const blockedUsersRef = db.ref("blocked_users")
+
+let authMap = {}        // uid -> akun dari /users
+let manualMap = {}      // uid -> akun dari /manual_users
+let daftarAkun = {}     // uid -> gabungan keduanya
+let daftarBlokir = {}   // uid -> {blocked, reason}
+let blockSearchQuery = ""
+let blockFilter = "semua" // semua | aktif | blokir | manual | duplikat
+
+// ===== cache (dihitung ulang HANYA kalau data Firebase berubah) =====
+let akunList = []                 // sudah terurut + sudah punya index pencarian
+let uidDuplikatCache = new Set()
+let statsCache = { totalAkun: 0, totalManual: 0, totalDuplikat: 0 }
+let hasilFilter = []              // hasil filter/pencarian saat ini
+const PAGE_SIZE = 40              // jumlah baris yang dirender per batch
+let shownCount = PAGE_SIZE
+const dataSiap = { users: false, manual: false, blokir: false }
+const collator = new Intl.Collator()
+
+// ===== cache lokal (IndexedDB): list langsung muncul, Firebase menyusul di belakang =====
+const CACHE_DB = "danzclean_blokirakun"
+const CACHE_STORE = "kv"
+let cacheDipakai = false
+let cacheDbPromise = null
+let cacheTimer = null
+
+function liveSiap(){
+    return dataSiap.users && dataSiap.manual && dataSiap.blokir
+}
+
+function bukaCacheDb(){
+    if(cacheDbPromise) return cacheDbPromise
+    cacheDbPromise = new Promise((resolve, reject) => {
+        if(!window.indexedDB) return reject(new Error("IndexedDB tidak tersedia"))
+        const req = indexedDB.open(CACHE_DB, 1)
+        req.onupgradeneeded = () => req.result.createObjectStore(CACHE_STORE)
+        req.onsuccess = () => resolve(req.result)
+        req.onerror = () => reject(req.error)
+    })
+    return cacheDbPromise
+}
+
+function cacheGet(key){
+    return bukaCacheDb().then(db => new Promise((resolve, reject) => {
+        const r = db.transaction(CACHE_STORE, "readonly").objectStore(CACHE_STORE).get(key)
+        r.onsuccess = () => resolve(r.result)
+        r.onerror = () => reject(r.error)
+    }))
+}
+
+function cacheSet(key, val){
+    return bukaCacheDb().then(db => new Promise((resolve, reject) => {
+        const tx = db.transaction(CACHE_STORE, "readwrite")
+        tx.objectStore(CACHE_STORE).put(val, key)
+        tx.oncomplete = () => resolve()
+        tx.onerror = () => reject(tx.error)
+    }))
+}
+
+// simpan versi ringkas (tanpa hash password, foto base64 besar dibuang)
+function jadwalkanSimpanCache(){
+    clearTimeout(cacheTimer)
+    cacheTimer = setTimeout(() => {
+        if(!liveSiap()) return
+        const ringkas = (m) => Object.values(m).map(a => ({
+            uid: a.uid,
+            username: a.username || "",
+            email: a.email || "",
+            phone: a.phone || "",
+            photo: (typeof a.photo === "string" && a.photo.length <= 500) ? a.photo : "",
+            sumberAkun: a.sumberAkun,
+            pw: a.passwordHash ? 1 : 0
+        }))
+        cacheSet("snapshot", {
+            owner: ownerUid || null,
+            waktu: Date.now(),
+            auth: ringkas(authMap),
+            manual: ringkas(manualMap),
+            blokir: daftarBlokir
+        }).catch(() => {})
+    }, 1500)
+}
+
+function muatDariCache(){
+    cacheGet("snapshot").then(snap => {
+        if(!snap || liveSiap()) return
+        if((snap.owner || null) !== (ownerUid || null)) return
+
+        const bangun = (arr) => {
+            const m = {}
+            ;(arr || []).forEach(a => {
+                m[a.uid] = {
+                    uid: a.uid, username: a.username, email: a.email, phone: a.phone,
+                    photo: a.photo, sumberAkun: a.sumberAkun, passwordHash: a.pw ? "1" : ""
+                }
+            })
+            return m
+        }
+
+        // jangan timpa bagian yang sudah keburu datang dari server
+        if(!dataSiap.users)  authMap = bangun(snap.auth)
+        if(!dataSiap.manual) manualMap = bangun(snap.manual)
+        if(!dataSiap.blokir) daftarBlokir = snap.blokir || {}
+
+        cacheDipakai = true
+        rebuildIndex()
+        renderBlockList(true)
+    }).catch(() => {})
+}
+
+function setBlockFilter(filter){
+    blockFilter = filter
+    document.getElementById("tabSemua").classList.toggle("active", filter === "semua")
+    document.getElementById("tabAktif").classList.toggle("active", filter === "aktif")
+    document.getElementById("tabBlokir").classList.toggle("active", filter === "blokir")
+    document.getElementById("tabManual").classList.toggle("active", filter === "manual")
+    document.getElementById("tabDuplikat").classList.toggle("active", filter === "duplikat")
+    document.getElementById("hapusSemuaDuplikatBtn").style.display = filter === "duplikat" ? "block" : "none"
+    renderBlockList(true)
+}
+
+async function hashSHA256(teks){
+    const enc = new TextEncoder().encode(teks)
+    const buf = await crypto.subtle.digest("SHA-256", enc)
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("")
+}
+
+function getOwnerUid(){
+    try{
+        const stored = localStorage.getItem("danzclean_logged_user")
+        if(!stored) return null
+        const data = JSON.parse(stored)
+        return data && data.uid ? data.uid : null
+    }catch(e){
+        return null
+    }
+}
+
+const ownerUid = getOwnerUid()
+
+function inisialAvatar(nama){
+    if(!nama) return "?"
+    return nama.trim().charAt(0).toUpperCase()
+}
+
+function esc(v){
+    return String(v == null ? "" : v)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;")
+}
+
+// ===== normalisasi nomor HP =====
+// "+62 838-3386-8943" / "0838 3386 8943" / "6283833868943"  ->  "6283833868943"
+function digitsOnly(s){
+    return String(s == null ? "" : s).replace(/\D/g, "")
+}
+
+function canonPhone(s){
+    let d = digitsOnly(s)
+    if(!d) return ""
+    if(d.startsWith("620")) return "62" + d.slice(3)
+    if(d.startsWith("00"))  return d.slice(2)
+    if(d.startsWith("0"))   return "62" + d.slice(1)
+    if(d.startsWith("8"))   return "62" + d
+    return d
+}
+
+// bikin fungsi pencocok SEKALI per pencarian (bukan per akun)
+function buatPencocok(raw){
+    const q = raw.trim().toLowerCase()
+    if(!q) return null
+
+    const qd = digitsOnly(q)
+    const varian = []
+    // query terlihat seperti nomor HP (hanya angka + spasi + - ( ) .)
+    if(/^[\d\s+\-().]+$/.test(q) && qd.length >= 3){
+        varian.push(qd)
+        if(qd.startsWith("620"))     varian.push("62" + qd.slice(3))
+        else if(qd.startsWith("00")) varian.push(qd.slice(2))
+        else if(qd.startsWith("0"))  varian.push("62" + qd.slice(1))
+    }
+
+    if(varian.length === 0){
+        return akun => akun._s.includes(q)
+    }
+    return akun => akun._s.includes(q) || (akun._p !== "" && varian.some(v => akun._p.includes(v)))
+}
+
+// ===== bangun ulang index (dipanggil hanya saat data akun berubah) =====
+function rebuildIndex(){
+
+    daftarAkun = Object.assign({}, authMap, manualMap)
+
+    const list = []
+    const grup = {}
+    let totalManual = 0
+
+    for(const key in daftarAkun){
+        const akun = daftarAkun[key]
+        if(ownerUid && akun.uid === ownerUid) continue
+
+        const username = akun.username || ""
+        const email = (akun.email || "").trim().toLowerCase()
+        const phone = (akun.phone || "").trim()
+
+        akun._n = username
+        akun._s = (username + "\n" + (akun.email || "") + "\n" + (akun.phone || "")).toLowerCase()
+        akun._p = canonPhone(akun.phone)
+        list.push(akun)
+
+        if(akun.sumberAkun === "manual") totalManual++
+
+        // deteksi duplikat (aturan sama persis seperti sebelumnya: email / nomor identik)
+        if(email){
+            const k = "email:" + email
+            ;(grup[k] || (grup[k] = [])).push(akun.uid)
+        }
+        if(phone){
+            const k = "phone:" + phone
+            ;(grup[k] || (grup[k] = [])).push(akun.uid)
+        }
+    }
+
+    list.sort((a, b) => collator.compare(a._n, b._n))
+    akunList = list
+
+    const setDup = new Set()
+    for(const k in grup){
+        if(grup[k].length > 1) grup[k].forEach(u => setDup.add(u))
+    }
+    uidDuplikatCache = setDup
+
+    statsCache = {
+        totalAkun: list.length,
+        totalManual: totalManual,
+        totalDuplikat: setDup.size
+    }
+}
+
+function getUidDuplikat(){
+    return uidDuplikatCache
+}
+
+function rowHtml(akun){
+
+    const bl = daftarBlokir[akun.uid]
+    const statusBlokir = !!(bl && bl.blocked)
+    const uid = esc(akun.uid)
+
+    const avatarHtml = akun.photo
+        ? `<img src="${esc(akun.photo)}" loading="lazy" decoding="async" alt="">`
+        : esc(inisialAvatar(akun.username))
+
+    const punyaPassword = !!akun.passwordHash
+
+    const alasanBlokir = statusBlokir && bl.reason
+        ? `<div class="block-meta">Alasan: ${esc(bl.reason)}</div>`
+        : ""
+
+    const badgeManual = akun.sumberAkun === "manual"
+        ? '<span style="font-size:10px;color:#73a5ff;background:rgba(76,125,255,.15);padding:2px 7px;border-radius:10px;margin-left:4px;font-weight:700;">MANUAL</span>'
+        : ""
+    const badgeDup = uidDuplikatCache.has(akun.uid)
+        ? '<span style="font-size:10px;color:#ff8f4d;background:rgba(255,143,77,.15);padding:2px 7px;border-radius:10px;margin-left:4px;font-weight:700;">DUPLIKAT</span>'
+        : ""
+
+    return `
+    <div class="block-row">
+        <div class="block-avatar">${avatarHtml}</div>
+        <div class="block-info">
+            <div class="block-username">${esc(akun.username) || "(tanpa username)"} ${badgeManual} ${badgeDup}</div>
+            <div class="block-meta">${esc(akun.email)}</div>
+            <div class="block-phone">
+                <span class="block-phone-text">${esc(akun.phone) || "(tidak ada nomor)"}</span>
+                <button class="block-edit-phone" data-act="phone" data-uid="${uid}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg> Ubah</button>
+            </div>
+            <div class="block-password">
+                <span class="block-password-text">${punyaPassword ? "Password: terenkripsi" : "(belum punya password)"}</span>
+                <button class="block-edit-password" data-act="pass" data-uid="${uid}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg> Ubah</button>
+            </div>
+            ${alasanBlokir}
+        </div>
+        <div class="block-actions">
+            <span class="block-status ${statusBlokir ? "blocked" : "aktif"}">
+                ${statusBlokir ? "DIBLOKIR" : "AKTIF"}
+            </span>
+            <button
+                class="block-btn ${statusBlokir ? "do-unblock" : "do-block"}"
+                data-act="toggle" data-uid="${uid}" data-blocked="${statusBlokir ? "0" : "1"}">
+                ${statusBlokir ? "Buka" : "Blokir"}
+            </button>
+            <button
+                class="block-btn do-delete"
+                data-act="delete" data-uid="${uid}">
+                 Hapus
+            </button>
+        </div>
+    </div>
+    `
+}
+
+function moreHtml(){
+    const sisa = hasilFilter.length - shownCount
+    if(sisa <= 0) return ""
+    return `<div id="blockMore" class="block-empty" data-act="more" style="cursor:pointer;color:#73a5ff;font-weight:600;">Tampilkan lebih banyak (${sisa} lagi)</div>`
+}
+
+function renderMore(){
+    if(shownCount >= hasilFilter.length) return
+    const container = document.getElementById("blockList")
+    const dari = shownCount
+    shownCount = Math.min(shownCount + PAGE_SIZE, hasilFilter.length)
+
+    const more = document.getElementById("blockMore")
+    if(more) more.remove()
+
+    container.insertAdjacentHTML(
+        "beforeend",
+        hasilFilter.slice(dari, shownCount).map(rowHtml).join("") + moreHtml()
+    )
+}
+
+function renderBlockList(reset){
+
+    const container = document.getElementById("blockList")
+    const countEl = document.getElementById("blockCount")
+
+    // tunggu semua sumber data selesai dimuat dulu
+    if(!liveSiap() && !cacheDipakai) return
+
+    const cocok = buatPencocok(blockSearchQuery)
+
+    const hasil = []
+    for(let i = 0; i < akunList.length; i++){
+        const akun = akunList[i]
+
+        if(blockFilter !== "semua"){
+            const statusBlokir = !!(daftarBlokir[akun.uid] && daftarBlokir[akun.uid].blocked)
+            if(blockFilter === "aktif" && statusBlokir) continue
+            if(blockFilter === "blokir" && !statusBlokir) continue
+            if(blockFilter === "manual" && akun.sumberAkun !== "manual") continue
+            if(blockFilter === "duplikat" && !uidDuplikatCache.has(akun.uid)) continue
+        }
+
+        if(cocok && !cocok(akun)) continue
+        hasil.push(akun)
+    }
+
+    hasilFilter = hasil
+
+    const totalBlokir = Object.values(daftarBlokir).filter(b => b && b.blocked).length
+    let teks = `${statsCache.totalAkun} akun terdaftar · ${totalBlokir} diblokir · ${statsCache.totalManual} login manual · ${statsCache.totalDuplikat} duplikat`
+    if(cocok || blockFilter !== "semua"){
+        teks += ` — ${hasil.length} hasil`
+    }
+    if(!liveSiap()){
+        teks += " · menyinkronkan data…"
+    }
+    countEl.innerText = teks
+
+    if(reset){
+        shownCount = PAGE_SIZE
+    }
+
+    if(hasil.length === 0){
+        container.innerHTML = `<div class="block-empty">Tidak ada akun ditemukan.</div>`
+        return
+    }
+
+    const scrollLama = container.scrollTop
+
+    container.innerHTML =
+        hasil.slice(0, shownCount).map(rowHtml).join("") + moreHtml()
+
+    container.scrollTop = reset ? 0 : scrollLama
+
+    requestAnimationFrame(cekLoadMore)
+}
+
+// auto-muat batch berikutnya saat tombol "Tampilkan lebih banyak" mendekati layar
+function cekLoadMore(){
+    const more = document.getElementById("blockMore")
+    if(!more) return
+    const container = document.getElementById("blockList")
+    const lr = container.getBoundingClientRect()
+    const mr = more.getBoundingClientRect()
+    const batas = Math.min(lr.bottom, window.innerHeight)
+    if(mr.top < batas + 300) renderMore()
+}
+
+let scrollRaf = null
+function onScrollLoad(){
+    if(scrollRaf) return
+    scrollRaf = requestAnimationFrame(() => {
+        scrollRaf = null
+        cekLoadMore()
+    })
+}
+
+function hapusLokal(uids){
+    uids.forEach(uid => {
+        delete authMap[uid]
+        delete manualMap[uid]
+        delete daftarBlokir[uid]
+    })
+    rebuildIndex()
+    renderBlockList(false)
+    jadwalkanSimpanCache()
+}
+
+let pendingBlockUid = null
+
+function toggleBlokirAkun(uid, blockedBaru){
+
+    const akun = daftarAkun[uid]
+
+    if(blockedBaru){
+        pendingBlockUid = uid
+        document.getElementById("blockModalName").innerText =
+            `Berikan alasan blokir untuk "${akun ? akun.username : uid}" (opsional).`
+        document.getElementById("blockModalInput").value = ""
+        document.getElementById("blockModal").classList.add("active")
+    }else{
+        blockedUsersRef.child(uid).remove().then(() => {
+            showPopup("Berhasil", `Akun "${akun ? akun.username : uid}" berhasil dibuka blokirnya ✅`)
+        })
+    }
+}
+
+function closeBlockModal(){
+    document.getElementById("blockModal").classList.remove("active")
+    pendingBlockUid = null
+}
+
+function konfirmasiBlokirAkun(){
+
+    if(!pendingBlockUid) return
+
+    const uid = pendingBlockUid
+    const akun = daftarAkun[uid]
+    const reason = document.getElementById("blockModalInput").value.trim()
+
+    blockedUsersRef.child(uid).set({
+        blocked: true,
+        reason: reason,
+        username: akun ? akun.username : "",
+        blockedAt: Date.now()
+    }).then(() => {
+        closeBlockModal()
+        showPopup("Berhasil", `Akun "${akun ? akun.username : uid}" berhasil diblokir 🚫`)
+    })
+}
+
+let pendingDeleteUid = null
+
+function hapusAkun(uid){
+
+    if(ownerUid && uid === ownerUid){
+        showPopup("Gagal", "Akun owner tidak bisa dihapus.")
+        return
+    }
+
+    const akun = daftarAkun[uid]
+    pendingDeleteUid = uid
+
+    document.getElementById("deleteModalName").innerText =
+        `Yakin ingin menghapus akun "${akun ? akun.username : uid}" secara permanen? Data akun tidak bisa dikembalikan.`
+    document.getElementById("deleteModal").classList.add("active")
+}
+
+function closeDeleteModal(){
+    document.getElementById("deleteModal").classList.remove("active")
+    pendingDeleteUid = null
+}
+
+function konfirmasiHapusAkun(){
+
+    if(!pendingDeleteUid) return
+
+    const uid = pendingDeleteUid
+    const akun = daftarAkun[uid]
+    const nama = akun ? akun.username : uid
+
+    if(ownerUid && uid === ownerUid){
+        closeDeleteModal()
+        return
+    }
+
+    document.getElementById("deleteModal").classList.remove("active")
+    pendingDeleteUid = null
+
+    Promise.all([
+        usersRef.child(uid).remove(),
+        manualUsersRef.child(uid).remove(),
+        blockedUsersRef.child(uid).remove()
+    ]).then(() => {
+        hapusLokal([uid])
+        showPopup("Berhasil", `Akun "${nama}" berhasil dihapus ✅`)
+    }).catch(() => {
+        showPopup("Gagal", "Gagal menghapus akun. Cek Firebase rules atau koneksi.")
+    })
+}
+
+function hapusSemuaDuplikatAkun(){
+
+    if(!liveSiap()){
+        showPopup("Info", "Data masih disinkronkan dari server, tunggu sebentar lalu coba lagi.")
+        return
+    }
+
+    const uidSet = getUidDuplikat()
+
+    if(uidSet.size === 0){
+        showPopup("Info", "Tidak ada akun duplikat yang ditemukan.")
+        return
+    }
+
+    document.getElementById("dupModalName").innerText =
+        `Yakin ingin menghapus SEMUA ${uidSet.size} akun duplikat? Semua akun dalam grup duplikat akan dihapus permanen, tidak ada satupun yang disisakan, dan tidak bisa dikembalikan.`
+    document.getElementById("dupModal").classList.add("active")
+}
+
+function closeDupModal(){
+    document.getElementById("dupModal").classList.remove("active")
+}
+
+function konfirmasiHapusDuplikat(){
+
+    if(!liveSiap()){
+        document.getElementById("dupModal").classList.remove("active")
+        showPopup("Info", "Data masih disinkronkan dari server, tunggu sebentar lalu coba lagi.")
+        return
+    }
+
+    const uidList = Array.from(getUidDuplikat())
+    document.getElementById("dupModal").classList.remove("active")
+
+    if(uidList.length === 0) return
+
+    const promises = []
+    uidList.forEach(uid => {
+        promises.push(usersRef.child(uid).remove())
+        promises.push(manualUsersRef.child(uid).remove())
+        promises.push(blockedUsersRef.child(uid).remove())
+    })
+
+    Promise.all(promises).then(() => {
+        hapusLokal(uidList)
+        showPopup("Berhasil", `Berhasil menghapus ${uidList.length} akun duplikat, tidak ada yang disisakan ✅`)
+    }).catch(() => {
+        showPopup("Gagal", "Terjadi kesalahan saat menghapus akun duplikat.")
+    })
+}
+
+let pendingPhoneUid = null
+
+function editNomorAkun(uid){
+
+    const akun = daftarAkun[uid]
+    pendingPhoneUid = uid
+
+    document.getElementById("phoneModalName").innerText =
+        `Masukkan nomor HP baru untuk "${akun ? akun.username : uid}".`
+    document.getElementById("phoneModalInput").value = akun && akun.phone ? akun.phone : ""
+    document.getElementById("phoneModal").classList.add("active")
+}
+
+function closePhoneModal(){
+    document.getElementById("phoneModal").classList.remove("active")
+    pendingPhoneUid = null
+}
+
+function simpanNomorAkun(){
+
+    if(!pendingPhoneUid) return
+
+    const uid = pendingPhoneUid
+    const akun = daftarAkun[uid]
+    const nomorTrim = document.getElementById("phoneModalInput").value.trim()
+
+    usersRef.child(uid).once("value").then(snap => {
+        if(snap.exists()){
+            return usersRef.child(uid).update({ phone: nomorTrim })
+        }
+        return manualUsersRef.child(uid).once("value").then(snap2 => {
+            if(snap2.exists()){
+                return manualUsersRef.child(uid).update({ phone: nomorTrim })
+            }
+            return manualUsersRef.child(uid).update({ phone: nomorTrim, username: akun ? akun.username : "" })
+        })
+    }).then(() => {
+        closePhoneModal()
+        showPopup("Berhasil", `Nomor HP akun "${akun ? akun.username : uid}" berhasil diubah ✅`)
+    }).catch(() => {
+        showPopup("Gagal", "Terjadi kesalahan saat mengubah nomor HP.")
+    })
+}
+
+let pendingPasswordUid = null
+
+function editPasswordAkun(uid){
+
+    const akun = daftarAkun[uid]
+    pendingPasswordUid = uid
+
+    document.getElementById("passwordModalName").innerText =
+        `Masukkan password baru untuk "${akun ? akun.username : uid}".`
+    document.getElementById("passwordModalInput").value = ""
+    document.getElementById("passwordModal").classList.add("active")
+}
+
+function closePasswordModal(){
+    document.getElementById("passwordModal").classList.remove("active")
+    pendingPasswordUid = null
+}
+
+async function simpanPasswordAkun(){
+
+    if(!pendingPasswordUid) return
+
+    const uid = pendingPasswordUid
+    const akun = daftarAkun[uid]
+    const passwordBaru = document.getElementById("passwordModalInput").value.trim()
+
+    if(!passwordBaru){
+        showPopup("Gagal", "Password tidak boleh kosong.")
+        return
+    }
+
+    const hashBaru = await hashSHA256(passwordBaru)
+
+    usersRef.child(uid).once("value").then(snap => {
+        if(snap.exists()){
+            return usersRef.child(uid).update({ passwordHash: hashBaru })
+        }
+        return manualUsersRef.child(uid).once("value").then(snap2 => {
+            if(snap2.exists()){
+                return manualUsersRef.child(uid).update({ passwordHash: hashBaru })
+            }
+            return manualUsersRef.child(uid).update({ passwordHash: hashBaru, username: akun ? akun.username : "" })
+        })
+    }).then(() => {
+        closePasswordModal()
+        showPopup("Berhasil", `Password akun "${akun ? akun.username : uid}" berhasil diubah ✅`)
+    }).catch(() => {
+        showPopup("Gagal", "Terjadi kesalahan saat mengubah password.")
+    })
+}
+
+// ----- pencarian: debounce supaya tidak render di setiap ketikan -----
+let searchTimer = null
+document.getElementById("blockSearch").addEventListener("input", (e) => {
+    const v = e.target.value
+    clearTimeout(searchTimer)
+    searchTimer = setTimeout(() => {
+        blockSearchQuery = v
+        renderBlockList(true)
+    }, 180)
+})
+
+// ----- satu event listener untuk semua tombol di list (delegation) -----
+const blockListEl = document.getElementById("blockList")
+
+blockListEl.addEventListener("click", (e) => {
+    const el = e.target.closest("[data-act]")
+    if(!el) return
+    const act = el.dataset.act
+    const uid = el.dataset.uid
+
+    if(act === "more")        renderMore()
+    else if(act === "phone")  editNomorAkun(uid)
+    else if(act === "pass")   editPasswordAkun(uid)
+    else if(act === "toggle") toggleBlokirAkun(uid, el.dataset.blocked === "1")
+    else if(act === "delete") hapusAkun(uid)
+})
+
+blockListEl.addEventListener("scroll", onScrollLoad, { passive: true })
+window.addEventListener("scroll", onScrollLoad, { passive: true })
+
+// ----- gabungkan banyak update Firebase jadi satu render -----
+let refreshTimer = null
+let perluRebuild = false
+
+function jadwalkanRefresh(rebuild){
+    if(rebuild) perluRebuild = true
+    clearTimeout(refreshTimer)
+    refreshTimer = setTimeout(() => {
+        if(perluRebuild){
+            rebuildIndex()
+            perluRebuild = false
+        }
+        renderBlockList(false)
+        jadwalkanSimpanCache()
+    }, 60)
+}
+
+function gagalMuat(nama){
+    return (err) => {
+        console.error("Gagal memuat " + nama, err)
+        dataSiap[nama] = true
+        document.getElementById("blockCount").innerText = "Gagal memuat sebagian data (" + nama + "). Cek koneksi / Firebase rules."
+    }
+}
+
+usersRef.on("value", snap => {
+    const data = snap.val() || {}
+    const map = {}
+    Object.keys(data).forEach(uid => {
+        map[uid] = { uid, ...data[uid], sumberAkun: "auth" }
+    })
+    authMap = map
+    dataSiap.users = true
+    jadwalkanRefresh(true)
+}, gagalMuat("users"))
+
+manualUsersRef.on("value", snap => {
+    const data = snap.val() || {}
+    const map = {}
+    Object.keys(data).forEach(uid => {
+        map[uid] = { uid, ...data[uid], sumberAkun: "manual" }
+    })
+    manualMap = map
+    dataSiap.manual = true
+    jadwalkanRefresh(true)
+}, gagalMuat("manual"))
+
+blockedUsersRef.on("value", snap => {
+    daftarBlokir = snap.val() || {}
+    dataSiap.blokir = true
+    jadwalkanRefresh(false)
+}, gagalMuat("blokir"))
+
+muatDariCache()
+
+</script>
+
+</body>
+</html>

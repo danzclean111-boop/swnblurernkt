@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Downloader - DanzClean</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="config.js"></script>
+</head>
+<body>
+    <div class="topbar">
+        <div class="menu-btn" onclick="toggleMenu()">☰</div>
+    </div>
+<div class="sidebar" id="sidebar"></div>
+<script src="sidebar.js"></script>
+
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <div class="container dl-page">
+        <div class="dl-panel">
+            <h2 class="dl-title">Instagram Downloader</h2>
+            <p class="dl-lead">Tempel link Instagram, lalu tekan Cari Media.</p>
+            
+            <input type="url" id="igUrlInput" class="dl-input" placeholder="Masukkan Link Instagram..." inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Masukkan Link Instagram...">
+            
+            <button onclick="processInstagramDownload()" class="dl-cta"><svg class="btn-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Cari Media</span></button>
+            
+            <div id="igResult" class="dl-result" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <div class="custom-popup" id="customPopup">
+        <div class="custom-popup-card">
+            <div class="custom-popup-text" id="customPopupText"></div>
+            <button class="custom-popup-btn" onclick="closeCustomPopup()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        function showCustomPopup(message) {
+            document.getElementById("customPopupText").innerText = message;
+            document.getElementById("customPopup").classList.add("show");
+        }
+
+        function closeCustomPopup() {
+            document.getElementById("customPopup").classList.remove("show");
+        }
+        function toggleMenu(){
+            document.getElementById("sidebar").classList.toggle("active");
+            document.getElementById("overlay").classList.toggle("active");
+        }
+
+        function extractFilename(url) {
+            try {
+                return new URL(url).searchParams.get('n') || 'danzclean_file';
+            } catch {
+                return 'danzclean_file';
+            }
+        }
+
+        
+        function forceDownload(fileUrl, fileName, btnElement) {
+            if (!fileName) fileName = extractFilename(fileUrl);
+            const originalText = btnElement.innerText;
+            btnElement.innerText = "Membuka unduhan...";
+            btnElement.style.opacity = "0.7";
+
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = fileUrl;
+            a.download = fileName;
+            a.rel = 'noopener';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            setTimeout(() => {
+                btnElement.innerText = originalText;
+                btnElement.style.opacity = "1";
+            }, 1200);
+        }
+
+        function isValidInstagramUrl(url) {
+            return /instagram\.com/i.test(url);
+        }
+
+        async function processInstagramDownload() {
+            const url = document.getElementById("igUrlInput").value.trim();
+            const resultDiv = document.getElementById("igResult");
+
+            if (!url) {
+                alert("Masukkan URL Instagram terlebih dahulu!");
+                return;
+            }
+
+            if (!isValidInstagramUrl(url)) {
+                showCustomPopup("Itu bukan link Instagram!");
+                return;
+            }
+
+            resultDiv.innerHTML = '<p class="dl-msg">Mengambil data media...</p>';
+
+            try {
+                const targetApi = `${DOWNLOAD_API}/api/instagram?url=${encodeURIComponent(url)}`;
+                const response = await fetch(targetApi);
+                const data = await response.json();
+
+                if (!data.status || !data.result) {
+                    resultDiv.innerHTML = `<p class="dl-msg dl-err">Gagal mengambil data dari URL tersebut.<br><span class="dl-msg-detail">${data.error || data.message || ''}</span></p>`;
+                    return;
+                }
+
+                const res = data.result;
+                let mediaHtml = '';
+
+                if (res.type === 'video' || (res.url && res.url.includes('.mp4'))) {
+                    mediaHtml = `
+                        <video src="${res.url}" controls class="dl-media"></video>
+                        <button onclick="forceDownload('${res.url}', null, this)" class="dl-btn">DOWNLOAD VIDEO</button>
+                    `;
+                } else {
+                    mediaHtml = `
+                        <img src="${res.url}" class="dl-media">
+                        <button onclick="forceDownload('${res.url}', null, this)" class="dl-btn">DOWNLOAD FOTO</button>
+                    `;
+                }
+
+                resultDiv.innerHTML = `
+                    <div class="dl-card">
+                        <p class="dl-user">@${res.username || 'instagram_user'}</p>
+                        ${res.caption ? `<p class="dl-textbox">${res.caption}</p>` : ''}
+                        ${mediaHtml}
+                    </div>
+                `;
+            } catch (e) {
+                console.error(e);
+                resultDiv.innerHTML = `<p class="dl-msg dl-err">Terjadi kesalahan koneksi.<br><span class="dl-msg-detail">${e.message}</span></p>`;
+            }
+        }
+    </script>
+</body>
+</html>

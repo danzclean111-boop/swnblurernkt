@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Akun Diblokir - danzclean</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.blocked-page{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    box-sizing:border-box;
+}
+.blocked-card{
+    width:100%;
+    max-width:420px;
+    text-align:center;
+    padding:32px 24px;
+    border-radius:28px;
+    background:linear-gradient(145deg, rgba(14,18,45,.94), rgba(6,9,24,.92));
+    border:1px solid rgba(255,255,255,.06);
+}
+.blocked-icon{ color:var(--danger); display:grid; place-items:center; margin-bottom:14px; }
+.blocked-title{
+    font-size:24px;
+    font-weight:800;
+    margin-bottom:10px;
+    background:linear-gradient(135deg, #ffffff, var(--danger));
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+.blocked-desc{
+    color:#aeb8e8;
+    font-size:14px;
+    line-height:1.7;
+    margin-bottom:24px;
+}
+.blocked-logout{
+    background:var(--danger);
+    color:#fff;
+    border:none;
+    padding:14px 30px;
+    border-radius:14px;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+}
+</style>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="firebase-config.js"></script>
+</head>
+<body>
+
+<div class="blocked-page">
+    <div class="blocked-card">
+        <div class="blocked-icon"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="m5.3 5.3 13.4 13.4"/></svg></div>
+        <div class="blocked-title">Akun Kamu Diblokir</div>
+        <div class="blocked-desc" id="blockedReason">
+            Akun ini telah diblokir oleh admin dan tidak bisa lagi mengakses layanan danzclean.
+        </div>
+        <button class="blocked-logout" onclick="logoutBlocked()">LOGOUT</button>
+    </div>
+</div>
+
+<script>
+if (!firebase.apps.length) {
+    firebase.initializeApp(FIREBASE_CONFIG_AUTH);
+}
+
+function logoutBlocked(){
+    localStorage.removeItem("danzclean_logged_user");
+    localStorage.removeItem("isOwner");
+    firebase.auth().signOut().finally(() => {
+        location.href = "/login.html";
+    });
+}
+
+const params = new URLSearchParams(location.search);
+const reason = params.get("reason");
+if (reason) {
+    document.getElementById("blockedReason").innerHTML =
+        "Akun ini telah diblokir oleh admin.<br><br><b>Alasan:</b> " + decodeURIComponent(reason);
+}
+</script>
+
+</body>
+</html>

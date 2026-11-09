@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "id.biz.arisu.danzclean.twa",
+        "sha256_cert_fingerprints": ["99:8D:D5:14:78:19:34:13:81:78:65:90:24:CF:8F:2E:8F:A7:63:B9:1C:E7:79:8A:2A:15:C0:49:6C:DA:C4:08"]
+      }
+    }]

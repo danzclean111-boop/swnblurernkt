@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Rating DanzClean</title>
+
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link
+href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap"
+rel="stylesheet">
+
+<link
+rel="stylesheet"
+href="style.css">
+
+<style>
+
+.review-comment{
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+}
+
+.rv-actions{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-top:6px;
+}
+
+.rv-act{
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;
+}
+.rv-act.edit{ color:#36e2a8; }
+.rv-act.del{ color:var(--danger); }
+
+.review-note{
+    text-align:center;
+    color:#7a84ad;
+    font-size:13px;
+    padding:22px 0;
+}
+
+#reviewMore{
+    text-align:center;
+    color:#73a5ff;
+    font-size:13px;
+    font-weight:600;
+    padding:16px 0 4px;
+    cursor:pointer;
+}
+
+.review-filters{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding:2px 2px 12px;
+    margin-bottom:6px;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+}
+.review-filters::-webkit-scrollbar{ display:none; }
+
+.rv-chip{
+    flex:0 0 auto;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    padding:9px 16px;
+    border-radius:20px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.06);
+    color:#aeb8e8;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    white-space:nowrap;
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;
+    transition:.2s;
+}
+.rv-chip small{
+    font-size:12px;
+    font-weight:600;
+    opacity:.65;
+}
+.rv-chip.active{
+    background:linear-gradient(135deg,var(--primary-mid),var(--violet));
+    border-color:transparent;
+    color:#fff;
+    box-shadow:0 6px 18px rgba(76,125,255,.35);
+}
+.rv-chip.active small{ opacity:.85; }
+
+.confirm-row{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+}
+.confirm-row .custom-popup-btn{
+    width:100%;
+    margin:0;
+    height:48px;
+    font-size:15px;
+}
+.custom-popup-btn.ghost{
+    background:rgba(255,255,255,.08);
+    box-shadow:none;
+}
+.custom-popup-btn.danger{
+    background:linear-gradient(135deg,var(--danger),var(--danger));
+    box-shadow:0 10px 30px rgba(255,59,48,.35);
+}
+
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="firebase-config.js"></script>
+
+</head>
+
+<body>
+
+<!-- sengaja disembunyikan dari awal: loader utama dari sidebar.js langsung dilepas
+     begitu DOM siap, tidak lagi menunggu data ulasan selesai diunduh -->
+<div id="pageLoader" style="display:none;"></div>
+
+<div class="topbar">
+
+<div
+class="menu-btn"
+onclick="toggleMenu()">
+
+☰
+
+</div>
+
+</div>
+
+<div
+class="sidebar"
+id="sidebar">
+
+</div>
+<script src="sidebar.js"></script>
+
+<div
+class="overlay"
+id="overlay"
+onclick="toggleMenu()"></div>
+
+<div class="rating-page">
+
+<div class="rating-card">
+
+<div class="playstore-title">
+Beri rating website ini
+</div>
+
+<div class="playstore-sub">
+Sampaikan pendapat Anda tentang DanzClean
+</div>
+
+<div class="rating-summary">
+
+<div class="rating-summary-left">
+
+<div class="rating-big" id="averageRating">
+0.0
+</div>
+
+<div class="rating-stars-big" id="averageStars">
+☆☆☆☆☆
+</div>
+
+<div class="rating-total" id="totalReviews">
+Memuat...
+</div>
+
+</div>
+
+<div class="rating-bars">
+
+<div class="rating-bar-row">
+<span>5</span>
+<div class="bar">
+<div id="bar5"></div>
+</div>
+</div>
+
+<div class="rating-bar-row">
+<span>4</span>
+<div class="bar">
+<div id="bar4"></div>
+</div>
+</div>
+
+<div class="rating-bar-row">
+<span>3</span>
+<div class="bar">
+<div id="bar3"></div>
+</div>
+</div>
+
+<div class="rating-bar-row">
+<span>2</span>
+<div class="bar">
+<div id="bar2"></div>
+</div>
+</div>
+
+<div class="rating-bar-row">
+<span>1</span>
+<div class="bar">
+<div id="bar1"></div>
+</div>
+</div>
+
+</div>
+
+</div>
+
+<div id="ratingTopContainer">
+
+<div class="playstore-stars">
+
+<span onclick="openReview(1)">☆</span>
+<span onclick="openReview(2)">☆</span>
+<span onclick="openReview(3)">☆</span>
+<span onclick="openReview(4)">☆</span>
+<span onclick="openReview(5)">☆</span>
+
+</div>
+
+</div>
+
+</div>
+
+<div
+id="reviewForm"
+class="review-form"
+style="display:none;">
+
+<input
+type="text"
+id="name"
+placeholder="Nama kamu"
+class="rating-input">
+
+<textarea
+id="comment"
+placeholder="Tulis ulasan..."
+class="rating-textarea"></textarea>
+
+<button
+class="rating-btn"
+onclick="sendReview()">
+
+POSTING
+
+</button>
+
+</div>
+
+<div class="review-section-title">
+Ulasan Pengguna
+</div>
+
+<div class="review-filters" id="reviewFilters"></div>
+
+<div id="reviewList">
+<div class="review-note">Memuat ulasan...</div>
+</div>
+
+</div>
+
+<div
+class="review-modal"
+id="reviewModal">
+
+<div class="review-modal-card">
+
+<div class="review-modal-header">
+
+<div
+class="review-back-btn"
+onclick="closeEditModal()">
+
+←
+
+</div>
+
+<div class="review-modal-title">
+Edit ulasan
+</div>
+
+</div>
+
+<div class="modal-stars">
+
+<span onclick="setModalStar(1)">☆</span>
+<span onclick="setModalStar(2)">☆</span>
+<span onclick="setModalStar(3)">☆</span>
+<span onclick="setModalStar(4)">☆</span>
+<span onclick="setModalStar(5)">☆</span>
+
+</div>
+
+<input
+type="text"
+id="editName"
+placeholder="Nama kamu"
+class="rating-input">
+
+<textarea
+id="editComment"
+placeholder="Tulis ulasan..."
+class="rating-textarea"></textarea>
+
+<button
+class="rating-btn"
+onclick="saveEditReview()">
+
+KIRIM
+
+</button>
+
+<button
+class="delete-review-main"
+onclick="deleteReview()">
+
+HAPUS ULASAN
+
+</button>
+
+</div>
+
+</div>
+
+<!-- popup info -->
+<div class="custom-popup" id="customPopup">
+
+<div class="custom-popup-card">
+
+<div class="custom-popup-text" id="popupText">
+Isi dulu bre
+</div>
+
+<button
+class="custom-popup-btn"
+onclick="closePopup()">
+
+OK
+
+</button>
+
+</div>
+
+</div>
+
+<!-- popup konfirmasi hapus (pengganti confirm() bawaan browser yang bisa diblokir) -->
+<div class="custom-popup" id="confirmPopup">
+
+<div class="custom-popup-card">
+
+<div class="custom-popup-text" id="confirmText">
+Hapus ulasan ini?
+</div>
+
+<div class="confirm-row">
+<button class="custom-popup-btn ghost" onclick="cancelDelete()">Batal</button>
+<button class="custom-popup-btn danger" onclick="confirmDelete()">Hapus</button>
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+/* ============================================================
+   UTIL
+   ============================================================ */
+
+function toggleMenu(){
+    document.getElementById("sidebar").classList.toggle("active")
+    document.getElementById("overlay").classList.toggle("active")
+}
+
+function esc(v){
+    return String(v == null ? "" : v)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;")
+}
+
+function safePhoto(p){
+    if(typeof p !== "string" || !p) return ""
+    return /^(https?:\/\/|data:image\/)/i.test(p) ? p : ""
+}
+
+function starsText(n){
+    n = Math.max(0, Math.min(5, n | 0))
+    return "★".repeat(n) + "☆".repeat(5 - n)
+}
+
+function showPopup(text){
+    document.getElementById("popupText").textContent = text
+    document.getElementById("customPopup").classList.add("show")
+}
+
+function closePopup(){
+    document.getElementById("customPopup").classList.remove("show")
+}
+
+function pesanError(err, aksi){
+    const code = err && err.code ? String(err.code) : ""
+    if(code === "PERMISSION_DENIED" || /permission_denied/i.test(String(err && err.message))){
+        return "Gagal " + aksi + " ulasan: ditolak Firebase Rules (PERMISSION_DENIED). Rules node \"ratings\" perlu mengizinkan aksi ini."
+    }
+    return "Gagal " + aksi + " ulasan. " + (err && err.message ? err.message : "Cek koneksi internet.")
+}
+
+/* ============================================================
+   FIREBASE + USER
+   ============================================================ */
+
+if(!firebase.apps.length){
+    firebase.initializeApp(FIREBASE_CONFIG_MAIN)
+}
+
+const db = firebase.database()
+
+let currentUser = null
+try{
+    const raw = localStorage.getItem("danzclean_logged_user")
+    currentUser = raw ? JSON.parse(raw) : null
+}catch(e){
+    currentUser = null
+}
+
+const userUid = currentUser && currentUser.uid ? currentUser.uid : null
+const isOwner = localStorage.getItem("isOwner") === "true"
+
+let selectedStar = 5
+let modalStar = 5
+let targetEditId = null
+
+let dataMap = {}        // id -> item (data live terbaru)
+let viewEntries = []    // daftar yang ditampilkan (sudah terurut)
+let hasMyReview = false
+let allEntries = []     // semua ulasan (belum difilter)
+let allStats = null
+let ratingFilter = 0    // 0 = semua, 1..5 = bintang
+
+/* ============================================================
+   RINGKASAN (rata-rata + bar)
+   ============================================================ */
+
+function hitungStats(entries){
+    const c = [0, 0, 0, 0, 0, 0]
+    let sum = 0
+    let valid = 0
+    entries.forEach(e => {
+        if(e.star >= 1 && e.star <= 5){
+            c[e.star]++
+            sum += e.star
+            valid++
+        }
+    })
+    return { count: entries.length, valid: valid, sum: sum, c: c }
+}
+
+function renderSummary(st){
+
+    const avgEl = document.getElementById("averageRating")
+    const starEl = document.getElementById("averageStars")
+    const totalEl = document.getElementById("totalReviews")
+
+    if(!st || st.valid === 0){
+        avgEl.textContent = "0.0"
+        starEl.textContent = "☆☆☆☆☆"
+        totalEl.textContent = (st ? st.count : 0) + " ulasan"
+        for(let i = 1; i <= 5; i++) document.getElementById("bar" + i).style.width = "0%"
+        return
+    }
+
+    const total = st.valid
+    const baseWeightCount = 10
+    const baseWeightStars = 50
+
+    const avgCalculated = (st.sum + baseWeightStars) / (total + baseWeightCount)
+    const avgReal = st.sum / total
+    const displayAvg = Math.max(Number(avgCalculated.toFixed(1)), avgReal).toFixed(1)
+
+    avgEl.textContent = displayAvg
+
+    const rounded = Math.round(displayAvg)
+    starEl.textContent = starsText(rounded)
+    totalEl.textContent = st.count + " ulasan"
+
+    document.getElementById("bar5").style.width = (((st.c[5] + 8) / (total + 8)) * 100) + "%"
+    for(let i = 1; i <= 4; i++){
+        document.getElementById("bar" + i).style.width = ((st.c[i] / total) * 100) + "%"
+    }
+}
+
+/* ============================================================
+   DAFTAR ULASAN (render bertahap, bukan sekaligus)
+   ============================================================ */
+
+const PAGE_SIZE = 20
+let shown = PAGE_SIZE
+
+function avatarHtml(item){
+    const p = safePhoto(item.photo)
+    if(p){
+        return `<img src="${esc(p)}" class="avatar-img" loading="lazy" decoding="async" alt="">`
+    }
+    return esc(item.name ? String(item.name).charAt(0).toUpperCase() : "U")
+}
+
+function cardHtml(item){
+
+    const isMine = !!userUid && item.id === userUid
+    const canManage = isMine || isOwner
+    const id = esc(item.id)
+
+    const aksi = canManage
+        ? `<div class="rv-actions">
+               <span class="rv-act edit" data-act="edit" data-id="${id}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v2.6M12 18.9v2.6M4.4 4.4l1.9 1.9M17.7 17.7l1.9 1.9M2.5 12h2.6M18.9 12h2.6M4.4 19.6l1.9-1.9M17.7 6.3l1.9-1.9"/></svg> ${isOwner ? "Edit" : "Edit / Hapus Ulasan"}</span>
+               ${isOwner ? `<span class="rv-act del" data-act="del" data-id="${id}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 6.5h17M9 6.5V4h6v2.5M6 6.5l1 13.5h10l1-13.5M10 11v5M14 11v5"/></svg> Hapus</span>` : ""}
+           </div>`
+        : ""
+
+    return `
+    <div class="review-card ${isMine ? "my-review-card" : ""}">
+        <div class="review-header">
+            <div class="review-avatar">${avatarHtml(item)}</div>
+            <div class="review-info">
+                <div class="review-name-row">
+                    <div class="review-name">${esc(item.name)}</div>
+                    ${isMine ? `<div class="review-tag">Review Anda</div>` : ""}
+                    ${isOwner && !isMine ? `<div class="review-tag" style="background:var(--danger); color:#fff;">Owner Access</div>` : ""}
+                </div>
+                <div class="review-stars-row">${starsText(item.star)}</div>
+                ${aksi}
+            </div>
+        </div>
+        <div class="review-comment">${esc(item.comment)}</div>
+    </div>
+    `
+}
+
+function moreHtml(){
+    const sisa = viewEntries.length - shown
+    if(sisa <= 0) return ""
+    return `<div id="reviewMore" data-act="more">Tampilkan lebih banyak (${sisa} lagi)</div>`
+}
+
+let moreObserver = null
+function observeMore(){
+    const el = document.getElementById("reviewMore")
+    if(!el || !("IntersectionObserver" in window)) return
+    if(!moreObserver){
+        moreObserver = new IntersectionObserver(list => {
+            if(list.some(x => x.isIntersecting)) renderMoreCards()
+        }, { rootMargin: "400px" })
+    }
+    moreObserver.disconnect()
+    moreObserver.observe(el)
+}
+
+function renderMoreCards(){
+    if(shown >= viewEntries.length) return
+    const list = document.getElementById("reviewList")
+    const dari = shown
+    shown = Math.min(shown + PAGE_SIZE, viewEntries.length)
+
+    const more = document.getElementById("reviewMore")
+    if(more) more.remove()
+
+    list.insertAdjacentHTML(
+        "beforeend",
+        viewEntries.slice(dari, shown).map(cardHtml).join("") + moreHtml()
+    )
+    observeMore()
+}
+
+function renderList(){
+
+    const list = document.getElementById("reviewList")
+
+    if(viewEntries.length === 0){
+        list.innerHTML = ratingFilter
+            ? `<div class="review-note">Belum ada ulasan bintang ${ratingFilter}.</div>`
+            : `<div class="review-note">Belum ada ulasan. Jadilah yang pertama!</div>`
+        return
+    }
+
+    list.innerHTML = viewEntries.slice(0, shown).map(cardHtml).join("") + moreHtml()
+    observeMore()
+}
+
+function renderFilters(){
+
+    const el = document.getElementById("reviewFilters")
+    const c = allStats && allStats.c ? allStats.c : [0, 0, 0, 0, 0, 0]
+    const total = allStats ? allStats.count : allEntries.length
+
+    const chips = [{ v: 0, label: "Semua", n: total }]
+    for(let i = 5; i >= 1; i--){
+        chips.push({ v: i, label: "★ " + i, n: c[i] })
+    }
+
+    el.innerHTML = chips.map(ch =>
+        `<span class="rv-chip ${ratingFilter === ch.v ? "active" : ""}" data-star="${ch.v}">${ch.label}<small>${ch.n}</small></span>`
+    ).join("")
+}
+
+function terapkanFilter(reset){
+
+    const sumber = ratingFilter
+        ? allEntries.filter(e => e.star === ratingFilter)
+        : allEntries
+
+    // ulasan milik sendiri di paling atas, sisanya terbaru dulu
+    viewEntries = sumber.slice().sort((a, b) => {
+        if(userUid){
+            if(a.id === userUid) return -1
+            if(b.id === userUid) return 1
+        }
+        return (b.time || 0) - (a.time || 0)
+    })
+
+    if(reset) shown = PAGE_SIZE
+
+    renderList()
+}
+
+function tampilkan(entries, stats){
+
+    allEntries = entries
+    allStats = stats
+
+    hasMyReview = !!userUid && entries.some(e => e.id === userUid)
+
+    renderSummary(stats)
+    renderFilters()
+    terapkanFilter(false)
+
+    document.getElementById("ratingTopContainer").style.display = hasMyReview ? "none" : "block"
+}
+
+document.getElementById("reviewFilters").addEventListener("click", e => {
+    const chip = e.target.closest("[data-star]")
+    if(!chip) return
+    const v = Number(chip.dataset.star) || 0
+    if(v === ratingFilter) return
+    ratingFilter = v
+    renderFilters()
+    terapkanFilter(true)
+})
+
+/* ============================================================
+   CACHE LOKAL (list langsung muncul, data live menyusul)
+   ============================================================ */
+
+const CACHE_KEY = "danzclean_ratings_cache_v1"
+const CACHE_MAX = 300
+
+function muatCache(){
+    try{
+        const c = JSON.parse(localStorage.getItem(CACHE_KEY))
+        if(c && Array.isArray(c.items) && c.stats) return c
+    }catch(e){}
+    return null
+}
+
+function simpanCache(entries, stats){
+    try{
+        const urut = entries.slice().sort((a, b) => (b.time || 0) - (a.time || 0))
+        const items = urut.slice(0, CACHE_MAX)
+        if(userUid && !items.some(e => e.id === userUid)){
+            const mine = entries.find(e => e.id === userUid)
+            if(mine) items.push(mine)
+        }
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+            t: Date.now(),
+            stats: stats,
+            items: items.map(e => ({
+                id: e.id,
+                name: e.name,
+                comment: e.comment,
+                star: e.star,
+                photo: (typeof e.photo === "string" && e.photo.length <= 300) ? e.photo : "",
+                time: e.time
+            }))
+        }))
+    }catch(e){}
+}
+
+/* ============================================================
+   FORM BERI RATING
+   ============================================================ */
+
+function updateStars(star){
+    document.querySelectorAll(".playstore-stars span").forEach((el, index) => {
+        if(index < star){
+            el.textContent = "★"
+            el.classList.add("active")
+        }else{
+            el.textContent = "☆"
+            el.classList.remove("active")
+        }
+    })
+}
+
+function openReview(star){
+
+    if(!currentUser){
+        showPopup("Silakan login terlebih dahulu untuk memberi rating!")
+        return
+    }
+
+    selectedStar = star
+    updateStars(star)
+
+    const form = document.getElementById("reviewForm")
+    form.style.display = "block"
+
+    const nameInput = document.getElementById("name")
+    if(currentUser.username){
+        nameInput.value = currentUser.username
+        nameInput.style.display = "none"
+    }
+
+    form.scrollIntoView({ behavior: "smooth", block: "center" })
+}
+
+function fotoUntukUlasan(name){
+    const p = currentUser && currentUser.photo
+    // foto base64 / terlalu panjang dibuang supaya data ratings tidak membengkak
+    if(typeof p === "string" && /^https?:\/\//i.test(p) && p.length <= 500) return p
+    return "https://ui-avatars.com/api/?name=" + encodeURIComponent(name) + "&background=4c7dff&color=fff"
+}
+
+let sedangKirim = false
+
+function sendReview(){
+
+    if(!currentUser || !userUid){
+        showPopup("Silakan login terlebih dahulu!")
+        return
+    }
+
+    if(sedangKirim) return
+
+    const name = document.getElementById("name").value.trim() || currentUser.username || "Pengguna"
+    const comment = document.getElementById("comment").value.trim()
+
+    if(!comment){
+        showPopup("Isi dulu ulasannya bre")
+        return
+    }
+
+    sedangKirim = true
+
+    db.ref("ratings/" + userUid).set({
+        name: name,
+        comment: comment,
+        star: selectedStar,
+        photo: fotoUntukUlasan(name),
+        time: Date.now()
+    }).then(() => {
+        document.getElementById("reviewForm").style.display = "none"
+        showPopup("Rating berhasil dikirim! ✅")
+    }).catch(err => {
+        showPopup(pesanError(err, "mengirim"))
+    }).then(() => {
+        sedangKirim = false
+    })
+}
+
+/* ============================================================
+   EDIT ULASAN
+   ============================================================ */
+
+function updateModalStars(star){
+    document.querySelectorAll(".modal-stars span").forEach((el, index) => {
+        if(index < star){
+            el.textContent = "★"
+            el.classList.add("active")
+        }else{
+            el.textContent = "☆"
+            el.classList.remove("active")
+        }
+    })
+}
+
+function setModalStar(star){
+    modalStar = star
+    updateModalStars(star)
+}
+
+function bisaKelola(id){
+    return !!id && (isOwner || (!!userUid && id === userUid))
+}
+
+function isiModalEdit(id, data){
+    targetEditId = id
+    document.getElementById("editName").value = data.name || ""
+    document.getElementById("editComment").value = data.comment || ""
+    modalStar = data.star >= 1 && data.star <= 5 ? data.star : 5
+    updateModalStars(modalStar)
+    document.getElementById("reviewModal").classList.add("active")
+}
+
+function openOwnerEditModal(id){
+
+    id = id || userUid
+    if(!bisaKelola(id)) return
+
+    if(dataMap[id]){
+        isiModalEdit(id, dataMap[id])
+        return
+    }
+
+    db.ref("ratings/" + id).once("value").then(snap => {
+        const data = snap.val()
+        if(data) isiModalEdit(id, data)
+    }).catch(err => {
+        showPopup(pesanError(err, "membuka"))
+    })
+}
+
+function closeEditModal(){
+    document.getElementById("reviewModal").classList.remove("active")
+}
+
+function saveEditReview(){
+
+    if(!bisaKelola(targetEditId)) return
+
+    const name = document.getElementById("editName").value.trim()
+    const comment = document.getElementById("editComment").value.trim()
+
+    if(!name || !comment){
+        showPopup("Isi dulu bre")
+        return
+    }
+
+    db.ref("ratings/" + targetEditId).update({
+        name: name,
+        comment: comment,
+        star: modalStar
+    }).then(() => {
+        closeEditModal()
+        showPopup("Ulasan berhasil diperbarui! ✅")
+    }).catch(err => {
+        showPopup(pesanError(err, "memperbarui"))
+    })
+}
+
+/* ============================================================
+   HAPUS ULASAN
+   ============================================================ */
+
+let pendingDeleteId = null
+
+function askDelete(id){
+
+    if(!bisaKelola(id)) return
+
+    pendingDeleteId = id
+
+    const d = dataMap[id]
+    document.getElementById("confirmText").textContent = d
+        ? `Hapus ulasan dari "${d.name || "Pengguna"}"? Tindakan ini tidak bisa dibatalkan.`
+        : "Hapus ulasan ini? Tindakan ini tidak bisa dibatalkan."
+
+    document.getElementById("confirmPopup").classList.add("show")
+}
+
+function cancelDelete(){
+    pendingDeleteId = null
+    document.getElementById("confirmPopup").classList.remove("show")
+}
+
+function confirmDelete(){
+
+    const id = pendingDeleteId
+    cancelDelete()
+
+    if(!bisaKelola(id)) return
+
+    db.ref("ratings/" + id).remove().then(() => {
+        closeEditModal()
+        showPopup("Ulasan berhasil dihapus! 🗑️")
+    }).catch(err => {
+        showPopup(pesanError(err, "menghapus"))
+    })
+}
+
+// tombol "HAPUS ULASAN" di dalam modal edit
+function deleteReview(){
+    askDelete(targetEditId)
+}
+
+/* ============================================================
+   EVENT DELEGATION UNTUK LIST
+   ============================================================ */
+
+document.getElementById("reviewList").addEventListener("click", e => {
+    const el = e.target.closest("[data-act]")
+    if(!el) return
+
+    const act = el.dataset.act
+    const id = el.dataset.id
+
+    if(act === "more") renderMoreCards()
+    else if(act === "edit") openOwnerEditModal(id)
+    else if(act === "del") askDelete(id)
+})
+
+/* ============================================================
+   DATA: cache dulu (instan), lalu realtime dari Firebase
+   ============================================================ */
+
+;(function renderDariCache(){
+    const c = muatCache()
+    if(!c) return
+    tampilkan(c.items, c.stats)
+})()
+
+db.ref("ratings").on("value", snap => {
+
+    const raw = snap.val() || {}
+    const entries = []
+    const map = {}
+
+    Object.keys(raw).forEach(id => {
+        const v = raw[id]
+        if(!v || typeof v !== "object") return
+
+        let star = Math.round(Number(v.star))
+        if(!(star >= 1 && star <= 5)) star = 0
+
+        const item = {
+            id: id,
+            name: v.name || "Pengguna",
+            comment: v.comment || "",
+            star: star,
+            photo: v.photo || "",
+            time: Number(v.time) || 0
+        }
+
+        map[id] = item
+        entries.push(item)
+    })
+
+    dataMap = map
+
+    const stats = hitungStats(entries)
+    tampilkan(entries, stats)
+    simpanCache(entries, stats)
+
+}, err => {
+    console.error("Gagal memuat ratings", err)
+    if(viewEntries.length === 0){
+        document.getElementById("reviewList").innerHTML =
+            `<div class="review-note">Gagal memuat ulasan. Cek koneksi internet lalu muat ulang halaman.</div>`
+        document.getElementById("totalReviews").textContent = "0 ulasan"
+    }
+})
+
+</script>
+
+</body>
+</html>

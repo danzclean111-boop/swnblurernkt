@@ -1,0 +1,23 @@
+{
+  "short_name": "DanzClean",
+  "name": "DanzClean - HD Status Uploader",
+  "icons": [
+    {
+      "src": "./media/logofest.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./media/logofest.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#060913",
+  "theme_color": "#3d6cff",
+  "display": "standalone",
+  "orientation": "portrait"
+}
