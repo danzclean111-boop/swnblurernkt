@@ -257,63 +257,70 @@
         }
 
         function setupPhoneChecker(ctrl, iconId, warningId) {
-            const input = ctrl.inputEl;
-            const icon = document.getElementById(iconId);
-            if (!input || !icon) return;
+    const input = ctrl.inputEl;
+    const icon = document.getElementById(iconId);
+    if (!input || !icon) return;
 
-            let debounceTimer = null;
-            let requestId = 0;
+    let debounceTimer = null;
+    let requestId = 0;
 
-            const runCheck = () => {
-                clearTimeout(debounceTimer);
+    const runCheck = () => {
+        clearTimeout(debounceTimer);
+
+        requestId++;
+        const currentRequest = requestId;
+
+        settingBlockState.phoneInvalid = false;
+        updateSaveButtonState();
+
+        if (!ctrl.nationalDigits) {
+            icon.className = "phone-status-icon";
+            icon.textContent = "";
+            togglePhoneFormatWarning(warningId, false);
+            return;
+        }
+
+        if (!ctrl.isValid()) {
+            icon.className = "phone-status-icon";
+            icon.textContent = "";
+            togglePhoneFormatWarning(warningId, true);
+            return;
+        }
+
+        togglePhoneFormatWarning(warningId, false);
+
+        const cleaned = ctrl.fullDigits;
+
+        icon.className = "phone-status-icon loading";
+        icon.textContent = "";
+
+        debounceTimer = setTimeout(async () => {
+            try {
+                const taken = await checkPhoneTaken(cleaned, loggedUser.uid);
+
+                if (currentRequest !== requestId) return;
+
+                icon.className = "phone-status-icon " + (taken ? "invalid" : "valid");
+                icon.innerHTML = taken ? ICON_CROSS_SVG : ICON_CHECK_SVG;
+
+                settingBlockState.phoneInvalid = taken;
+                updateSaveButtonState();
+
+            } catch (err) {
+                if (currentRequest !== requestId) return;
+
                 icon.className = "phone-status-icon";
                 icon.textContent = "";
+
                 settingBlockState.phoneInvalid = false;
                 updateSaveButtonState();
-                requestId++;
-                const currentRequest = requestId;
+            }
+        }, 700);
+    };
 
-                if (!ctrl.nationalDigits) {
-                    togglePhoneFormatWarning(warningId, false);
-                    return;
-                }
-
-                if (!ctrl.isValid()) {
-                    togglePhoneFormatWarning(warningId, true);
-                    return;
-                }
-                togglePhoneFormatWarning(warningId, false);
-
-                
-                if (!ctrl.isFull()) {
-                    return;
-                }
-
-                const cleaned = ctrl.fullDigits;
-
-                icon.className = "phone-status-icon loading";
-
-                debounceTimer = setTimeout(async () => {
-                    try {
-                        const taken = await checkPhoneTaken(cleaned, loggedUser.uid);
-                        if (currentRequest !== requestId) return;
-                        icon.className = "phone-status-icon " + (taken ? "invalid" : "valid");
-                        icon.innerHTML = taken ? ICON_CROSS_SVG : ICON_CHECK_SVG;
-                        settingBlockState.phoneInvalid = taken;
-                        updateSaveButtonState();
-                    } catch (err) {
-                        if (currentRequest !== requestId) return;
-                        icon.className = "phone-status-icon";
-                        icon.textContent = "";
-                        settingBlockState.phoneInvalid = false;
-                        updateSaveButtonState();
-                    }
-                }, 700);
-            };
-
-            input.addEventListener("input", runCheck);
-            input.addEventListener("phonechange", runCheck);
-        }
+    input.addEventListener("input", runCheck);
+    input.addEventListener("phonechange", runCheck);
+}
 
         setupUsernameChecker("setUsername", "setUsernameStatusIcon");
         setupPhoneChecker(setPhoneCtrl, "setPhoneStatusIcon", "setPhoneFormatWarning");
