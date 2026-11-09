@@ -1,18 +1,10 @@
-/* =====================================================================
-   DanzClean Design System v2 — "Sharp Signal"
-   Konsep: janji produk = HD tanpa blur. UI dibuat tajam & tenang; blur hanya
-   dipakai sebagai latar. Satu warna aksi (biru), mint khusus status HD/online,
-   amber khusus donasi, merah khusus bahaya.
-   Urutan file: 1) tokens  2) base  3) komponen (legacy, sudah di-restyle)
-                4) lapisan v2 di akhir file (nav, topbar, halaman)
-   ===================================================================== */
+
 
 :root {
-    /* type */
+    
     --font: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-    /* surfaces (midnight navy, bukan hitam polos) */
     --bg-dark: #060913;
     --bg: #060913;
     --bg-2: #0a1020;
@@ -24,24 +16,21 @@
     --line-strong: rgba(150, 170, 255, 0.24);
     --border-glow: rgba(77, 124, 255, 0.28);
 
-    /* brand */
     --primary: #4d7cff;
     --primary-600: #3a63e6;
     --primary-700: #2c4fc4;
     --primary-300: #8fb0ff;
     --primary-glow: rgba(77, 124, 255, 0.38);
-    --accent: #36e2a8;          /* HD / online / sukses */
+    --accent: #36e2a8;          
     --accent-glow: rgba(54, 226, 168, 0.28);
-    --amber: #ffbf47;           /* donasi / peringatan */
+    --amber: #ffbf47;           
     --danger: #ff5d73;
 
-    /* text — semua lolos kontras 4.5:1 di atas --surface */
     --text-main: #eef2ff;
     --text-2: #b6bedf;
     --text-muted: #98a2cc;
     --text-3: #8089b3;
 
-    /* shape, space, motion */
     --r-sm: 10px;
     --r-md: 14px;
     --r-lg: 20px;
@@ -53,7 +42,6 @@
     --shadow-1: 0 1px 0 rgba(255,255,255,.04) inset, 0 8px 24px rgba(0,0,0,.35);
     --shadow-2: 0 1px 0 rgba(255,255,255,.06) inset, 0 18px 48px rgba(0,0,0,.5);
 
-    /* v3 — token pelengkap (menggantikan hex liar di komponen) */
     --primary-hi: #5b86ff;
     --primary-mid: #3d6cff;
     --primary-lo: #3358d6;
@@ -61,9 +49,9 @@
     --cta-grad: linear-gradient(180deg, var(--primary-hi), var(--primary-mid) 55%, var(--primary-lo));
     --danger-soft: rgba(255, 93, 115, .14);
     --tap: 44px;
-    --dur-1: .15s;   /* press / hover */
-    --dur-2: .25s;   /* state, overlay */
-    --dur-3: .4s;    /* masuk / keluar kartu */
+    --dur-1: .15s;   
+    --dur-2: .25s;   
+    --dur-3: .4s;    
     --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px;
     --dock-h: 64px;
     --dock-clear: calc(var(--dock-h) + 12px + env(safe-area-inset-bottom, 0px) + 20px);
@@ -3118,8 +3106,6 @@ pointer-events:none;
     transform: translateY(1px);
 }
 
-/* (v2) blok media-query 768px lama dihapus: dulu membesarkan semua elemen jadi "mobile raksasa" di tablet/desktop */
-
 .tutorial-overlay {
     position: fixed;
     top: 0;
@@ -6103,7 +6089,6 @@ body { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
     box-shadow: 0 0 10px rgba(127, 162, 255, 0.9);
 }
 
-
 html {
     background: #070a13;
 }
@@ -6165,13 +6150,6 @@ html:has(#dzLoader) .cs-hint-tooltip {
     visibility: hidden !important;
 }
 
-
-/* =====================================================================
-   DESIGN SYSTEM v2 — LAPISAN KOMPONEN GLOBAL
-   (topbar, dock navigasi, popover, tooltip, notifikasi, profil)
-   ===================================================================== */
-
-/* ---------- Topbar: satu bar tenang, bukan tiga cincin neon ---------- */
 #dzTopbar.topbar {
     top: 12px !important;
     left: max(12px, calc(50% - 560px)) !important;
@@ -6265,7 +6243,6 @@ html:has(#dzLoader) .cs-hint-tooltip {
 .topbar-cs-status { right: 6px; bottom: 6px; }
 .topbar-profile-status { border-color: var(--bg-2); }
 
-/* ---------- Tooltip CS: terbaca, bukan label 8px kapital ---------- */
 .cs-hint-tooltip {
     max-width: 176px;
     padding: 9px 12px;
@@ -6287,7 +6264,6 @@ html:has(#dzLoader) .cs-hint-tooltip {
     border-left: 1px solid var(--line-strong);
 }
 
-/* ---------- Dropdown profil & panel notifikasi ---------- */
 .profile-dropdown,
 .notif-panel {
     background: rgba(13, 20, 48, 0.96);
@@ -6318,7 +6294,6 @@ html:has(#dzLoader) .cs-hint-tooltip {
 .notif-panel-add textarea { font-size: 13px; padding: 9px 11px; margin-bottom: 0; text-align: left; min-height: 0; }
 .notif-panel-add button { font-size: 13px; min-height: 40px; }
 
-/* ---------- Dock navigasi bawah ---------- */
 .mn-nav {
     --mn-h: 64px;
     --mn-bar: #0e1635;
@@ -6353,13 +6328,11 @@ html:has(#dzLoader) .cs-hint-tooltip {
 .mn-pop-txt small { font-size: 12px; color: var(--text-muted); }
 .mn-pop-ico { color: var(--primary-300); background: rgba(77,124,255,.14); }
 
-/* ---------- Layar lebar: konten tidak lagi "mobile yang melar" ---------- */
 @media (min-width: 1024px) {
     .mn-nav { max-width: 460px; --mn-h: 68px; }
     .mn-pop { max-width: 460px; }
 }
 
-/* ---------- Gerak: hormati preferensi pengguna ---------- */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         animation-duration: .01ms !important;
@@ -6369,12 +6342,6 @@ html:has(#dzLoader) .cs-hint-tooltip {
     }
 }
 
-
-/* =====================================================================
-   DESIGN SYSTEM v2 — MODAL, POPUP, TOMBOL SEKUNDER
-   Satu pola untuk semua dialog: kartu surface, radius 24, masuk dengan
-   skala halus. Mekanisme buka/tutup (.show / .active) tidak diubah.
-   ===================================================================== */
 .modal-overlay,
 .popup-overlay,
 .tutorial-overlay,
@@ -6504,7 +6471,6 @@ html:has(#dzLoader) .cs-hint-tooltip {
 .group-modal-title { font-size: 18px; font-weight: 800; letter-spacing: -.01em; text-transform: none; }
 .group-modal-sub { font-size: 14px; color: var(--text-2); }
 
-/* ---------- Tombol sekunder (ghost) ---------- */
 .btn-ghost,
 button.btn-ghost {
     background: rgba(255, 255, 255, 0.05);
@@ -6521,9 +6487,6 @@ button.btn-ghost:hover {
 }
 .btn-ico { flex: none; }
 
-/* =====================================================================
-   HALAMAN UPLOAD (index) — "viewfinder"
-   ===================================================================== */
 .upload-box::before {
     content: "";
     position: absolute;
@@ -6591,7 +6554,6 @@ button.btn-ghost:hover {
 }
 #uploadBtn { min-height: 54px; font-size: 16px; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 0; }
 
-/* focus-pull: judul masuk dari blur -> tajam (hanya heading, murah di perangkat lemah) */
 @keyframes dz-focus {
     from { opacity: 0; filter: blur(8px); transform: translateY(6px); }
     to   { opacity: 1; filter: blur(0);   transform: none; }
@@ -6603,7 +6565,6 @@ button.btn-ghost:hover {
 #uploadBtn { animation-delay: .14s; }
 #status { animation-delay: .2s; }
 
-/* Desktop: studio dua kolom (tanpa mengubah urutan DOM) */
 @media (min-width: 960px) {
     .container.idx-page {
         max-width: 1040px;
@@ -6628,11 +6589,6 @@ button.btn-ghost:hover {
 }
 .cf-turnstile:empty { display: none; }
 
-
-/* =====================================================================
-   HALAMAN DOWNLOADER (Instagram, TikTok, YouTube, Pinterest)
-   Satu pola: judul -> input -> CTA -> hasil. Semua pakai token v2.
-   ===================================================================== */
 .dl-page { max-width: 640px; text-align: left; }
 .dl-panel { display: flex; flex-direction: column; gap: 0; }
 .dl-title {
@@ -6726,7 +6682,6 @@ button.btn-ghost:hover {
 .dl-btn-alt:hover { background: rgba(255,255,255,.1); box-shadow: none; }
 .dl-btn-sm { min-height: 40px; width: auto; padding: 8px 14px; font-size: 12px; margin: 0 auto; }
 
-/* panduan Pinterest */
 .dl-tip { background: rgba(54,226,168,.07); border: 1px dashed rgba(54,226,168,.45); border-radius: var(--r-lg); padding: 16px; margin-bottom: 14px; text-align: left; }
 .dl-tip-c { text-align: center; }
 .dl-tip-title { font-size: 14px; font-weight: 700; color: var(--accent); margin: 0 0 12px; text-align: center; }
@@ -6739,10 +6694,6 @@ button.btn-ghost:hover {
     .dl-page { max-width: 720px; }
 }
 
-
-/* =====================================================================
-   HALAMAN LAIN — konsistensi jarak atas, desktop, statistik
-   ===================================================================== */
 .rating-page { padding-top: calc(var(--topbar-h) + 76px); }
 .setting-container { padding-top: calc(var(--topbar-h) + 76px); }
 .pt-page { padding-top: calc(var(--topbar-h) + 76px); }
@@ -6762,7 +6713,6 @@ button.btn-ghost:hover {
 }
 .maintenance-icon { display: grid; place-items: center; color: var(--amber); }
 
-/* Landing / login: tombol memakai bentuk yang sama dengan seluruh aplikasi */
 a.btn-primary, .btn-primary {
     min-height: 52px;
     padding: 14px 28px;
@@ -6786,14 +6736,6 @@ a.btn-ghost, .btn-ghost {
     .hero-cta { flex-direction: row; max-width: none; width: auto; justify-content: center; }
 }
 
-
-/* =====================================================================
-   DESIGN SYSTEM v3 — PENYEMPURNAAN DETAIL
-   Konsistensi token, target sentuh 44px, ikon SVG, state interaksi.
-   Tidak mengubah konsep v2 "Sharp Signal".
-   ===================================================================== */
-
-/* ---------- Ikon inline ---------- */
 .ic {
     width: 1.15em;
     height: 1.15em;
@@ -6808,7 +6750,6 @@ a.btn-ghost, .btn-ghost {
 .lock-icon { display: inline-grid; place-items: center; color: var(--primary-300); }
 .icon > svg { display: block; margin: 0 auto; }
 
-/* ---------- Tombol modal: satu keluarga ---------- */
 .modal-btn { background: var(--cta-grad); gap: 8px; transition: filter var(--dur-1) var(--ease), transform var(--dur-1) var(--ease); }
 .modal-btn + .modal-btn,
 .modal-btn + a.modal-btn,
@@ -6833,7 +6774,6 @@ a.modal-btn + .modal-btn { margin-top: 10px; }
 .modal-icon[data-tone="info"] { color: var(--primary-300); background: rgba(77,124,255,.14); box-shadow: 0 0 0 6px rgba(77,124,255,.07); }
 .modal-icon svg { display: block; }
 
-/* ---------- Target sentuh >= 44px ---------- */
 #dzTopbar > .topbar-notif-btn,
 #dzTopbar > .topbar-cs-btn,
 #dzTopbar > .topbar-profile-btn {
@@ -6853,7 +6793,6 @@ a.modal-btn + .modal-btn { margin-top: 10px; }
     min-height: var(--tap);
 }
 
-/* ---------- Feedback sentuh & fokus ---------- */
 button, .btn-ghost, .mn-item, .profile-dropdown-item { -webkit-tap-highlight-color: transparent; }
 button:not(:disabled):active,
 .btn-ghost:active,
@@ -6868,24 +6807,19 @@ input:focus-visible, textarea:focus-visible, select:focus-visible,
     .profile-dropdown-item:hover { padding-left: inherit; }
 }
 
-/* ---------- Transisi: properti spesifik, bukan "all" ---------- */
 button, .btn-ghost, .upload-box, .modal-btn {
     transition-property: background-color, border-color, color, box-shadow, transform, filter, opacity;
     transition-duration: var(--dur-2);
     transition-timing-function: var(--ease);
 }
 
-/* ---------- Index desktop: hint sejajar kotak upload ---------- */
 @media (min-width: 960px) {
     .idx-page > .upload-hint { grid-column: 1; grid-row: 8; margin: 14px 0 0; text-align: center; justify-self: center; }
     .container.idx-page > .logo { margin-bottom: 8px; }
 }
 
-/* ---------- Konten tidak tertutup dock ---------- */
 .container { padding-bottom: max(var(--dock-clear), 96px); }
 
-/* ---------- v3.1 — tombol bulat sempurna & modal group ---------- */
-/* min-height global tombol (48px) membuat tombol bulat jadi lonjong: kunci rasio 1:1 */
 #dzTopbar > .topbar-profile-btn,
 .gc-copy,
 .popup-close-btn,
@@ -6919,7 +6853,6 @@ button, .btn-ghost, .upload-box, .modal-btn {
     border-radius: 50% !important;
 }
 
-/* Modal pilih group: judul tidak bertabrakan dengan tombol tutup */
 .group-modal-card { padding: 28px 20px 20px; }
 .group-modal-close {
     top: 10px !important;
@@ -6936,15 +6869,12 @@ button, .btn-ghost, .upload-box, .modal-btn {
 .group-modal-sub { margin-bottom: 18px; line-height: 1.5; text-wrap: balance; }
 .group-list-container { gap: 10px; }
 
-/* Item group: kolom status cukup lebar untuk "Unknown/Online/Offline" */
 .gc-link { min-height: 68px; padding-right: 58px; }
 .gc-state { flex: 0 0 76px; padding: 0 4px; gap: 7px; }
 .gc-status { font-size: 12px; white-space: nowrap; }
 .gc-body { padding: 10px 10px; }
 .gc-name { font-size: 14px; overflow-wrap: anywhere; }
 
-/* ---------- v3.2 — ikon X tepat di tengah tombol tutup ---------- */
-/* Glyph teks "×" punya metrik font sendiri sehingga tampak turun/geser; diganti SVG simetris */
 .popup-close-btn,
 .tutorial-close-btn,
 .group-modal-close {
@@ -6964,16 +6894,17 @@ button, .btn-ghost, .upload-box, .modal-btn {
     pointer-events: none;
 }
 
-/* ---------- v3.2 — halaman Perbaikan (admin) memakai navigasi ---------- */
 .maintenance-page.maintenance-admin {
     justify-content: flex-start;
     padding-top: calc(var(--topbar-h) + 24px);
     padding-bottom: max(var(--dock-clear), 96px);
 }
 .maintenance-page.maintenance-admin .maintenance-card { margin: auto 0; }
-/* sembunyikan nav saat popup hasil (Berhasil/Gagal) tampil agar tidak menutupi */
+
 html:has(.modal-overlay.active) #mnNav,
 html:has(.modal-overlay.active) #dzTopbar {
     opacity: 0 !important;
     pointer-events: none !important;
 }
+
+html, body { touch-action: pan-x pan-y; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
