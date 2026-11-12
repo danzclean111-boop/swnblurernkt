@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+<meta name="robots" content="noindex, nofollow">
+<script>
+    (function () {
+        if (!localStorage.getItem("danzclean_logged_user")) {
+            window.location.replace("/danzclean.html");
+        }
+    })();
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+<title>Chat Global - DanzClean</title>
+<link rel="icon" href="/favicon.png" type="image/png">
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <div class="topbar">
+        <div class="menu-btn dashboard-menu" onclick="toggleMenu()">☰</div>
+    </div>
+
+    <div class="sidebar" id="sidebar"></div>
+    <script src="Akun.js"></script>
+    <script src="sidebar.js"></script>
+
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <div class="cg-page">
+      <div class="cg-shell">
+
+        <header class="cg-head">
+            <div class="cg-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5h14a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 17h-7l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 5 5z"/><path d="M8 10h8M8 13h5"/></svg>
+            </div>
+            <div class="cg-title">
+                <b>Chat Global</b>
+                <span class="cg-state"><i class="cg-dot" id="cgDot"></i><em id="cgState">Menyambung...</em></span>
+            </div>
+        </header>
+
+        <section class="cg-stage">
+            <div class="cg-list" id="cgList">
+                <div class="cg-sys">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                    <span>Pesan terhapus otomatis setelah 24 jam. Geser pesan ke kanan untuk membalas, tahan untuk opsi lain. Ketik @ untuk menyebut.</span>
+                </div>
+                <div class="cg-skel" id="cgSkel"><i></i><i></i><i></i></div>
+            </div>
+            <button type="button" class="cg-pill" id="cgPill" hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+                <span id="cgPillTxt">Pesan baru</span>
+            </button>
+            <div class="cg-note" id="cgNote" role="status"></div>
+        </section>
+
+
+        <div class="cg-composer">
+            <div class="cg-mentions" id="cgMentions" role="listbox" aria-label="Sebut pengguna" hidden></div>
+            <div class="cg-reply" id="cgReply" hidden>
+                <i class="qbar"></i>
+                <div class="qb"><b id="cgRbName"></b><span id="cgRbText"></span></div>
+                <button type="button" id="cgRbX" aria-label="Batalkan balasan">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="cg-row-compose">
+                <textarea id="cgInput" rows="1" maxlength="500" placeholder="Tulis pesan…" autocomplete="off" aria-label="Tulis pesan"></textarea>
+                <button type="button" class="cg-send" id="cgSend" aria-label="Kirim" disabled>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>
+                </button>
+            </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="cg-scrim" id="cgScrim" hidden>
+        <div class="cg-sheet" id="cgSheet" role="dialog" aria-modal="true" aria-labelledby="cgSheetWho">
+            <div class="cg-sheet-prev"><b id="cgSheetWho"></b><span id="cgSheetTxt"></span></div>
+            <div class="cg-sheet-list" id="cgSheetList">
+                <button type="button" class="cg-sheet-item" data-act="reply">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17 4 12l5-5"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
+                    <span>Balas</span>
+                </button>
+                <button type="button" class="cg-sheet-item" data-act="copy">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    <span id="cgCopyTxt">Salin</span>
+                </button>
+                <button type="button" class="cg-sheet-item danger" data-act="del" id="cgDelItem" hidden>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>
+                    <span>Hapus</span>
+                </button>
+            </div>
+            <div class="cg-sheet-confirm" id="cgSheetConfirm" hidden>
+                <p>Hapus pesan ini untuk semua orang? Tindakan ini tidak bisa dibatalkan.</p>
+                <div class="cg-sheet-btns">
+                    <button type="button" data-act="cancel">Batal</button>
+                    <button type="button" class="fill" data-act="confirm">Hapus</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="chatglobal.js"></script>
+</body>
+</html>
