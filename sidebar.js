@@ -180,6 +180,7 @@ const MN_NAV = [
   { key: "dl", label: "Downloader", icon: "download", img: "./media/downloader.png", popup: "dl", list: MN_DOWNLOADER },
   { key: "preset", label: "Preset", icon: "layers", img: "./media/preset.png", popup: "preset", list: MN_PRESET },
   { key: "stats", label: "Statistik", icon: "chart", img: "./media/statistik.png", alts: ["stats", "statistic", "statistics", "stat", "grafik", "chart"], href: "/stats.html" },
+  { key: "chat", label: "Chat", icon: "chat", img: "./media/chat.png", href: "/chatglobal.html" },
   { key: "more", label: "Lainnya", icon: "grid", img: "./media/lainnya.png", popup: "more", list: MN_MORE },
 ];
 
@@ -189,6 +190,7 @@ const MN_ICONS = {
   layers: '<path d="M12 4 3.5 8.5 12 13l8.5-4.5z"/><path d="M3.5 12.5 12 17l8.5-4.5"/><path d="M3.5 16.5 12 21l8.5-4.5"/>',
   chart: '<path d="M5 20v-8"/><path d="M12 20V4"/><path d="M19 20v-5"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
+  chat: '<path d="M5 5h14a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 17h-7l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 5 5z"/><path d="M8 10h8M8 13h5"/>',
   grid: '<rect x="4" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.8"/>',
 };
 
@@ -585,6 +587,150 @@ function mnPopHtml(list, isGrid, isOwner, cur) {
   return '<div class="' + (isGrid ? "mn-pop-grid" : "mn-pop-list") + '">' + out + "</div>";
 }
 
+
+/* ===== Badge Chat: lingkaran merah (belum dibaca) + tanda @ (disebut / dibalas) ===== */
+const DZ_CHAT_READ_KEY = "dz_chat_read";
+const DZ_CHAT_CFG_KEY = "dz_fb_chat_cfg";
+const DZ_CHAT_BADGES =
+  '<span class="dz-cb dz-cb-at" id="dzChatAt" aria-hidden="true">@</span>' +
+  '<span class="dz-cb dz-cb-n" id="dzChatCount" aria-hidden="true"></span>';
+
+function dzInjectChatBadgeCss() {
+  if (document.getElementById("dzChatBadgeCss")) return;
+  const st = document.createElement("style");
+  st.id = "dzChatBadgeCss";
+  st.textContent =
+    ".mn-ico{position:relative}" +
+    ".dz-cb{position:absolute;top:-8px;min-width:18px;height:18px;padding:0 5px;box-sizing:border-box;border-radius:99px;display:flex;align-items:center;justify-content:center;font:800 10.5px/1 'Plus Jakarta Sans','Inter',system-ui,sans-serif;pointer-events:none;transform:scale(0);opacity:0;transition:transform .28s cubic-bezier(.34,1.5,.5,1),opacity .15s ease;box-shadow:0 0 0 2px var(--mn-bar,#0e1635)}" +
+    ".dz-cb.show{transform:scale(1);opacity:1}" +
+    ".dz-cb-n{right:-12px;background:#e5284a;color:#fff}" +
+    ".dz-cb-at{left:-13px;width:18px;padding:0;background:#36e2a8;color:#04281c;font-size:11px}" +
+    ".dz-cb.bump{animation:dzCbBump .45s cubic-bezier(.34,1.5,.5,1)}" +
+    "@keyframes dzCbBump{0%{transform:scale(.6)}55%{transform:scale(1.3)}100%{transform:scale(1)}}" +
+    ".mn-item.active .dz-cb{display:none}" +
+    ".dz-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}" +
+    "@media (max-width:420px){.mn-label{font-size:10px!important;letter-spacing:-.2px!important}}" +
+    "@media (prefers-reduced-motion:reduce){.dz-cb{transition:none}.dz-cb.bump{animation:none}}";
+  (document.head || document.documentElement).appendChild(st);
+}
+
+function dzChatMyId() {
+  let s = {};
+  try { s = JSON.parse(localStorage.getItem("danzclean_logged_user") || "{}") || {}; } catch (e) {}
+  const str = String(s.email || s.username || "anon").toLowerCase().trim();
+  let h = 5381;
+  for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
+  return "u" + (h >>> 0).toString(36);
+}
+
+const dzChat = { unread: 0, mention: false, items: {}, announced: 0 };
+
+function dzChatRender() {
+  const cnt = document.getElementById("dzChatCount");
+  const at = document.getElementById("dzChatAt");
+  const item = cnt && cnt.closest(".mn-item");
+  if (!cnt || !at || !item) return;
+
+  const n = dzChat.unread;
+  const prevN = parseInt(cnt.getAttribute("data-n") || "0", 10);
+  cnt.textContent = n > 99 ? "99+" : String(n || "");
+  cnt.setAttribute("data-n", String(n));
+  cnt.classList.toggle("show", n > 0);
+  at.classList.toggle("show", n > 0 && dzChat.mention);
+
+  if (n > prevN) {
+    [cnt, at].forEach(b => { b.classList.remove("bump"); void b.offsetWidth; if (b.classList.contains("show")) b.classList.add("bump"); });
+  }
+
+  let label = "Chat";
+  if (n > 0) label += ", " + n + " pesan belum dibaca" + (dzChat.mention ? ", ada yang menyebut atau membalas kamu" : "");
+  item.setAttribute("aria-label", label);
+
+  let live = document.getElementById("dzChatLive");
+  if (!live) {
+    live = document.createElement("span");
+    live.id = "dzChatLive";
+    live.className = "dz-sr";
+    live.setAttribute("role", "status");
+    live.setAttribute("aria-live", "polite");
+    live.setAttribute("aria-atomic", "true");
+    document.body.appendChild(live);
+  }
+  if (n > dzChat.announced) live.textContent = dzChat.mention ? "Ada pesan baru di chat, kamu disebut" : n + " pesan baru di chat";
+  dzChat.announced = n;
+}
+
+function dzChatRecount() {
+  const lastRead = Number(localStorage.getItem(DZ_CHAT_READ_KEY)) || 0;
+  let n = 0, mention = false;
+  Object.keys(dzChat.items).forEach(k => {
+    const it = dzChat.items[k];
+    if (it.ts <= lastRead) { delete dzChat.items[k]; return; }
+    n++;
+    if (it.mention) mention = true;
+  });
+  dzChat.unread = n;
+  dzChat.mention = mention;
+  dzChatRender();
+}
+
+function dzBootChatBadge() {
+  if (dzChat.booted) return;
+  dzChat.booted = true;
+  if (mnNormPath(location.pathname) === "/chatglobal") return;
+  if (!localStorage.getItem("danzclean_logged_user")) return;
+
+  dzBootNotif().then(() => {
+    let cfg = null, name = "";
+    if (typeof FIREBASE_CONFIG_CHAT !== "undefined") { cfg = FIREBASE_CONFIG_CHAT; name = "chatApp"; }
+    else if (typeof FIREBASE_CONFIG_VERIFY !== "undefined") { cfg = FIREBASE_CONFIG_VERIFY; name = "verifyApp"; }
+
+    if (cfg) {
+      try { localStorage.setItem(DZ_CHAT_CFG_KEY, JSON.stringify({ name: name, cfg: cfg })); } catch (e) {}
+    } else {
+      try {
+        const saved = JSON.parse(localStorage.getItem(DZ_CHAT_CFG_KEY));
+        if (saved && saved.cfg && saved.cfg.databaseURL) { cfg = saved.cfg; name = saved.name; }
+      } catch (e) {}
+    }
+    if (!cfg || typeof firebase === "undefined" || !firebase.database) return;
+
+    let app = firebase.apps.find(a => a.name === name);
+    if (!app) app = firebase.initializeApp(cfg, name);
+
+    const myId = dzChatMyId();
+    let lastRead = Number(localStorage.getItem(DZ_CHAT_READ_KEY)) || 0;
+    if (!lastRead) {
+      lastRead = Date.now();
+      try { localStorage.setItem(DZ_CHAT_READ_KEY, String(lastRead)); } catch (e) {}
+    }
+
+    const q = app.database().ref("global_chat/messages").orderByChild("ts").startAt(lastRead + 1).limitToLast(60);
+
+    q.on("child_added", snap => {
+      const m = snap.val();
+      if (!m || typeof m !== "object" || m.u === myId) return;
+      const ts = Number(m.ts) || 0;
+      if (ts <= (Number(localStorage.getItem(DZ_CHAT_READ_KEY)) || 0)) return;
+      const mn = Array.isArray(m.mn) ? m.mn : (m.mn && typeof m.mn === "object" ? Object.keys(m.mn).map(k => m.mn[k]) : []);
+      dzChat.items[snap.key] = {
+        ts: ts,
+        mention: !!(m.r && m.r.u === myId) || mn.some(x => x && x.u === myId)
+      };
+      dzChatRecount();
+    });
+    q.on("child_removed", snap => {
+      delete dzChat.items[snap.key];
+      dzChatRecount();
+    });
+
+    window.addEventListener("storage", e => { if (e.key === DZ_CHAT_READ_KEY) dzChatRecount(); });
+    window.addEventListener("pageshow", dzChatRecount);
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") dzChatRecount(); });
+    dzChatRecount();
+  });
+}
+
 function renderBottomNav() {
   if (document.getElementById("mnNav")) return;
 
@@ -603,7 +749,7 @@ function renderBottomNav() {
     const icoHtml = it.img
       ? '<img src="' + mnIconSrc(it) + '" alt="" draggable="false" decoding="sync" data-key="' + it.key + '" data-try="0" data-fallback="' + it.icon + '">'
       : mnSvg(it.icon);
-    const inner = '<span class="mn-ico">' + icoHtml + '</span><span class="mn-label">' + it.label + "</span>";
+    const inner = '<span class="mn-ico">' + icoHtml + (it.key === "chat" ? DZ_CHAT_BADGES : "") + '</span><span class="mn-label">' + it.label + "</span>";
     if (it.popup) {
       itemsHtml += '<button type="button" class="mn-item" data-idx="' + i + '" data-popup="' + it.popup + '" aria-expanded="false">' + inner + "</button>";
     } else {
@@ -651,7 +797,11 @@ function renderBottomNav() {
     const list = mnIconCandidates(item);
     const useFallback = () => {
       const span = img.parentNode;
-      if (span) span.innerHTML = mnSvg(img.getAttribute("data-fallback"));
+      if (span) {
+        const keep = Array.from(span.querySelectorAll(".dz-cb"));
+        span.innerHTML = mnSvg(img.getAttribute("data-fallback"));
+        keep.forEach(n => span.appendChild(n));
+      }
     };
     const tryNext = () => {
       if (img.src.indexOf("data:") === 0) {
@@ -861,9 +1011,11 @@ function dzInjectCriticalCss() {
 
 function initDanzNav() {
   dzInjectCriticalCss();
+  dzInjectChatBadgeCss();
   ensureTopbar();
   renderTopbarProfile();
   renderBottomNav();
+  dzBootChatBadge();
 
   let repairs = 0;
   let timer = null;
@@ -887,3 +1039,20 @@ if (document.body) {
 } else {
   document.addEventListener("DOMContentLoaded", initDanzNav);
 }
+
+
+/* Cegah pinch-zoom & double-tap zoom (iOS Safari / browser yang abaikan meta viewport) */
+(function () {
+  ["gesturestart", "gesturechange", "gestureend"].forEach(function (ev) {
+    document.addEventListener(ev, function (e) { e.preventDefault(); }, { passive: false });
+  });
+  document.addEventListener("touchmove", function (e) {
+    if (e.touches && e.touches.length > 1) e.preventDefault();
+  }, { passive: false });
+  var lastTouchEnd = 0;
+  document.addEventListener("touchend", function (e) {
+    var now = Date.now();
+    if (now - lastTouchEnd <= 300) e.preventDefault();
+    lastTouchEnd = now;
+  }, { passive: false });
+})();
