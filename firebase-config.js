@@ -53,3 +53,14 @@ const FIREBASE_CONFIG_NOTIF = {
   appId: "1:159257237463:web:be79fea1216f31f3ac9d92",
   measurementId: "G-1Z9FVXZDHN"
 };
+
+const FIREBASE_CONFIG_CHAT = {
+  apiKey: "AIzaSyCt1ysCOnjZXTI5OcYs8EkQNkBvpXjud0s",
+  authDomain: "chatglobal-72ac4.firebaseapp.com",
+  databaseURL: "https://chatglobal-72ac4-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "chatglobal-72ac4",
+  storageBucket: "chatglobal-72ac4.firebasestorage.app",
+  messagingSenderId: "723191036470",
+  appId: "1:723191036470:web:299858056a59b313fa7697",
+  measurementId: "G-7Z33G70N8G"
+};
