@@ -1,5 +1,4 @@
-// Anti-DevTools (port dari komponen React AntiDevtools ke vanilla JS)
-// Memblokir shortcut DevTools / view-source dan klik kanan.
+
 (function () {
     "use strict";
 
