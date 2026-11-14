@@ -64,8 +64,6 @@
             }
         }
 
-        // Trigger download native browser (server sudah kirim Content-Disposition: attachment,
-        // jadi browser langsung streaming ke disk tanpa nunggu file utuh ke-load ke memori dulu)
         function forceDownload(fileUrl, fileName, btnElement) {
             if (!fileName) fileName = extractFilename(fileUrl);
             const originalText = btnElement.innerText;

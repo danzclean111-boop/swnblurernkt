@@ -1,8 +1,4 @@
-/* ============================================================
-   Chat Global - DanzClean
-   ============================================================ */
 
-/* ---------- menu sidebar (dipanggil dari onclick di HTML) ---------- */
 function toggleMenu() {
     document.getElementById("sidebar").classList.toggle("active");
     document.getElementById("overlay").classList.toggle("active");
@@ -38,7 +34,6 @@ function toggleMenu() {
         seen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M1.8 12.8l4.6 4.6 9.4-10"/><path d="M10.2 15.8l1.6 1.6 9.8-10.2"/></svg>'
     };
 
-    /* ---------- identitas ---------- */
     var session = {};
     try { session = JSON.parse(localStorage.getItem("danzclean_logged_user") || "{}") || {}; } catch (e) {}
     var myName = String(session.username || session.name || "User").trim().slice(0, 30) || "User";
@@ -50,21 +45,19 @@ function toggleMenu() {
     }
     var myId = hashId(String(session.email || session.username || "anon").toLowerCase().trim());
 
-    /* foto profil: URL https pendek, atau thumbnail data:image kecil (foto asli di akun bisa sampai 2MB, jadi tidak dikirim utuh) */
     function safePhoto(u) {
         u = String(u || "").trim();
         if (/^https:\/\/[^\s"'<>]+$/i.test(u) && u.length <= 500) return u;
         if (/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(u) && u.length <= 30000) return u;
         return "";
     }
-    var profiles = {}; /* id pengguna -> foto (dibaca dari global_chat/profiles) */
+    var profiles = {}; 
 
     var isOwner = false;
     try { isOwner = (typeof cekAkunOwner === "function" && cekAkunOwner()) || localStorage.getItem("isOwner") === "true"; } catch (e) {}
 
     var AV_COLORS = ["#3a68e8", "#12805a", "#8a3fd0", "#c2492a", "#bf2a64", "#12788f", "#8f5f08"];
     var NM_COLORS = ["#8fb0ff", "#5fe0b0", "#d3a4ff", "#ffa98c", "#ff8fb4", "#6fd6f2", "#f4c44f"];
-    /* avatar: huruf berwarna sebagai dasar, foto akun menimpa kalau ada dan berhasil dimuat */
     function setAvatarPhoto(av, photo) {
         var old = av.querySelector("img");
         if (old) av.removeChild(old);
@@ -102,7 +95,6 @@ function toggleMenu() {
     var database = db();
     var ref = database.ref(CHAT_PATH);
 
-    /* ---------- util ---------- */
     function esc(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
     function toArr(v) { return Array.isArray(v) ? v.filter(Boolean) : (v && typeof v === "object" ? Object.keys(v).map(function (k) { return v[k]; }) : []); }
     function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
@@ -126,7 +118,6 @@ function toggleMenu() {
     listEl.addEventListener("scroll", function () { if (nearBottom()) { pillEl.hidden = true; newCount = 0; } });
     pillEl.addEventListener("click", toBottom);
 
-    /* ---------- state ---------- */
     var rows = {}, msgs = {}, people = {}, mineRows = {};
     var pending = {}, othersSeen = 0;
     var last = { u: null, ts: 0, day: "" };
@@ -149,7 +140,6 @@ function toggleMenu() {
         if (n && dotEl.classList.contains("on")) stateEl.textContent = "Terhubung · " + n + " peserta";
     }
 
-    /* ---------- penanda baca (dipakai badge di sidebar) ---------- */
     function markRead() {
         if (!loaded || document.visibilityState !== "visible" || !maxTs) return;
         try {
@@ -159,7 +149,6 @@ function toggleMenu() {
     }
     document.addEventListener("visibilitychange", markRead);
 
-    /* ---------- teks + mention ---------- */
     function fillText(node, text, mn) {
         node.textContent = "";
         var list = toArr(mn).filter(function (x) { return x && x.n; });
@@ -180,7 +169,6 @@ function toggleMenu() {
         return !!r || toArr(m.mn).some(function (x) { return x && x.u === myId; });
     }
 
-    /* ---------- keadaan kosong ---------- */
     function showEmpty() {
         if (listEl.querySelector(".cg-row") || listEl.querySelector(".cg-state-box")) return;
         var box = el("div", "cg-state-box");
@@ -192,7 +180,6 @@ function toggleMenu() {
         if (skelEl && skelEl.parentNode) skelEl.remove();
     }
 
-    /* hapus penanda hari yatim (tanpa pesan di bawahnya) + sinkronkan status pengelompokan */
     function pruneDays() {
         Array.prototype.slice.call(listEl.children).forEach(function (n) {
             if (!n.classList.contains("cg-day")) return;
@@ -209,7 +196,6 @@ function toggleMenu() {
         }
     }
 
-    /* ---------- render pesan ---------- */
     function render(key, m) {
         if (rows[key]) return;
         clearStateBoxes();
@@ -310,7 +296,6 @@ function toggleMenu() {
         setTimeout(function () { r.classList.remove("flash"); }, 1300);
     }
 
-    /* ---------- gestur: geser kanan = balas, tahan = menu ---------- */
     function bindGestures(row, inner, ic, bubble, key) {
         var st = null, lp = null, longFired = false;
 
@@ -384,7 +369,6 @@ function toggleMenu() {
         bubble.addEventListener("dblclick", function () { setReply(key); });
     }
 
-    /* ---------- balas ---------- */
     function setReply(key) {
         var m = msgs[key]; if (!m) return;
         replyTo = { k: key, u: m.u || "", n: String(m.n || "User"), t: String(m.t || "").slice(0, 120) };
@@ -400,7 +384,6 @@ function toggleMenu() {
     $("cgRbX").addEventListener("click", function () { clearReply(); inputEl.focus(); });
     $("cgRbX").addEventListener("pointerdown", function (e) { e.preventDefault(); });
 
-    /* ---------- menu tahan pesan ---------- */
     var menuKey = null, menuOpenedAt = 0;
     function openMenu(key) {
         var m = msgs[key]; if (!m) return;
@@ -460,7 +443,6 @@ function toggleMenu() {
         if (menuKey) closeMenu(); else if (replyTo) clearReply();
     });
 
-    /* ---------- sebut @ ---------- */
     var mentionIdx = 0, mentionList = [];
     function currentToken() {
         var pos = inputEl.selectionStart, before = inputEl.value.slice(0, pos);
@@ -513,7 +495,6 @@ function toggleMenu() {
         return out.slice(0, 10);
     }
 
-    /* ---------- dilihat ---------- */
     var lastSeenWrite = 0, seenTimer = null;
     function markSeen() {
         if (!loaded || document.visibilityState !== "visible") return;
@@ -539,7 +520,6 @@ function toggleMenu() {
         refreshTicks();
     });
 
-    /* ---------- muat & dengarkan ---------- */
     var query = ref.orderByChild("ts").startAt(Date.now() - TTL_MS).limitToLast(HISTORY_LIMIT);
     query.once("value").then(function () {
         loaded = true;
@@ -591,7 +571,6 @@ function toggleMenu() {
         if (on) updatePeopleCount();
     });
 
-    /* ---------- foto profil akun ---------- */
     var profRef = database.ref("global_chat/profiles");
     function onProfile(snap) {
         var v = safePhoto(snap.val());
@@ -635,7 +614,6 @@ function toggleMenu() {
         var src = String(session.photo || "").trim();
         if (!src) return;
         makeThumb(src, function (thumb) {
-            /* kalau thumbnail gagal dibuat (mis. foto https dari situs lain yang memblokir canvas), pakai URL aslinya */
             var val = thumb || safePhoto(src);
             if (!val) return;
             profRef.child(myId).once("value").then(function (snap) {
@@ -645,7 +623,6 @@ function toggleMenu() {
     }
     publishMyPhoto();
 
-    /* ---------- kirim ---------- */
     var lastSend = 0;
     function syncSend() { sendBtn.disabled = !inputEl.value.trim(); }
     function send() {

@@ -26,7 +26,7 @@ href="style.css">
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script src="firebase-config.js"></script>
-<script src="admin-auth.js"></script>
+<script src="admin-auth.js?v=3"></script>
 
 </head>
 
@@ -167,7 +167,6 @@ OKE
 
 <script>
 
-// Hanya akun yang terdaftar di akun.js yang boleh buka halaman ini
 if (localStorage.getItem("isOwner") !== "true") {
     location.href = "/"
 }
@@ -218,7 +217,15 @@ db.ref("maintenance")
 
 dzAdminGuard(maintenanceRef, firebase.app())
 
-window.addEventListener("unhandledrejection", function(e){ var m=(e.reason&&e.reason.message)||"Akses ditolak"; if(typeof showPopup==="function") showPopup("Gagal", m) })
+(function(){
+var _set = maintenanceRef.set
+maintenanceRef.set = function(){
+return _set.apply(maintenanceRef, arguments).catch(function(e){
+showPopup("Gagal", (e && e.message) || "Gagal menyimpan, akses ditolak")
+throw e
+})
+}
+})()
 
 let selectedImage = ""
 

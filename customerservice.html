@@ -52,7 +52,6 @@
         gap: 12px;
     }
 
-    /* Halaman CS: tanpa dock navigasi, cukup tombol kembali */
     #mnNav, #mnScrim, [id^="mnPop-"] { display: none !important; }
     .cs-back-btn {
         flex: none;
@@ -70,7 +69,6 @@
     .cs-back-btn:hover { background: rgba(255, 255, 255, 0.1); transform: none; }
     .cs-back-btn:active { transform: scale(.94); }
 
-    /* ---------- Agent status card (signature element) ---------- */
     .cs-agent-card {
         position: relative;
         display: flex;
@@ -224,13 +222,12 @@
         transform: scale(0.94);
     }
 
-    /* ---------- Quick-issue shortcuts (muncul di bawah pesan sambutan) ---------- */
     .cs-quick-replies {
         display: flex;
         flex-wrap: wrap;
         gap: 7px;
         max-width: 78%;
-        margin-left: 36px; /* sejajar dengan bubble bot (lebar avatar + gap) */
+        margin-left: 36px; 
         animation: csRise .3s cubic-bezier(.22,1,.36,1) both;
     }
 
@@ -261,7 +258,6 @@
 
     .cs-chip:active { transform: translateY(0); }
 
-    /* ---------- Chat window ---------- */
     .cs-chat-window {
         flex: 1;
         min-height: 0;
@@ -397,7 +393,6 @@
         30% { transform: translateY(-4px); opacity: 1; }
     }
 
-    /* ---------- Image preview before send ---------- */
     .cs-image-preview {
         position: relative;
         display: inline-flex;
@@ -430,7 +425,6 @@
         box-shadow: none;
     }
 
-    /* ---------- Composer ---------- */
     .cs-composer {
         display: flex;
         align-items: flex-end;
@@ -606,12 +600,12 @@
         ];
 
         let csHistory = [];
-        let csDisplayLog = []; // untuk render ulang chat setelah reload
-        let pendingImage = null; // { base64, mimeType, dataUrl }
+        let csDisplayLog = [];
+        let pendingImage = null;
         let isSending = false;
 
         const CS_STORAGE_KEY = "danzclean_cs_chat_v1";
-        const CS_STORAGE_TTL = 24 * 60 * 60 * 1000; // obrolan disimpan 1 hari
+        const CS_STORAGE_TTL = 24 * 60 * 60 * 1000;
 
         function csSaveStorage() {
             try {

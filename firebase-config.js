@@ -65,11 +65,13 @@ const FIREBASE_CONFIG_CHAT = {
   measurementId: "G-7Z33G70N8G"
 };
 
-
-/* ===== Firebase App Check (reCAPTCHA v3) =====
-   1) Buat reCAPTCHA v3 site key, daftarkan di Firebase Console > App Check untuk tiap project.
-   2) Isi site key di bawah. Selama masih placeholder, App Check tidak aktif (website jalan seperti biasa). */
-const APPCHECK_SITE_KEY = "ISI_SITE_KEY_RECAPTCHA_V3";
+const APPCHECK_SITE_KEYS = {
+    "danzclean-auth":   "6Ld7hR8uAAAAAMqaueNKm5vSkPL23IQgBZVcq_el",
+    "danzzclean":       "6LeqwR8uAAAAAMNfODpYA4r-UuGbxlMBR0g7XUP1",
+    "danzclean-verify": "ISI_SITE_KEY_DANZCLEAN_VERIFY",
+    "preset-9ebb6":     "6LdQwx8uAAAAAGAo2L5hk4cyt4e6ycmdqqiPsjON",
+    "chatglobal-72ac4": "6Lccwh8uAAAAAMJSCFtTQrZsCz3_gSkhktGmV6YW"
+};
 
 (function () {
     if (typeof firebase === "undefined" || !firebase.initializeApp || firebase.__dzAppCheckWrapped) return;
@@ -81,8 +83,12 @@ const APPCHECK_SITE_KEY = "ISI_SITE_KEY_RECAPTCHA_V3";
     firebase.initializeApp = function () {
         var app = origInit.apply(null, arguments);
         try {
-            if (APPCHECK_SITE_KEY.indexOf("ISI_") !== 0 && typeof firebase.appCheck === "function") {
-                firebase.appCheck(app).activate(APPCHECK_SITE_KEY, true);
+            var key = APPCHECK_SITE_KEYS[app.options && app.options.projectId];
+            if (key && key.indexOf("ISI_") !== 0 && typeof firebase.appCheck === "function") {
+                var provider = (firebase.appCheck.ReCaptchaEnterpriseProvider)
+                    ? new firebase.appCheck.ReCaptchaEnterpriseProvider(key)
+                    : key;
+                firebase.appCheck(app).activate(provider, true);
             }
         } catch (e) { console.warn("[AppCheck]", e && e.message); }
         return app;

@@ -32,5 +32,4 @@ function cekAkunOwner() {
     }
 }
 
-// Langsung dicek begitu file ini dimuat, sebelum sidebar dirender
 cekAkunOwner();

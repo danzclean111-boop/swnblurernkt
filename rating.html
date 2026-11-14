@@ -137,8 +137,6 @@ href="style.css">
 
 <body>
 
-<!-- sengaja disembunyikan dari awal: loader utama dari sidebar.js langsung dilepas
-     begitu DOM siap, tidak lagi menunggu data ulasan selesai diunduh -->
 <div id="pageLoader" style="display:none;"></div>
 
 <div class="topbar">
@@ -353,7 +351,6 @@ HAPUS ULASAN
 
 </div>
 
-<!-- popup info -->
 <div class="custom-popup" id="customPopup">
 
 <div class="custom-popup-card">
@@ -374,7 +371,6 @@ OK
 
 </div>
 
-<!-- popup konfirmasi hapus (pengganti confirm() bawaan browser yang bisa diblokir) -->
 <div class="custom-popup" id="confirmPopup">
 
 <div class="custom-popup-card">
@@ -393,10 +389,6 @@ Hapus ulasan ini?
 </div>
 
 <script>
-
-/* ============================================================
-   UTIL
-   ============================================================ */
 
 function toggleMenu(){
     document.getElementById("sidebar").classList.toggle("active")
@@ -439,10 +431,6 @@ function pesanError(err, aksi){
     return "Gagal " + aksi + " ulasan. " + (err && err.message ? err.message : "Cek koneksi internet.")
 }
 
-/* ============================================================
-   FIREBASE + USER
-   ============================================================ */
-
 if(!firebase.apps.length){
     firebase.initializeApp(FIREBASE_CONFIG_MAIN)
 }
@@ -464,16 +452,12 @@ let selectedStar = 5
 let modalStar = 5
 let targetEditId = null
 
-let dataMap = {}        // id -> item (data live terbaru)
-let viewEntries = []    // daftar yang ditampilkan (sudah terurut)
+let dataMap = {}
+let viewEntries = []
 let hasMyReview = false
-let allEntries = []     // semua ulasan (belum difilter)
+let allEntries = []
 let allStats = null
-let ratingFilter = 0    // 0 = semua, 1..5 = bintang
-
-/* ============================================================
-   RINGKASAN (rata-rata + bar)
-   ============================================================ */
+let ratingFilter = 0
 
 function hitungStats(entries){
     const c = [0, 0, 0, 0, 0, 0]
@@ -522,10 +506,6 @@ function renderSummary(st){
         document.getElementById("bar" + i).style.width = ((st.c[i] / total) * 100) + "%"
     }
 }
-
-/* ============================================================
-   DAFTAR ULASAN (render bertahap, bukan sekaligus)
-   ============================================================ */
 
 const PAGE_SIZE = 20
 let shown = PAGE_SIZE
@@ -642,7 +622,6 @@ function terapkanFilter(reset){
         ? allEntries.filter(e => e.star === ratingFilter)
         : allEntries
 
-    // ulasan milik sendiri di paling atas, sisanya terbaru dulu
     viewEntries = sumber.slice().sort((a, b) => {
         if(userUid){
             if(a.id === userUid) return -1
@@ -680,10 +659,6 @@ document.getElementById("reviewFilters").addEventListener("click", e => {
     terapkanFilter(true)
 })
 
-/* ============================================================
-   CACHE LOKAL (list langsung muncul, data live menyusul)
-   ============================================================ */
-
 const CACHE_KEY = "danzclean_ratings_cache_v1"
 const CACHE_MAX = 300
 
@@ -717,10 +692,6 @@ function simpanCache(entries, stats){
         }))
     }catch(e){}
 }
-
-/* ============================================================
-   FORM BERI RATING
-   ============================================================ */
 
 function updateStars(star){
     document.querySelectorAll(".playstore-stars span").forEach((el, index) => {
@@ -758,7 +729,6 @@ function openReview(star){
 
 function fotoUntukUlasan(name){
     const p = currentUser && currentUser.photo
-    // foto base64 / terlalu panjang dibuang supaya data ratings tidak membengkak
     if(typeof p === "string" && /^https?:\/\//i.test(p) && p.length <= 500) return p
     return "https://ui-avatars.com/api/?name=" + encodeURIComponent(name) + "&background=4c7dff&color=fff"
 }
@@ -799,10 +769,6 @@ function sendReview(){
         sedangKirim = false
     })
 }
-
-/* ============================================================
-   EDIT ULASAN
-   ============================================================ */
 
 function updateModalStars(star){
     document.querySelectorAll(".modal-stars span").forEach((el, index) => {
@@ -880,10 +846,6 @@ function saveEditReview(){
     })
 }
 
-/* ============================================================
-   HAPUS ULASAN
-   ============================================================ */
-
 let pendingDeleteId = null
 
 function askDelete(id){
@@ -920,14 +882,9 @@ function confirmDelete(){
     })
 }
 
-// tombol "HAPUS ULASAN" di dalam modal edit
 function deleteReview(){
     askDelete(targetEditId)
 }
-
-/* ============================================================
-   EVENT DELEGATION UNTUK LIST
-   ============================================================ */
 
 document.getElementById("reviewList").addEventListener("click", e => {
     const el = e.target.closest("[data-act]")
@@ -940,10 +897,6 @@ document.getElementById("reviewList").addEventListener("click", e => {
     else if(act === "edit") openOwnerEditModal(id)
     else if(act === "del") askDelete(id)
 })
-
-/* ============================================================
-   DATA: cache dulu (instan), lalu realtime dari Firebase
-   ============================================================ */
 
 ;(function renderDariCache(){
     const c = muatCache()

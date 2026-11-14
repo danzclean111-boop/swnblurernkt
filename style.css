@@ -6909,7 +6909,6 @@ html:has(.modal-overlay.active) #dzTopbar {
 
 html, body { touch-action: pan-x pan-y; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
-/* Desain: flat, satu aksen biru, hairline solid. Tanpa gradient, glow, pola titik, atau ekor bubble. */
 :root {
     --cg-bg: #0c1018;
     --cg-surface: #121826;
@@ -6954,7 +6953,6 @@ html.cg-typing .cg-title b { font-size: 15px; }
 html.cg-typing .cg-state { font-size: 12px; margin-top: 0; }
 html.cg-typing .cg-composer { padding: 8px 10px; }
 
-/* ---------- Shell: layar penuh di HP, kartu tipis di layar lebar ---------- */
 .cg-shell {
     flex: 1;
     min-height: 0;
@@ -6972,7 +6970,6 @@ html.cg-typing .cg-composer { padding: 8px 10px; }
     }
 }
 
-/* ---------- Header ---------- */
 .cg-head {
     flex: none;
     display: flex;
@@ -6993,7 +6990,6 @@ html.cg-typing .cg-composer { padding: 8px 10px; }
 .cg-logo svg { width: 20px; height: 20px; display: block; }
 .cg-title { flex: 1; min-width: 0; }
 .cg-title b { display: block; font-size: 16px; font-weight: 700; line-height: 1.25; }
-/* status "Terhubung · N peserta" disembunyikan (elemennya dipertahankan karena dipakai script) */
 .cg-state { display: none !important; }
 .cg-state-unused {
     display: flex; align-items: center; gap: 6px;
@@ -7005,7 +7001,6 @@ html.cg-typing .cg-composer { padding: 8px 10px; }
 .cg-dot { width: 7px; height: 7px; border-radius: 50%; background: #f5b942; flex: none; }
 .cg-dot.on { background: var(--cg-accent); }
 
-/* ---------- Stage / list ---------- */
 .cg-stage {
     position: relative;
     flex: 1;
@@ -7065,7 +7060,6 @@ html.cg-typing .cg-composer { padding: 8px 10px; }
 .cg-skel i:nth-child(3) { width: 66%; height: 56px; }
 @keyframes cgShim { to { background-position: -200% 0; } }
 
-/* ---------- Row / bubble ---------- */
 .cg-row {
     position: relative;
     margin-top: 10px;
@@ -7135,7 +7129,6 @@ html.cg-typing .cg-composer { padding: 8px 10px; }
 }
 .cg-bubble:focus-visible { outline: 2px solid var(--cg-link); outline-offset: 2px; }
 .cg-row.me .cg-bubble { background: var(--cg-out); color: #fff; }
-/* sudut kecil di sisi pengirim hanya pada pesan pertama dalam grup */
 .cg-row:not(.grouped):not(.me) .cg-bubble { border-top-left-radius: 4px; }
 .cg-row:not(.grouped).me .cg-bubble { border-top-right-radius: 4px; }
 .cg-row.tagged:not(.me) .cg-bubble { box-shadow: inset 0 0 0 1.5px rgba(52, 211, 153, .6); }
@@ -7153,9 +7146,8 @@ html.cg-typing .cg-composer { padding: 8px 10px; }
     line-height: 1.35;
 }
 
-/* ---------- Bubble owner: satu warna (emas), garis tipis + napas halus + kilau lewat pelan ---------- */
 .cg-row.owner .cg-bubble {
-    --cg-owner: 245, 185, 66; /* ganti angka RGB ini untuk mengubah warna aksen */
+    --cg-owner: 245, 185, 66; 
     background: #151a36;
     color: #fff;
     isolation: isolate;
@@ -7227,7 +7219,6 @@ html.cg-typing .cg-composer { padding: 8px 10px; }
 .cg-tick.sending svg { width: 12px; height: 12px; }
 .cg-tick.seen { color: #8be9ff; }
 
-/* ---------- Scroll pill ---------- */
 .cg-pill {
     position: absolute;
     right: 12px; bottom: 12px;
@@ -7248,7 +7239,6 @@ html.cg-typing .cg-composer { padding: 8px 10px; }
 .cg-note { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 4; width: max-content; max-width: calc(100% - 24px); text-align: center; font-size: 13px; font-weight: 600; line-height: 1.4; color: #fecaca; padding: 8px 14px; border-radius: 10px; background: #3a1620; border: 1px solid rgba(248, 113, 113, .5); pointer-events: none; }
 .cg-note:empty { display: none; }
 
-/* ---------- Composer ---------- */
 .cg-composer {
     position: relative;
     flex: none;
@@ -7341,7 +7331,6 @@ html.cg-typing .cg-composer { padding: 8px 10px; }
 .cg-ment .cg-avatar { width: 30px; height: 30px; font-size: 12px; }
 .cg-ment span.n { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* ---------- Action sheet (tahan pesan) ---------- */
 .cg-scrim {
     position: fixed; inset: 0;
     z-index: 8200;
@@ -7404,7 +7393,6 @@ html.cg-typing .cg-composer { padding: 8px 10px; }
 }
 .cg-sheet-btns button.fill { background: #dc2626; border-color: #dc2626; color: #fff; }
 
-/* netralkan gaya global `button` dari style.css untuk tombol chat */
 .cg-reply button, .cg-ment, .cg-sheet-item, .cg-sheet-btns button { box-shadow: none !important; }
 .cg-page button:hover, .cg-scrim button:hover { transform: none; }
 .cg-sheet-btns button.fill { box-shadow: none !important; }

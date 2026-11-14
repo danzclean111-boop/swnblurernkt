@@ -22,7 +22,6 @@
     }
 
     function tampilkanLayarBlokir(reason) {
-        // Cegah interaksi lain di halaman
         document.documentElement.style.overflow = "hidden";
 
         const overlay = document.createElement("div");
@@ -62,7 +61,7 @@
     }
 
     const uid = getCurrentUid();
-    if (!uid) return; // belum login, tidak perlu dicek
+    if (!uid) return;
 
     function mulaiPantau() {
         firebase.database().ref("blocked_users/" + uid).on("value", function (snap) {

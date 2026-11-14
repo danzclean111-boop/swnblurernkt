@@ -36,16 +36,6 @@
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <style>
 
-
-
-
-
-
-
-
-
-
-
         .loading-container {
             display: flex;
             align-items: center;
@@ -70,7 +60,6 @@
             transition: all 0.3s ease;
         }
 
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -82,7 +71,6 @@
             100% { transform: scale(1); }
         }
     
-        /* ===== Daftar grup: tombol hijau + status + salin ===== */
         body.gm-open .rating-float-track {
             opacity: 0 !important;
             visibility: hidden !important;
@@ -304,12 +292,9 @@
             </div>
             <p id="file-name">Tap di sini buat masukin video / foto</p>
             <input type="file" id="file" accept="video/mp4, video/*, image/*" hidden>
-            
-            
+
         </label>
         <p class="upload-hint">Video &amp; foto &middot; maks 100 MB &middot; kualitas tetap HD</p>
-
-        
 
         <div class="cf-turnstile" data-sitekey="0x4AAAAAADQlj_kkJ1cpQ9ur" id="cfWidget"></div>
 
@@ -347,9 +332,6 @@
     </div>
 </div>
 
-        
-
-
 <button id="uploadBtn" onclick="upload()">UPLOAD NOW</button>
 
         <div id="status">Waiting upload...</div>
@@ -367,7 +349,6 @@
             </div>
         </div>
     </div>
-    
 
     <script src="config.js"></script>
     <script>
@@ -461,13 +442,11 @@
     const btn = document.getElementById("uploadBtn");
     const file = fileInput.files[0];
 
-
     if (btn) {
         btn.disabled = true;
         btn.innerHTML = `<div class="loading-container"><div class="spinner"></div><span>Memproses...</span></div>`;
     }
 
-    
     const batalkanProses = () => {
         if (btn) {
             btn.disabled = false;
@@ -676,7 +655,6 @@ const intervalCek = setInterval(async () => {
 
         const statusData = await cekReq.json();
 
-        // Berhasil terhubung lagi
         gagalCekProgress = 0;
 
         if (statusData.status === "proses") {
@@ -767,7 +745,6 @@ const intervalCek = setInterval(async () => {
             errCek.message
         );
 
-        // Jangan langsung menganggap upload gagal.
         document.getElementById("status").innerHTML =
             "Koneksi terganggu, server masih memproses video...";
 
@@ -780,7 +757,6 @@ const intervalCek = setInterval(async () => {
                 `MENUNGGU SERVER... (${Math.min(gagalCekProgress, 5)}/5)`;
         }
 
-        
         if (gagalCekProgress >= 5) {
 
             clearInterval(intervalCek);
@@ -817,7 +793,6 @@ const intervalCek = setInterval(async () => {
         }
     };
 
-    
     let bodyTerkirim = false;
     xhr.upload.onload = function () {
         bodyTerkirim = true;
@@ -864,7 +839,6 @@ const intervalCek = setInterval(async () => {
     xhr.send(form);
 }
 
-
 function resetUploadState() {
     isCurrentlyUploading = false;
     if (typeof turnstile !== "undefined") turnstile.reset();
@@ -892,14 +866,13 @@ function resetUploadState() {
     document.getElementById("file-name").innerText = "Tap di sini buat masukin video / foto";
 }
 
-
     </script>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app-check.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="firebase-config.js"></script>
-    <script src="admin-auth.js"></script>
+    <script src="admin-auth.js?v=3"></script>
     <script>
         (function() {
             if (!firebase.apps.length) {
@@ -962,8 +935,7 @@ maintenanceRef.once("value")
             }
         }, 1500);
     }
-    
-    
+
     document.body.style.display = "block";
 })
 .catch(err => {
@@ -972,7 +944,6 @@ maintenanceRef.once("value")
     document.body.style.display = "block";
 });
 
-
 function closeDonationPopup() {
     const donationPopup = document.getElementById("donationPopup");
     if (donationPopup) {
@@ -980,10 +951,6 @@ function closeDonationPopup() {
     }
 }
 </script>
-
-
-<!-- FLOAT REVIEW -->
-
 
 <div class="rating-float-track" id="ratingTrack"></div>
 
@@ -1095,7 +1062,6 @@ div.remove()
 
 }
 
-
     function startReviewLoop(){
         const existing = document.querySelector(".rating-item");
         if(existing){
@@ -1121,8 +1087,6 @@ div.remove()
     }
 }); 
 
-
-
 </script>
 
     <div class="popup-overlay" id="donationPopup">
@@ -1141,9 +1105,6 @@ div.remove()
                     style="width: 100%; height: 100%; object-fit: contain;">
                 </video>
             </div>
-
-
-
 
             <a href="https://saweria.co/Danztsuyoi" target="_blank" class="popup-donate-btn">DONASI</a>
         </div>
@@ -1188,8 +1149,7 @@ div.remove()
     let groupsFallback = true;
 
     const groupListContainer = document.getElementById("groupListContainer");
-    
-    
+
     const GROUP_STATUS_TTL = 8 * 1000;
 const GROUP_POLL_MS = 12 * 1000;
     const GROUP_API_BASE = /^(localhost|127\.0\.0\.1|)$/.test(location.hostname)
@@ -1207,7 +1167,6 @@ const GROUP_POLL_MS = 12 * 1000;
         return code ? "https://chat.whatsapp.com/" + code : url;
     }
 
-    
     async function checkGroupStatus(url) {
         const code = getInviteCode(url);
         if (!code) return "offline";
@@ -1374,7 +1333,7 @@ item.appendChild(copyBtn);
                     } catch (err) {
                         delBtn.disabled = false;
                         delBtn.classList.remove("armed");
-                        ownerMsg("Gagal menghapus. Cek rules Firebase / koneksi.", "err");
+                        ownerMsg((err && err.message) ? err.message : "Gagal menghapus. Cek rules Firebase / koneksi.", "err");
                     }
                 });
                 item.appendChild(delBtn);
@@ -1549,7 +1508,7 @@ closeGroupModal.addEventListener("click", () => {
                 ownerMsg("Grup ditambahkan.", "ok");
             }
         } catch (err) {
-            ownerMsg("Gagal menyimpan. Cek rules Firebase / koneksi.", "err");
+            ownerMsg((err && err.message) ? err.message : "Gagal menyimpan. Cek rules Firebase / koneksi.", "err");
         } finally {
             saveBtn.disabled = false;
         }

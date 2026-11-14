@@ -38,7 +38,7 @@
         if (window.dzAdminEnsure) return go();
         return new Promise((res, rej) => {
             const s = document.createElement("script");
-            s.src = "/admin-auth.js";
+            s.src = "/admin-auth.js?v=3";
             s.onload = res;
             s.onerror = () => rej(new Error("admin-auth.js gagal dimuat"));
             document.head.appendChild(s);
@@ -184,6 +184,7 @@
             msgInput.value = "";
         }).catch(err => {
             console.error("Gagal menambah notifikasi:", err);
+            alert("Gagal menyimpan informasi: " + ((err && err.message) || "akses ditolak"));
         }).finally(() => {
             if (addBtn) {
                 addBtn.disabled = false;
@@ -196,6 +197,7 @@
         if (!isOwnerUser() || !key) return;
         adminReady().then(() => getMainDb().ref(NOTIF_DB_PATH).child(key).remove()).catch(err => {
             console.error("Gagal menghapus notifikasi:", err);
+            alert("Gagal menghapus informasi: " + ((err && err.message) || "akses ditolak"));
         });
     }
 

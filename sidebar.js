@@ -590,8 +590,6 @@ function mnPopHtml(list, isGrid, isOwner, cur) {
   return '<div class="' + (isGrid ? "mn-pop-grid" : "mn-pop-list") + '">' + out + "</div>";
 }
 
-
-/* ===== Badge Chat: lingkaran merah (belum dibaca) + tanda @ (disebut / dibalas) ===== */
 const DZ_CHAT_READ_KEY = "dz_chat_read";
 const DZ_CHAT_CFG_KEY = "dz_fb_chat_cfg";
 const DZ_CHAT_BADGES =
@@ -1043,8 +1041,6 @@ if (document.body) {
   document.addEventListener("DOMContentLoaded", initDanzNav);
 }
 
-
-/* Cegah pinch-zoom & double-tap zoom (iOS Safari / browser yang abaikan meta viewport) */
 (function () {
   ["gesturestart", "gesturechange", "gestureend"].forEach(function (ev) {
     document.addEventListener(ev, function (e) { e.preventDefault(); }, { passive: false });

@@ -329,7 +329,7 @@ href="style.css">
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script src="firebase-config.js"></script>
-<script src="admin-auth.js"></script>
+<script src="admin-auth.js?v=3"></script>
 
 </head>
 
@@ -602,32 +602,28 @@ if (!firebase.apps.length) {
 const db =
 firebase.database()
 
-
 const usersRef = db.ref("users")
 const manualUsersRef = db.ref("manual_users")
 const blockedUsersRef = db.ref("blocked_users")
 dzAdminGuard(blockedUsersRef, firebase.app())
 window.addEventListener("unhandledrejection", function(e){ var m=(e.reason&&e.reason.message)||"Akses ditolak"; if(typeof showPopup==="function") showPopup("Gagal", m) })
 
-
-let authMap = {}        // uid -> akun dari /users
-let manualMap = {}      // uid -> akun dari /manual_users
-let daftarAkun = {}     // uid -> gabungan keduanya
-let daftarBlokir = {}   // uid -> {blocked, reason}
+let authMap = {}
+let manualMap = {}
+let daftarAkun = {}
+let daftarBlokir = {}
 let blockSearchQuery = ""
-let blockFilter = "semua" // semua | aktif | blokir | manual | duplikat
+let blockFilter = "semua"
 
-// ===== cache (dihitung ulang HANYA kalau data Firebase berubah) =====
-let akunList = []                 // sudah terurut + sudah punya index pencarian
+let akunList = []
 let uidDuplikatCache = new Set()
 let statsCache = { totalAkun: 0, totalManual: 0, totalDuplikat: 0 }
-let hasilFilter = []              // hasil filter/pencarian saat ini
-const PAGE_SIZE = 40              // jumlah baris yang dirender per batch
+let hasilFilter = []
+const PAGE_SIZE = 40
 let shownCount = PAGE_SIZE
 const dataSiap = { users: false, manual: false, blokir: false }
 const collator = new Intl.Collator()
 
-// ===== cache lokal (IndexedDB): list langsung muncul, Firebase menyusul di belakang =====
 const CACHE_DB = "danzclean_blokirakun"
 const CACHE_STORE = "kv"
 let cacheDipakai = false
@@ -667,7 +663,6 @@ function cacheSet(key, val){
     }))
 }
 
-// simpan versi ringkas (tanpa hash password, foto base64 besar dibuang)
 function jadwalkanSimpanCache(){
     clearTimeout(cacheTimer)
     cacheTimer = setTimeout(() => {
@@ -707,7 +702,6 @@ function muatDariCache(){
             return m
         }
 
-        // jangan timpa bagian yang sudah keburu datang dari server
         if(!dataSiap.users)  authMap = bangun(snap.auth)
         if(!dataSiap.manual) manualMap = bangun(snap.manual)
         if(!dataSiap.blokir) daftarBlokir = snap.blokir || {}
@@ -762,8 +756,6 @@ function esc(v){
         .replace(/'/g, "&#39;")
 }
 
-// ===== normalisasi nomor HP =====
-// "+62 838-3386-8943" / "0838 3386 8943" / "6283833868943"  ->  "6283833868943"
 function digitsOnly(s){
     return String(s == null ? "" : s).replace(/\D/g, "")
 }
@@ -778,14 +770,12 @@ function canonPhone(s){
     return d
 }
 
-// bikin fungsi pencocok SEKALI per pencarian (bukan per akun)
 function buatPencocok(raw){
     const q = raw.trim().toLowerCase()
     if(!q) return null
 
     const qd = digitsOnly(q)
     const varian = []
-    // query terlihat seperti nomor HP (hanya angka + spasi + - ( ) .)
     if(/^[\d\s+\-().]+$/.test(q) && qd.length >= 3){
         varian.push(qd)
         if(qd.startsWith("620"))     varian.push("62" + qd.slice(3))
@@ -799,7 +789,6 @@ function buatPencocok(raw){
     return akun => akun._s.includes(q) || (akun._p !== "" && varian.some(v => akun._p.includes(v)))
 }
 
-// ===== bangun ulang index (dipanggil hanya saat data akun berubah) =====
 function rebuildIndex(){
 
     daftarAkun = Object.assign({}, authMap, manualMap)
@@ -823,7 +812,6 @@ function rebuildIndex(){
 
         if(akun.sumberAkun === "manual") totalManual++
 
-        // deteksi duplikat (aturan sama persis seperti sebelumnya: email / nomor identik)
         if(email){
             const k = "email:" + email
             ;(grup[k] || (grup[k] = [])).push(akun.uid)
@@ -938,7 +926,6 @@ function renderBlockList(reset){
     const container = document.getElementById("blockList")
     const countEl = document.getElementById("blockCount")
 
-    // tunggu semua sumber data selesai dimuat dulu
     if(!liveSiap() && !cacheDipakai) return
 
     const cocok = buatPencocok(blockSearchQuery)
@@ -990,7 +977,6 @@ function renderBlockList(reset){
     requestAnimationFrame(cekLoadMore)
 }
 
-// auto-muat batch berikutnya saat tombol "Tampilkan lebih banyak" mendekati layar
 function cekLoadMore(){
     const more = document.getElementById("blockMore")
     if(!more) return
@@ -1260,7 +1246,6 @@ async function simpanPasswordAkun(){
     })
 }
 
-// ----- pencarian: debounce supaya tidak render di setiap ketikan -----
 let searchTimer = null
 document.getElementById("blockSearch").addEventListener("input", (e) => {
     const v = e.target.value
@@ -1271,7 +1256,6 @@ document.getElementById("blockSearch").addEventListener("input", (e) => {
     }, 180)
 })
 
-// ----- satu event listener untuk semua tombol di list (delegation) -----
 const blockListEl = document.getElementById("blockList")
 
 blockListEl.addEventListener("click", (e) => {
@@ -1290,7 +1274,6 @@ blockListEl.addEventListener("click", (e) => {
 blockListEl.addEventListener("scroll", onScrollLoad, { passive: true })
 window.addEventListener("scroll", onScrollLoad, { passive: true })
 
-// ----- gabungkan banyak update Firebase jadi satu render -----
 let refreshTimer = null
 let perluRebuild = false
 
@@ -1315,27 +1298,48 @@ function gagalMuat(nama){
     }
 }
 
-usersRef.on("value", snap => {
-    const data = snap.val() || {}
-    const map = {}
-    Object.keys(data).forEach(uid => {
-        map[uid] = { uid, ...data[uid], sumberAkun: "auth" }
-    })
-    authMap = map
-    dataSiap.users = true
-    jadwalkanRefresh(true)
-}, gagalMuat("users"))
+let akunListenerAktif = false
+function mulaiMuatAkun(){
+    if(akunListenerAktif) return
+    akunListenerAktif = true
+    usersRef.on("value", snap => {
+        const data = snap.val() || {}
+        const map = {}
+        Object.keys(data).forEach(uid => {
+            map[uid] = { uid, ...data[uid], sumberAkun: "auth" }
+        })
+        authMap = map
+        dataSiap.users = true
+        jadwalkanRefresh(true)
+    }, gagalMuat("users"))
 
-manualUsersRef.on("value", snap => {
-    const data = snap.val() || {}
-    const map = {}
-    Object.keys(data).forEach(uid => {
-        map[uid] = { uid, ...data[uid], sumberAkun: "manual" }
-    })
-    manualMap = map
-    dataSiap.manual = true
-    jadwalkanRefresh(true)
-}, gagalMuat("manual"))
+    manualUsersRef.on("value", snap => {
+        const data = snap.val() || {}
+        const map = {}
+        Object.keys(data).forEach(uid => {
+            map[uid] = { uid, ...data[uid], sumberAkun: "manual" }
+        })
+        manualMap = map
+        dataSiap.manual = true
+        jadwalkanRefresh(true)
+    }, gagalMuat("manual"))
+}
+
+function tampilkanLoginAdmin(){
+    if(document.getElementById("btnLoginAdmin")) return
+    const b = document.createElement("button")
+    b.id = "btnLoginAdmin"
+    b.textContent = "🔐 Login Admin (Google) untuk memuat akun"
+    b.style.cssText = "position:fixed;left:50%;transform:translateX(-50%);bottom:90px;z-index:9999;padding:14px 20px;border:0;border-radius:14px;background:#4f6bff;color:#fff;font-weight:700"
+    b.onclick = function(){
+        dzAdminEnsure(firebase.app()).then(function(){ b.remove(); mulaiMuatAkun() }).catch(function(e){ alert(e && e.message ? e.message : "Login admin gagal") })
+    }
+    document.body.appendChild(b)
+}
+
+dzAdminSilent(firebase.app()).then(function(u){
+    if(u) mulaiMuatAkun(); else tampilkanLoginAdmin()
+}).catch(function(){ tampilkanLoginAdmin() })
 
 blockedUsersRef.on("value", snap => {
     daftarBlokir = snap.val() || {}

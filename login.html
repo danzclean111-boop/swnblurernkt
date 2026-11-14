@@ -239,8 +239,6 @@
         const auth = firebase.auth();
         const db = firebase.database();
 
-        
-
         function buildBrevoErrorMessage(errData) {
             const code = (errData && errData.code || "").toLowerCase();
             const msg = (errData && errData.message || "").toLowerCase();
@@ -322,7 +320,6 @@
             }
         });
 
-        
         const googlePhoneCtrl = PhoneCountryModule.createPhoneInput({
             wrapperEl: document.getElementById("googlePhoneWrapper"),
             inputEl: document.getElementById("inputGooglePhone"),
@@ -333,7 +330,6 @@
             inputEl: document.getElementById("inputPhone"),
             hintEl: document.getElementById("manualPhoneFormatHint")
         });
-
 
         document.getElementById("btnGoogleLogin").addEventListener("click", () => {
             const provider = new firebase.auth.GoogleAuthProvider();
@@ -354,7 +350,6 @@
                         return;
                     }
 
-                    
                     const matchedManual = await findManualUserByIdentifier(user.email);
                     if (matchedManual) {
                         
@@ -455,58 +450,50 @@
 
         let authMode = "login"; 
 
-        
-        async function findManualUserByIdentifier(identifier) {
-            if (!identifier) return null;
-            const idLower = identifier.trim().toLowerCase();
+        function idVariants(v) {
+            const t = String(v || "").trim();
+            const l = t.toLowerCase();
+            const c = l.charAt(0).toUpperCase() + l.slice(1);
+            return Array.from(new Set([t, l, t.toUpperCase(), c])).filter(Boolean);
+        }
 
-            const snap = await db.ref("manual_users").once("value");
-            if (!snap.exists()) return null;
-
-            const all = snap.val();
-            for (const key of Object.keys(all)) {
-                const data = all[key];
+        async function lookupInTable(table, identifier) {
+            const idLower = String(identifier || "").trim().toLowerCase();
+            if (!idLower) return null;
+            const found = {};
+            const jobs = [];
+            ["email", "username"].forEach((field) => {
+                idVariants(identifier).forEach((val) => {
+                    jobs.push(
+                        db.ref(table).orderByChild(field).equalTo(val).once("value")
+                            .then((snap) => { snap.forEach((ch) => { found[ch.key] = ch.val(); }); })
+                            .catch((err) => { console.error("lookup " + table + "." + field, err); })
+                    );
+                });
+            });
+            await Promise.all(jobs);
+            for (const key of Object.keys(found)) {
+                const data = found[key] || {};
                 const emailMatch = data.email && data.email.trim().toLowerCase() === idLower;
                 const usernameMatch = data.username && data.username.trim().toLowerCase() === idLower;
-                if (emailMatch || usernameMatch) {
-                    return { uid: key, data };
-                }
+                if (emailMatch || usernameMatch) return { uid: key, data };
             }
             return null;
         }
 
-        
+        async function findManualUserByIdentifier(identifier) {
+            if (!identifier) return null;
+            return lookupInTable("manual_users", identifier);
+        }
+
         async function findAnyUserByIdentifier(identifier) {
             if (!identifier) return null;
-            const idLower = identifier.trim().toLowerCase();
-
-            const [usersSnap, manualSnap] = await Promise.all([
-                db.ref("users").once("value"),
-                db.ref("manual_users").once("value")
+            const [u, m] = await Promise.all([
+                lookupInTable("users", identifier),
+                lookupInTable("manual_users", identifier)
             ]);
-
-            if (usersSnap.exists()) {
-                const all = usersSnap.val();
-                for (const key of Object.keys(all)) {
-                    const data = all[key];
-                    const emailMatch = data.email && data.email.trim().toLowerCase() === idLower;
-                    const usernameMatch = data.username && data.username.trim().toLowerCase() === idLower;
-                    if (emailMatch || usernameMatch) {
-                        return { uid: key, data, table: "users" };
-                    }
-                }
-            }
-            if (manualSnap.exists()) {
-                const all = manualSnap.val();
-                for (const key of Object.keys(all)) {
-                    const data = all[key];
-                    const emailMatch = data.email && data.email.trim().toLowerCase() === idLower;
-                    const usernameMatch = data.username && data.username.trim().toLowerCase() === idLower;
-                    if (emailMatch || usernameMatch) {
-                        return { uid: key, data, table: "manual_users" };
-                    }
-                }
-            }
+            if (u) return { uid: u.uid, data: u.data, table: "users" };
+            if (m) return { uid: m.uid, data: m.data, table: "manual_users" };
             return null;
         }
 
@@ -523,7 +510,6 @@
             showModal("success", "Kode OTP Dikirim!", `Silakan cek inbox (atau folder spam) di ${targetEmail} untuk kode OTP-nya.`);
         }
 
-        
         function setAuthMode(mode) {
             authMode = mode;
             const isLogin = mode === "login";
@@ -546,7 +532,6 @@
             clearLoginInlineError();
         }
 
-        
         function resetManualFormIndicators() {
             ["usernameStatusIcon", "emailStatusIcon", "emailPhoneStatusIcon"].forEach((id) => {
                 const el = document.getElementById(id);
@@ -566,7 +551,6 @@
             }
         }
 
-        
         function showLoginInlineError(msg) {
             const el = document.getElementById("loginErrorText");
             el.textContent = msg;
@@ -751,7 +735,6 @@
             showModal("success", "Pendaftaran Berhasil!", "Akun kamu sudah dibuat. Silakan login memakai email/username dan password kamu.");
         });
 
-        
         function backToLoginAfterOtp() {
             const otpForm = document.getElementById("stepOtpForm");
             otpForm.reset();
@@ -816,10 +799,8 @@
             }
         });
 
-        
         let tempForgotUser = null;
 
-        
         async function canSendOtp(uid) {
             const snap = await db.ref("manual_users/" + uid + "/otpMeta").once("value");
             const meta = snap.val() || {};
@@ -998,7 +979,6 @@
             warningEl.classList.toggle("show", show);
         }
 
-        
         async function checkPhoneExists(phone) {
             const [usersSnap, manualSnap] = await Promise.all([
                 db.ref("users").orderByChild("phone").equalTo(phone).once("value"),
@@ -1007,7 +987,6 @@
             return usersSnap.exists() || manualSnap.exists();
         }
 
-        
         function setupPhoneChecker(ctrl, iconId, submitBtnId, warningId, onBlockChange) {
             const input = ctrl.inputEl;
             const icon = document.getElementById(iconId);
@@ -1041,8 +1020,6 @@
                 }
                 if (warningId) togglePhoneFormatWarning(warningId, false);
 
-                // Begitu jumlah digit udah masuk rentang valid negara (min-max),
-                // langsung cek ke database — nggak nunggu persis digit maksimal.
                 const cleaned = ctrl.fullDigits;
 
                 icon.className = "phone-status-icon loading";
@@ -1067,7 +1044,6 @@
             input.addEventListener("phonechange", runCheck);
         }
 
-        
         async function checkUsernameExists(username) {
             const [usersSnap, manualSnap] = await Promise.all([
                 db.ref("users").orderByChild("username").equalTo(username).once("value"),
@@ -1076,7 +1052,6 @@
             return usersSnap.exists() || manualSnap.exists();
         }
 
-        
         const googleFormBlockState = { usernameInvalid: false, phoneInvalid: false };
         function updateGoogleSubmitState() {
             const btn = document.getElementById("btnSubmitGooglePhone");
@@ -1138,7 +1113,6 @@
         });
         setupPhoneChecker(manualPhoneCtrl, "emailPhoneStatusIcon", null, "emailPhoneFormatWarning");
 
-        
         async function checkEmailExists(email) {
             const [usersSnap, manualSnap] = await Promise.all([
                 db.ref("users").orderByChild("email").equalTo(email).once("value"),
@@ -1186,7 +1160,6 @@
 
         setupEmailChecker("inputEmail", "emailStatusIcon");
 
-        
         function calcPasswordStrength(pw) {
             if (!pw) return 0;
             let categories = 0;
