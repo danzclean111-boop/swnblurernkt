@@ -64,3 +64,27 @@ const FIREBASE_CONFIG_CHAT = {
   appId: "1:723191036470:web:299858056a59b313fa7697",
   measurementId: "G-7Z33G70N8G"
 };
+
+
+/* ===== Firebase App Check (reCAPTCHA v3) =====
+   1) Buat reCAPTCHA v3 site key, daftarkan di Firebase Console > App Check untuk tiap project.
+   2) Isi site key di bawah. Selama masih placeholder, App Check tidak aktif (website jalan seperti biasa). */
+const APPCHECK_SITE_KEY = "ISI_SITE_KEY_RECAPTCHA_V3";
+
+(function () {
+    if (typeof firebase === "undefined" || !firebase.initializeApp || firebase.__dzAppCheckWrapped) return;
+    firebase.__dzAppCheckWrapped = true;
+    if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+        self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+    }
+    var origInit = firebase.initializeApp.bind(firebase);
+    firebase.initializeApp = function () {
+        var app = origInit.apply(null, arguments);
+        try {
+            if (APPCHECK_SITE_KEY.indexOf("ISI_") !== 0 && typeof firebase.appCheck === "function") {
+                firebase.appCheck(app).activate(APPCHECK_SITE_KEY, true);
+            }
+        } catch (e) { console.warn("[AppCheck]", e && e.message); }
+        return app;
+    };
+})();

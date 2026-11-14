@@ -253,6 +253,9 @@ function dzBootNotif() {
     if (typeof firebase === "undefined") {
       await dzLoadScript("https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js");
     }
+    if (typeof firebase !== "undefined" && !firebase.appCheck) {
+      try { await dzLoadScript("https://www.gstatic.com/firebasejs/8.10.1/firebase-app-check.js"); } catch (e) {}
+    }
     if (typeof firebase !== "undefined" && !firebase.database) {
       await dzLoadScript("https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js");
     }

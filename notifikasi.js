@@ -32,6 +32,19 @@
         return firebase.app(NOTIF_APP_NAME).database();
     }
 
+    function adminReady() {
+        getMainDb();
+        const go = () => window.dzAdminEnsure(firebase.app(NOTIF_APP_NAME));
+        if (window.dzAdminEnsure) return go();
+        return new Promise((res, rej) => {
+            const s = document.createElement("script");
+            s.src = "/admin-auth.js";
+            s.onload = res;
+            s.onerror = () => rej(new Error("admin-auth.js gagal dimuat"));
+            document.head.appendChild(s);
+        }).then(go);
+    }
+
     function escapeHtml(str) {
         const div = document.createElement("div");
         div.innerText = str == null ? "" : String(str);
@@ -161,12 +174,12 @@
             addBtn.innerText = "Menyimpan...";
         }
 
-        getMainDb().ref(NOTIF_DB_PATH).push({
+        adminReady().then(() => getMainDb().ref(NOTIF_DB_PATH).push({
             title: title || "Informasi",
             message: message,
             author: loggedUser.username || "Owner",
             createdAt: firebase.database.ServerValue.TIMESTAMP
-        }).then(() => {
+        })).then(() => {
             titleInput.value = "";
             msgInput.value = "";
         }).catch(err => {
@@ -181,7 +194,7 @@
 
     function handleDeleteNotif(key) {
         if (!isOwnerUser() || !key) return;
-        getMainDb().ref(NOTIF_DB_PATH).child(key).remove().catch(err => {
+        adminReady().then(() => getMainDb().ref(NOTIF_DB_PATH).child(key).remove()).catch(err => {
             console.error("Gagal menghapus notifikasi:", err);
         });
     }

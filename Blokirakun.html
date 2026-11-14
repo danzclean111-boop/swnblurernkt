@@ -324,10 +324,12 @@ href="style.css">
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app-check.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script src="firebase-config.js"></script>
+<script src="admin-auth.js"></script>
 
 </head>
 
@@ -604,6 +606,9 @@ firebase.database()
 const usersRef = db.ref("users")
 const manualUsersRef = db.ref("manual_users")
 const blockedUsersRef = db.ref("blocked_users")
+dzAdminGuard(blockedUsersRef, firebase.app())
+window.addEventListener("unhandledrejection", function(e){ var m=(e.reason&&e.reason.message)||"Akses ditolak"; if(typeof showPopup==="function") showPopup("Gagal", m) })
+
 
 let authMap = {}        // uid -> akun dari /users
 let manualMap = {}      // uid -> akun dari /manual_users

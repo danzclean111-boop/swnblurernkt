@@ -896,8 +896,10 @@ function resetUploadState() {
     </script>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app-check.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="firebase-config.js"></script>
+    <script src="admin-auth.js"></script>
     <script>
         (function() {
             if (!firebase.apps.length) {
@@ -1419,7 +1421,7 @@ closeGroupModal.addEventListener("click", () => {
     const GROUPS_PATH = "wa_groups";
 
     function groupsRef() {
-        return firebase.app("verifyApp").database().ref(GROUPS_PATH);
+        return dzAdminGuard(firebase.app("verifyApp").database().ref(GROUPS_PATH), firebase.app("verifyApp"));
     }
 
     function resetGroupCache() {

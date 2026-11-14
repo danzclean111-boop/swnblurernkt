@@ -21,10 +21,12 @@ rel="stylesheet"
 href="style.css">
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app-check.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script src="firebase-config.js"></script>
+<script src="admin-auth.js"></script>
 
 </head>
 
@@ -213,6 +215,10 @@ firebase.database()
 
 const maintenanceRef =
 db.ref("maintenance")
+
+dzAdminGuard(maintenanceRef, firebase.app())
+
+window.addEventListener("unhandledrejection", function(e){ var m=(e.reason&&e.reason.message)||"Akses ditolak"; if(typeof showPopup==="function") showPopup("Gagal", m) })
 
 let selectedImage = ""
 
