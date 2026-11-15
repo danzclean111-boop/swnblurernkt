@@ -234,6 +234,13 @@ function dzWhenPageLoaded() {
 
 const DZ_MAIN_CFG_KEY = "dz_fb_main_cfg";
 
+function dzSdkUrl(name) {
+  const v9 = typeof firebase === "undefined" || String(firebase.SDK_VERSION || "").indexOf("9.") === 0;
+  return v9
+    ? "https://www.gstatic.com/firebasejs/9.23.0/firebase-" + name + "-compat.js"
+    : "https://www.gstatic.com/firebasejs/8.10.1/firebase-" + name + ".js";
+}
+
 function dzBootNotif() {
   if (dzNotifBootPromise) return dzNotifBootPromise;
 
@@ -251,13 +258,13 @@ function dzBootNotif() {
     saveCfg();
 
     if (typeof firebase === "undefined") {
-      await dzLoadScript("https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js");
+      await dzLoadScript(dzSdkUrl("app"));
     }
     if (typeof firebase !== "undefined" && !firebase.appCheck) {
-      try { await dzLoadScript("https://www.gstatic.com/firebasejs/8.10.1/firebase-app-check.js"); } catch (e) {}
+      try { await dzLoadScript(dzSdkUrl("app-check")); } catch (e) {}
     }
     if (typeof firebase !== "undefined" && !firebase.database) {
-      await dzLoadScript("https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js");
+      await dzLoadScript(dzSdkUrl("database"));
     }
 
     if (!saveCfg()) {
