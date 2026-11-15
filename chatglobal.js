@@ -43,7 +43,10 @@ function toggleMenu() {
         for (var i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
         return "u" + (h >>> 0).toString(36);
     }
-    var myId = hashId(String(session.email || session.username || "anon").toLowerCase().trim());
+    function accountKey(x) {
+        return String((x && (x.email || x.uid || x.username)) || "anon").toLowerCase().trim();
+    }
+    var myId = hashId(accountKey(session));
 
     function safePhoto(u) {
         u = String(u || "").trim();
@@ -54,7 +57,27 @@ function toggleMenu() {
     var profiles = {}; 
 
     var isOwner = false;
-    try { isOwner = (typeof cekAkunOwner === "function" && cekAkunOwner()) || localStorage.getItem("isOwner") === "true"; } catch (e) {}
+    try {
+        var ownerFlag = (typeof cekAkunOwner === "function" && cekAkunOwner()) || localStorage.getItem("isOwner") === "true";
+        isOwner = ownerFlag;
+        if (ownerFlag) {
+            var boundTo = localStorage.getItem("isOwnerFor");
+            if (!boundTo) localStorage.setItem("isOwnerFor", accountKey(session));
+            else if (boundTo !== accountKey(session)) isOwner = false;
+        }
+    } catch (e) {}
+
+    function accountChanged() {
+        var x = {};
+        try { x = JSON.parse(localStorage.getItem("danzclean_logged_user") || "{}") || {}; } catch (e) {}
+        return hashId(accountKey(x)) !== myId;
+    }
+    window.addEventListener("storage", function (e) {
+        if (e.key === "danzclean_logged_user" || e.key === "isOwner" || e.key === "isOwnerFor") location.reload();
+    });
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden && accountChanged()) location.reload();
+    });
 
     var AV_COLORS = ["#3a68e8", "#12805a", "#8a3fd0", "#c2492a", "#bf2a64", "#12788f", "#8f5f08"];
     var NM_COLORS = ["#8fb0ff", "#5fe0b0", "#d3a4ff", "#ffa98c", "#ff8fb4", "#6fd6f2", "#f4c44f"];
