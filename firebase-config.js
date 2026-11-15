@@ -73,7 +73,8 @@ const APPCHECK_SITE_KEYS = {
     "chatglobal-72ac4": "6Lccwh8uAAAAAMJSCFtTQrZsCz3_gSkhktGmV6YW"
 };
 
-
+// Jenis kunci reCAPTCHA tiap project di Firebase Console > App Check.
+// "Fraud Defense (reCAPTCHA Enterprise)" -> "enterprise"; "reCAPTCHA" biasa -> "v3" (default).
 const APPCHECK_PROVIDER_TYPE = {
     "chatglobal-72ac4": "enterprise"
 };

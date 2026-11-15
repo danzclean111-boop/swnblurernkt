@@ -600,14 +600,6 @@
                             renderGrid();
                         }
                         refreshDetailLikeUI(cat, type);
-                    }, err => {
-                        // Sebelumnya tidak ada error callback -> skeleton muncul selamanya
-                        console.error("[preset] gagal baca presets/" + cat + "/" + type, err);
-                        loadedOnce[cat][type] = true;
-                        if (cat === currentCat && type === currentType) {
-                            renderGrid();
-                            showToast("Gagal memuat preset: " + ((err && err.code) || (err && err.message) || "error"));
-                        }
                     });
                 });
             });
