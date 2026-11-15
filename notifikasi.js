@@ -45,6 +45,17 @@
         }).then(go);
     }
 
+    function callNotifApi(payload) {
+        return adminReady().then(user => user.getIdToken()).then(token => fetch("/api/admin-notif", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+            body: JSON.stringify(payload)
+        })).then(r => r.json().catch(() => ({})).then(j => {
+            if (!r.ok) throw new Error(j.error || ("Permintaan ditolak server (" + r.status + ")"));
+            return j;
+        }));
+    }
+
     function escapeHtml(str) {
         const div = document.createElement("div");
         div.innerText = str == null ? "" : String(str);
@@ -174,12 +185,12 @@
             addBtn.innerText = "Menyimpan...";
         }
 
-        adminReady().then(() => getMainDb().ref(NOTIF_DB_PATH).push({
+        callNotifApi({
+            action: "add",
             title: title || "Informasi",
             message: message,
-            author: loggedUser.username || "Owner",
-            createdAt: firebase.database.ServerValue.TIMESTAMP
-        })).then(() => {
+            author: loggedUser.username || "Owner"
+        }).then(() => {
             titleInput.value = "";
             msgInput.value = "";
         }).catch(err => {
@@ -195,7 +206,7 @@
 
     function handleDeleteNotif(key) {
         if (!isOwnerUser() || !key) return;
-        adminReady().then(() => getMainDb().ref(NOTIF_DB_PATH).child(key).remove()).catch(err => {
+        callNotifApi({ action: "remove", key: key }).catch(err => {
             console.error("Gagal menghapus notifikasi:", err);
             alert("Gagal menghapus informasi: " + ((err && err.message) || "akses ditolak"));
         });
