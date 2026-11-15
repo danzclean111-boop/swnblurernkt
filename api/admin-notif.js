@@ -32,34 +32,17 @@ function readBody(req) {
   }
 }
 
-const DATA_PROJECT_ID = "danzzclean";
+const PROJECT_ID = "danzzclean";
 const DATABASE_URL = "https://danzzclean-default-rtdb.asia-southeast1.firebasedatabase.app";
-const DATA_APP_NAME = "adminNotifData";
+const APP_NAME = "adminNotif";
 
-const AUTH_PROJECT_ID = "danzclean-auth";
-const AUTH_APP_NAME = "adminNotifAuth";
-
-// App ini HANYA dipakai untuk menulis ke database notifikasi (project danzzclean),
-// pakai service account server sendiri. Tidak perlu token user yang cocok dengan
-// project ini, karena verifikasi login dilakukan lewat getAuthApp() di bawah.
-function getDataApp() {
-  const found = admin.apps.find((a) => a && a.name === DATA_APP_NAME);
+function getApp() {
+  const found = admin.apps.find((a) => a && a.name === APP_NAME);
   if (found) return found;
   return admin.initializeApp({
-    credential: admin.credential.cert(parseServiceAccount(process.env.FIREBASE_SERVICE_ACCOUNT_MAIN, DATA_PROJECT_ID, "FIREBASE_SERVICE_ACCOUNT_MAIN")),
+    credential: admin.credential.cert(parseServiceAccount(process.env.FIREBASE_SERVICE_ACCOUNT_MAIN, PROJECT_ID, "FIREBASE_SERVICE_ACCOUNT_MAIN")),
     databaseURL: DATABASE_URL
-  }, DATA_APP_NAME);
-}
-
-// App ini HANYA dipakai untuk memverifikasi ID token owner, yang dibuat dari project
-// login utama (danzclean-auth) - sesi yang sama dipakai di seluruh dashboard, jadi
-// owner tidak perlu login popup kedua kalinya khusus untuk fitur notifikasi ini.
-function getAuthApp() {
-  const found = admin.apps.find((a) => a && a.name === AUTH_APP_NAME);
-  if (found) return found;
-  return admin.initializeApp({
-    credential: admin.credential.cert(parseServiceAccount(process.env.FIREBASE_SERVICE_ACCOUNT, AUTH_PROJECT_ID, "FIREBASE_SERVICE_ACCOUNT"))
-  }, AUTH_APP_NAME);
+  }, APP_NAME);
 }
 
 module.exports = async function handler(req, res) {
@@ -79,10 +62,9 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: "ADMIN_EMAILS belum diatur di Vercel" });
   }
 
-  let authApp, dataApp;
+  let app;
   try {
-    authApp = getAuthApp();
-    dataApp = getDataApp();
+    app = getApp();
   } catch (e) {
     console.error("[adminNotif] init:", e.message);
     return res.status(500).json({ error: "Server belum dikonfigurasi: " + e.message });
@@ -95,7 +77,7 @@ module.exports = async function handler(req, res) {
 
   let decoded;
   try {
-    decoded = await admin.auth(authApp).verifyIdToken(match[1]);
+    decoded = await admin.auth(app).verifyIdToken(match[1]);
   } catch (e) {
     return res.status(401).json({ error: "Sesi login tidak valid, login ulang" });
   }
@@ -106,7 +88,7 @@ module.exports = async function handler(req, res) {
   }
 
   const body = readBody(req);
-  const db = admin.database(dataApp);
+  const db = admin.database(app);
 
   try {
     if (body.action === "add") {
