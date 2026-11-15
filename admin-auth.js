@@ -52,6 +52,9 @@
         if (c === "auth/popup-blocked") return "Popup diblokir browser. Izinkan popup lalu coba lagi.";
         if (c === "auth/popup-closed-by-user" || c === "auth/cancelled-popup-request") return "Login Google dibatalkan.";
         if (c === "auth/network-request-failed") return "Koneksi bermasalah, coba lagi.";
+        if (c === "auth/operation-not-supported-in-this-environment") return "Browser ini tidak mendukung login popup. Coba buka lewat Chrome/Safari biasa (bukan in-app browser seperti WhatsApp/Instagram).";
+        if (c === "auth/web-storage-unsupported") return "Mode penyamaran (incognito) tidak didukung untuk login admin. Nonaktifkan mode penyamaran lalu coba lagi.";
+        if (c === "auth/timeout" || c === "DZ_POPUP_TIMEOUT") return "Jendela login Google tidak muncul atau tertutup browser. Pastikan pop-up diizinkan untuk situs ini, lalu coba lagi.";
         return (e && e.message) || "Login admin gagal.";
     }
 
@@ -75,7 +78,11 @@
         var provider = new firebase.auth.GoogleAuthProvider();
         provider.setCustomParameters({ prompt: "select_account" });
         var timeout = new Promise(function (_, rej) {
-            setTimeout(function () { rej(new Error("Login Google tidak selesai dalam 2 menit. Tutup tab login, lalu coba lagi.")); }, 120000);
+            setTimeout(function () {
+                var e = new Error("Jendela login Google tidak muncul (kemungkinan diblokir browser). Izinkan pop-up untuk situs ini, lalu coba lagi.");
+                e.code = "DZ_POPUP_TIMEOUT";
+                rej(e);
+            }, 9000);
         });
         return Promise.race([auth.signInWithPopup(provider), timeout]).catch(function (e) {
             throw new Error(friendly(e, app));
