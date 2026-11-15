@@ -33,7 +33,7 @@ href="style.css">
 <body>
 
 <div class="sidebar" id="sidebar"></div>
-<script src="akun.js"></script>
+<script src="Akun.js"></script>
 <script src="sidebar.js"></script>
 
 <div class="topbar">
@@ -207,7 +207,7 @@ document
 
 }
 
-firebase.initializeApp(FIREBASE_CONFIG_AUTH)
+if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG_AUTH);
 
 const db =
 firebase.database()
@@ -215,9 +215,9 @@ firebase.database()
 const maintenanceRef =
 db.ref("maintenance")
 
-dzAdminGuard(maintenanceRef, firebase.app())
+dzAdminGuard(maintenanceRef, firebase.app());
 
-(function(){
+;(function(){
 var _set = maintenanceRef.set
 maintenanceRef.set = function(){
 return _set.apply(maintenanceRef, arguments).catch(function(e){
