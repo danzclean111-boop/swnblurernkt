@@ -32,9 +32,7 @@
         return firebase.app(NOTIF_APP_NAME).database();
     }
 
-    // Tulis ke database notifikasi (project danzzclean) hanya lewat /api/admin-notif, pakai
-    // sesi login owner yang sudah ada di project AUTH (tidak perlu login ulang / popup lagi
-    // untuk project danzzclean, sehingga tombol "Tambah Informasi" tidak menggantung).
+
     function adminReady() {
         const go = () => window.dzAdminEnsure();
         if (window.dzAdminEnsure) return go();
