@@ -119,6 +119,7 @@ function toggleMenu() {
     pillEl.addEventListener("click", toBottom);
 
     var rows = {}, msgs = {}, people = {}, mineRows = {};
+    var removedKeys = {};
     var pending = {}, othersSeen = 0;
     var last = { u: null, ts: 0, day: "" };
     var loaded = false, maxTs = 0;
@@ -575,6 +576,7 @@ function toggleMenu() {
     });
     query.on("child_removed", function (snap) {
         var key = snap.key, row = rows[key];
+        removedKeys[key] = true;
         if (menuKey === key) closeMenu(true);
         if (row) {
             row.classList.add("gone");
@@ -600,12 +602,53 @@ function toggleMenu() {
     setTimeout(purgeExpired, 20000);
     setInterval(purgeExpired, 10 * 60 * 1000);
 
+    var isConn = false, reconnecting = false, downTimer = null;
+    function kick() {
+        if (reconnecting) return;
+        reconnecting = true;
+        try { database.goOffline(); } catch (e) {}
+        setTimeout(function () {
+            try { database.goOnline(); } catch (e) {}
+            reconnecting = false;
+        }, 350);
+    }
+
+    var syncing = false;
+    function syncNew() {
+        if (!loaded || syncing || document.visibilityState !== "visible") return;
+        syncing = true;
+        var from = Math.max(maxTs, Date.now() - TTL_MS);
+        ref.orderByChild("ts").startAt(from).limitToLast(HISTORY_LIMIT).once("value").then(function (snap) {
+            snap.forEach(function (c) {
+                var m = c.val();
+                if (m && typeof m === "object" && !rows[c.key] && !removedKeys[c.key]) render(c.key, m);
+            });
+        }).catch(function () {}).then(function () { syncing = false; });
+    }
+    setInterval(syncNew, 4000);
+
     database.ref(".info/connected").on("value", function (s) {
         var on = s.val() === true;
+        isConn = on;
         dotEl.classList.toggle("on", on);
         stateEl.textContent = on ? "Terhubung" : "Menyambung...";
-        if (on) updatePeopleCount();
+        clearTimeout(downTimer);
+        if (on) { updatePeopleCount(); syncNew(); markSeen(); }
+        else {
+            downTimer = setTimeout(function () {
+                if (!isConn && document.visibilityState === "visible") { note("Menyambung ulang ke server..."); kick(); }
+            }, 5000);
+        }
     });
+
+    document.addEventListener("visibilitychange", function () {
+        if (document.visibilityState !== "visible") return;
+        if (!isConn) kick();
+        syncNew();
+    });
+    window.addEventListener("online", kick);
+    window.addEventListener("focus", function () { if (!isConn) kick(); syncNew(); });
+    window.addEventListener("pageshow", function (e) { if (e.persisted) { kick(); syncNew(); } });
 
     var profRef = database.ref("global_chat/profiles");
     function onProfile(snap) {
@@ -694,6 +737,12 @@ function toggleMenu() {
         inputEl.style.height = "auto";
         hideMentions(); clearReply(); syncSend();
         inputEl.focus();
+
+        setTimeout(function () {
+            if (!pending[key]) return;
+            note("Koneksi lambat, menyambung ulang...");
+            kick();
+        }, 6000);
 
         newRef.set(payload).then(function () {
             delete pending[key];
