@@ -89,7 +89,7 @@ const APPCHECK_SKIP = { "chatglobal-72ac4": true };
         try {
             var pid = app.options && app.options.projectId;
             var key = APPCHECK_SITE_KEYS[pid];
-            if (APPCHECK_SKIP[pid] && typeof firebase.appCheck === "function") {
+            if (APPCHECK_SKIP[pid] && !/[?&]ac=1/.test(location.search) && typeof firebase.appCheck === "function") {
                 // App Check tetap "diaktifkan" tapi pakai token kosong yang langsung jadi,
                 // supaya SDK database tidak gagal (use-before-activation) dan tidak menunggu reCAPTCHA.
                 var fake = { getToken: function () { return Promise.resolve({ token: "dz-skip", expireTimeMillis: Date.now() + 3600000 }); } };
