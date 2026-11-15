@@ -1007,6 +1007,21 @@ function hapusLokal(uids){
     jadwalkanSimpanCache()
 }
 
+function wajibAdmin(){
+    var u = null
+    try{ u = firebase.auth && firebase.auth().currentUser }catch(e){}
+    if(u && u.email) return true
+    tampilkanLoginAdmin()
+    showPopup("Login Admin Diperlukan", "Tekan tombol \"Login Admin (Google)\" di bawah layar, pilih akun owner, lalu ulangi aksinya.")
+    return false
+}
+
+function pesanError(e, cadangan){
+    var m = e && e.message ? e.message : ""
+    if(/permission_denied/i.test(m)) return "Akses ditolak Firebase rules. Pastikan sudah login admin (Google) dengan email owner."
+    return m || cadangan
+}
+
 let pendingBlockUid = null
 
 function toggleBlokirAkun(uid, blockedBaru){
@@ -1020,8 +1035,11 @@ function toggleBlokirAkun(uid, blockedBaru){
         document.getElementById("blockModalInput").value = ""
         document.getElementById("blockModal").classList.add("active")
     }else{
+        if(!wajibAdmin()) return
         blockedUsersRef.child(uid).remove().then(() => {
             showPopup("Berhasil", `Akun "${akun ? akun.username : uid}" berhasil dibuka blokirnya ✅`)
+        }).catch(e => {
+            showPopup("Gagal", pesanError(e, "Gagal membuka blokir."))
         })
     }
 }
@@ -1034,6 +1052,7 @@ function closeBlockModal(){
 function konfirmasiBlokirAkun(){
 
     if(!pendingBlockUid) return
+    if(!wajibAdmin()){ closeBlockModal(); return }
 
     const uid = pendingBlockUid
     const akun = daftarAkun[uid]
@@ -1047,6 +1066,9 @@ function konfirmasiBlokirAkun(){
     }).then(() => {
         closeBlockModal()
         showPopup("Berhasil", `Akun "${akun ? akun.username : uid}" berhasil diblokir 🚫`)
+    }).catch(e => {
+        closeBlockModal()
+        showPopup("Gagal", pesanError(e, "Gagal memblokir akun."))
     })
 }
 
@@ -1088,15 +1110,17 @@ function konfirmasiHapusAkun(){
     document.getElementById("deleteModal").classList.remove("active")
     pendingDeleteUid = null
 
+    if(!wajibAdmin()) return
+
     Promise.all([
         usersRef.child(uid).remove(),
         manualUsersRef.child(uid).remove(),
-        blockedUsersRef.child(uid).remove()
+        daftarBlokir[uid] ? blockedUsersRef.child(uid).remove() : Promise.resolve()
     ]).then(() => {
         hapusLokal([uid])
         showPopup("Berhasil", `Akun "${nama}" berhasil dihapus ✅`)
-    }).catch(() => {
-        showPopup("Gagal", "Gagal menghapus akun. Cek Firebase rules atau koneksi.")
+    }).catch(e => {
+        showPopup("Gagal", pesanError(e, "Gagal menghapus akun. Cek koneksi."))
     })
 }
 
@@ -1135,19 +1159,20 @@ function konfirmasiHapusDuplikat(){
     document.getElementById("dupModal").classList.remove("active")
 
     if(uidList.length === 0) return
+    if(!wajibAdmin()) return
 
     const promises = []
     uidList.forEach(uid => {
         promises.push(usersRef.child(uid).remove())
         promises.push(manualUsersRef.child(uid).remove())
-        promises.push(blockedUsersRef.child(uid).remove())
+        if(daftarBlokir[uid]) promises.push(blockedUsersRef.child(uid).remove())
     })
 
     Promise.all(promises).then(() => {
         hapusLokal(uidList)
         showPopup("Berhasil", `Berhasil menghapus ${uidList.length} akun duplikat, tidak ada yang disisakan ✅`)
-    }).catch(() => {
-        showPopup("Gagal", "Terjadi kesalahan saat menghapus akun duplikat.")
+    }).catch(e => {
+        showPopup("Gagal", pesanError(e, "Terjadi kesalahan saat menghapus akun duplikat."))
     })
 }
 
