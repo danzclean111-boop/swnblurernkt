@@ -73,6 +73,10 @@ const APPCHECK_SITE_KEYS = {
     "chatglobal-72ac4": "6Lccwh8uAAAAAMJSCFtTQrZsCz3_gSkhktGmV6YW"
 };
 
+// Project yang dilewati App Check-nya (token reCAPTCHA menggantung -> koneksi realtime tertahan).
+// Hapus baris ini kalau App Check untuk chat sudah beres dan ingin diaktifkan lagi.
+const APPCHECK_SKIP = { "chatglobal-72ac4": true };
+
 (function () {
     if (typeof firebase === "undefined" || !firebase.initializeApp || firebase.__dzAppCheckWrapped) return;
     firebase.__dzAppCheckWrapped = true;
@@ -83,7 +87,8 @@ const APPCHECK_SITE_KEYS = {
     firebase.initializeApp = function () {
         var app = origInit.apply(null, arguments);
         try {
-            var key = APPCHECK_SITE_KEYS[app.options && app.options.projectId];
+            var pid = app.options && app.options.projectId;
+            var key = APPCHECK_SKIP[pid] ? null : APPCHECK_SITE_KEYS[pid];
             if (key && key.indexOf("ISI_") !== 0 && typeof firebase.appCheck === "function") {
                 var provider = (firebase.appCheck.ReCaptchaEnterpriseProvider)
                     ? new firebase.appCheck.ReCaptchaEnterpriseProvider(key)
