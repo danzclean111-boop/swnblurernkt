@@ -868,9 +868,9 @@ function resetUploadState() {
 
     </script>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app-check.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="admin-auth.js?v=3"></script>
     <script>
@@ -900,6 +900,14 @@ function resetUploadState() {
     <script src="Blockcheck.js"></script>
 <script>
 document.body.style.display = "none";
+
+let bodyShown = false;
+function showBody() {
+    if (bodyShown) return;
+    bodyShown = true;
+    document.body.style.display = "block";
+}
+setTimeout(showBody, 2500);
 
 const maintenanceRef = firebase.database().ref("maintenance");
 
@@ -936,12 +944,13 @@ maintenanceRef.once("value")
         }, 1500);
     }
 
+    bodyShown = true;
     document.body.style.display = "block";
 })
 .catch(err => {
     
     console.error("Firebase error:", err);
-    document.body.style.display = "block";
+    showBody();
 });
 
 function closeDonationPopup() {
