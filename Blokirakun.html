@@ -605,7 +605,6 @@ firebase.database()
 const usersRef = db.ref("users")
 const manualUsersRef = db.ref("manual_users")
 const blockedUsersRef = db.ref("blocked_users")
-dzAdminGuard(blockedUsersRef, firebase.app())
 window.addEventListener("unhandledrejection", function(e){ var m=(e.reason&&e.reason.message)||"Akses ditolak"; if(typeof showPopup==="function") showPopup("Gagal", m) })
 
 let authMap = {}
@@ -1007,20 +1006,32 @@ function hapusLokal(uids){
     jadwalkanSimpanCache()
 }
 
-const DAFTAR_ADMIN = ["caisen004@gmail.com","yeonj7725@gmail.com","vizomzomi@gmail.com","oktabae491@gmail.com"]
-
 function wajibAdmin(){
     var u = null
     try{ u = firebase.auth && firebase.auth().currentUser }catch(e){}
-    var mail = u && u.email ? String(u.email).toLowerCase() : ""
-    if(mail && DAFTAR_ADMIN.indexOf(mail) !== -1) return true
+    if(u && localStorage.getItem("isOwner") === "true") return true
     tampilkanLoginAdmin()
     showPopup(
         "Login Admin Diperlukan",
-        (mail ? "Saat ini login sebagai " + mail + ", bukan akun owner. " : "Belum login admin. ") +
         "Tekan tombol \"Login Admin (Google)\" di bawah layar, pilih email owner, lalu ulangi aksinya."
     )
     return false
+}
+
+async function adminApi(action, uid, reason, username){
+    var user = null
+    try{ user = firebase.auth().currentUser }catch(e){}
+    if(!user) throw new Error("Belum login admin. Tekan tombol Login Admin (Google) dulu.")
+    var token = await user.getIdToken()
+    var r = await fetch("/api/admin-blocked", {
+        method: "POST",
+        headers: {"Content-Type": "application/json", "Authorization": "Bearer " + token},
+        body: JSON.stringify({action: action, uid: uid, reason: reason || "", username: username || ""})
+    })
+    var j = {}
+    try{ j = await r.json() }catch(e){}
+    if(!r.ok) throw new Error(j.error || ("Permintaan ditolak server (" + r.status + ")"))
+    return j
 }
 
 function pesanError(e, cadangan){
@@ -1043,7 +1054,7 @@ function toggleBlokirAkun(uid, blockedBaru){
         document.getElementById("blockModal").classList.add("active")
     }else{
         if(!wajibAdmin()) return
-        blockedUsersRef.child(uid).remove().then(() => {
+        adminApi("unblock", uid).then(() => {
             showPopup("Berhasil", `Akun "${akun ? akun.username : uid}" berhasil dibuka blokirnya ✅`)
         }).catch(e => {
             showPopup("Gagal", pesanError(e, "Gagal membuka blokir."))
@@ -1065,12 +1076,7 @@ function konfirmasiBlokirAkun(){
     const akun = daftarAkun[uid]
     const reason = document.getElementById("blockModalInput").value.trim()
 
-    blockedUsersRef.child(uid).set({
-        blocked: true,
-        reason: reason,
-        username: akun ? akun.username : "",
-        blockedAt: Date.now()
-    }).then(() => {
+    adminApi("block", uid, reason, akun ? akun.username : "").then(() => {
         closeBlockModal()
         showPopup("Berhasil", `Akun "${akun ? akun.username : uid}" berhasil diblokir 🚫`)
     }).catch(e => {
@@ -1122,7 +1128,7 @@ function konfirmasiHapusAkun(){
     Promise.all([
         usersRef.child(uid).remove(),
         manualUsersRef.child(uid).remove(),
-        daftarBlokir[uid] ? blockedUsersRef.child(uid).remove() : Promise.resolve()
+        daftarBlokir[uid] ? adminApi("unblock", uid) : Promise.resolve()
     ]).then(() => {
         hapusLokal([uid])
         showPopup("Berhasil", `Akun "${nama}" berhasil dihapus ✅`)
@@ -1172,7 +1178,7 @@ function konfirmasiHapusDuplikat(){
     uidList.forEach(uid => {
         promises.push(usersRef.child(uid).remove())
         promises.push(manualUsersRef.child(uid).remove())
-        if(daftarBlokir[uid]) promises.push(blockedUsersRef.child(uid).remove())
+        if(daftarBlokir[uid]) promises.push(adminApi("unblock", uid))
     })
 
     Promise.all(promises).then(() => {

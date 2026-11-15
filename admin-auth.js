@@ -1,15 +1,17 @@
 (function () {
     "use strict";
-    var ADMIN_EMAILS = [
-        "caisen004@gmail.com",
-        "yeonj7725@gmail.com",
-        "vizomzomi@gmail.com",
-        "oktabae491@gmail.com"
-    ];
     var AUTH_SDK = "https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js";
     var AUTH_APP_NAME = "dzAdminAuthApp";
     var inflight = {};
     var sdkPromise = null;
+    var verifyCache = {};
+
+    function setOwnerFlag(v) {
+        try {
+            if (v) localStorage.setItem("isOwner", "true");
+            else localStorage.removeItem("isOwner");
+        } catch (e) {}
+    }
 
     function loadAuthSdk() {
         if (typeof firebase !== "undefined" && firebase.auth) return Promise.resolve();
@@ -24,8 +26,23 @@
         return sdkPromise;
     }
 
-    function isAdminEmail(email) {
-        return !!email && ADMIN_EMAILS.indexOf(String(email).toLowerCase()) !== -1;
+    function serverIsAdmin(user) {
+        if (!user) return Promise.resolve(false);
+        var c = verifyCache[user.uid];
+        if (c && Date.now() - c.t < 300000) return Promise.resolve(c.v);
+        return user.getIdToken().then(function (token) {
+            return fetch("/api/admin-check", {
+                method: "POST",
+                headers: { "Authorization": "Bearer " + token }
+            });
+        }).then(function (r) {
+            if (r.status === 401 || r.status === 403) return false;
+            if (!r.ok) return null;
+            return r.json().then(function (j) { return !!(j && j.admin); });
+        }).then(function (v) {
+            if (v !== null) verifyCache[user.uid] = { v: v, t: Date.now() };
+            return v;
+        }).catch(function () { return null; });
     }
 
     function friendly(e, app) {
@@ -60,34 +77,49 @@
         var timeout = new Promise(function (_, rej) {
             setTimeout(function () { rej(new Error("Login Google tidak selesai dalam 2 menit. Tutup tab login, lalu coba lagi.")); }, 120000);
         });
-        return Promise.race([auth.signInWithPopup(provider), timeout]).then(function (r) {
-            if (!r.user || !isAdminEmail(r.user.email)) {
-                return auth.signOut().then(function () {
-                    throw new Error("Akun Google ini bukan akun owner.");
-                });
-            }
-            return r;
-        }, function (e) { throw new Error(friendly(e, app)); });
+        return Promise.race([auth.signInWithPopup(provider), timeout]).catch(function (e) {
+            throw new Error(friendly(e, app));
+        });
+    }
+
+    function rejectNonOwner(auth) {
+        setOwnerFlag(false);
+        return auth.signOut().then(function () {
+            throw new Error("Akun Google ini bukan akun owner.");
+        });
     }
 
     function signInAdmin(app) {
         var auth = firebase.auth(app);
         return waitState(auth).then(function (cur) {
-            if (cur && isAdminEmail(cur.email)) return cur;
-            if (isAuthProject(app) || typeof FIREBASE_CONFIG_AUTH === "undefined") {
-                return popupSignIn(app).then(function (r) { return r.user; });
-            }
-            return popupSignIn(getAuthApp()).then(function (r) {
-                var cred = r.credential;
-                if (!cred || !cred.idToken) throw new Error("Token Google tidak tersedia, coba lagi.");
-                return auth.signInWithCredential(firebase.auth.GoogleAuthProvider.credential(cred.idToken)).then(function (res) {
-                    if (!isAdminEmail(res.user.email)) {
-                        return auth.signOut().then(function () {
-                            throw new Error("Akun Google ini bukan akun owner.");
+            var authProject = isAuthProject(app) || typeof FIREBASE_CONFIG_AUTH === "undefined";
+            if (!authProject) {
+                if (cur) return cur;
+                return popupSignIn(getAuthApp()).then(function (r) {
+                    var cred = r.credential;
+                    return serverIsAdmin(r.user).then(function (ok) {
+                        if (ok === false) return rejectNonOwner(firebase.auth(getAuthApp()));
+                        if (ok === null) throw new Error("Server tidak bisa memeriksa akun owner, coba lagi.");
+                        if (!cred || !cred.idToken) throw new Error("Token Google tidak tersedia, coba lagi.");
+                        return auth.signInWithCredential(firebase.auth.GoogleAuthProvider.credential(cred.idToken)).then(function (res) {
+                            setOwnerFlag(true);
+                            return res.user;
                         });
-                    }
-                    return res.user;
-                }, function (e) { throw new Error(friendly(e, app)); });
+                    });
+                });
+            }
+            var ask = cur ? serverIsAdmin(cur) : Promise.resolve(false);
+            return ask.then(function (ok) {
+                if (ok === true) { setOwnerFlag(true); return cur; }
+                if (ok === null) throw new Error("Server tidak bisa memeriksa akun owner, coba lagi.");
+                return popupSignIn(app).then(function (r) {
+                    return serverIsAdmin(r.user).then(function (ok2) {
+                        if (ok2 === false) return rejectNonOwner(auth);
+                        if (ok2 === null) throw new Error("Server tidak bisa memeriksa akun owner, coba lagi.");
+                        setOwnerFlag(true);
+                        return r.user;
+                    });
+                });
             });
         });
     }
@@ -106,9 +138,13 @@
     window.dzAdminSilent = function (app) {
         app = app || firebase.app();
         return loadAuthSdk().then(function () {
-            var auth = firebase.auth(app);
-            return new Promise(function (res) {
-                var off = auth.onAuthStateChanged(function (u) { off(); res(u && isAdminEmail(u.email) ? u : null); });
+            return waitState(firebase.auth(app));
+        }).then(function (u) {
+            if (!u) return null;
+            return serverIsAdmin(u).then(function (ok) {
+                if (ok === true) { setOwnerFlag(true); return u; }
+                if (ok === false) setOwnerFlag(false);
+                return null;
             });
         });
     };
@@ -129,5 +165,23 @@
         return ref;
     };
 
-    try { if (localStorage.getItem("isOwner") === "true") loadAuthSdk().catch(function () {}); } catch (e) {}
+    function refreshOwner() {
+        try { if (localStorage.getItem("isOwner") !== "true") return; } catch (e) { return; }
+        if (typeof FIREBASE_CONFIG_AUTH === "undefined" || typeof firebase === "undefined") return;
+        loadAuthSdk().then(function () {
+            var apps = [getAuthApp()];
+            try { if (isAuthProject(firebase.app())) apps.unshift(firebase.app()); } catch (e) {}
+            return Promise.all(apps.map(function (a) { return waitState(firebase.auth(a)); })).then(function (users) {
+                var list = users.filter(Boolean);
+                if (!list.length) { setOwnerFlag(false); return; }
+                return Promise.all(list.map(serverIsAdmin)).then(function (res) {
+                    if (res.indexOf(true) !== -1) return;
+                    if (res.indexOf(null) !== -1) return;
+                    setOwnerFlag(false);
+                });
+            });
+        }).catch(function () {});
+    }
+
+    refreshOwner();
 })();

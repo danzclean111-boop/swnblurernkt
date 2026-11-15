@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Login Owner</title>
+<style>
+:root{--bg:#0b1020;--card:#121a33;--text:#e8ecff;--muted:#9aa6d1;--btn:#3b6cff}
+@media (prefers-color-scheme: light){:root{--bg:#eef1fb;--card:#fff;--text:#14183a;--muted:#59618a}}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;padding:20px}
+.card{width:100%;max-width:380px;background:var(--card);border-radius:20px;padding:28px;text-align:center}
+h1{font-size:20px;margin:0 0 8px}
+p{color:var(--muted);font-size:14px;margin:0 0 20px;line-height:1.5}
+button{width:100%;padding:14px;border:0;border-radius:14px;background:var(--btn);color:#fff;font-size:16px;font-weight:700}
+button:disabled{opacity:.6}
+#status{margin-top:16px;font-size:14px;min-height:20px}
+</style>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app-check.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="firebase-config.js"></script>
+<script src="admin-auth.js"></script>
+</head>
+<body>
+<div class="card">
+<h1>Login Owner</h1>
+<p>Masuk dengan akun Google owner untuk membuka menu admin.</p>
+<button id="btn">Login dengan Google</button>
+<div id="status"></div>
+</div>
+<script>
+firebase.initializeApp(FIREBASE_CONFIG_AUTH)
+var btn = document.getElementById("btn")
+var st = document.getElementById("status")
+btn.onclick = function(){
+    btn.disabled = true
+    st.textContent = "Menunggu login Google..."
+    dzAdminEnsure(firebase.app()).then(function(){
+        st.textContent = "Berhasil. Mengalihkan..."
+        setTimeout(function(){ location.href = "/" }, 800)
+    }).catch(function(e){
+        btn.disabled = false
+        st.textContent = (e && e.message) ? e.message : "Login gagal."
+    })
+}
+</script>
+</body>
+</html>
