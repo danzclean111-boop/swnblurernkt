@@ -1034,6 +1034,23 @@ async function adminApi(action, uid, reason, username){
     return j
 }
 
+async function adminApiMany(action, uids){
+    var user = null
+    try{ user = firebase.auth().currentUser }catch(e){}
+    if(!user) throw new Error("Belum login admin. Tekan tombol Login Admin (Google) dulu.")
+    var token = await user.getIdToken()
+    for(var i = 0; i < uids.length; i += 500){
+        var r = await fetch("/api/admin-blocked", {
+            method: "POST",
+            headers: {"Content-Type": "application/json", "Authorization": "Bearer " + token},
+            body: JSON.stringify({action: action, uids: uids.slice(i, i + 500)})
+        })
+        var j = {}
+        try{ j = await r.json() }catch(e){}
+        if(!r.ok) throw new Error(j.error || ("Permintaan ditolak server (" + r.status + ")"))
+    }
+}
+
 function pesanError(e, cadangan){
     var m = e && e.message ? e.message : ""
     if(/permission_denied/i.test(m)) return "Akses ditolak Firebase rules. Pastikan sudah login admin (Google) dengan email owner."
@@ -1125,11 +1142,7 @@ function konfirmasiHapusAkun(){
 
     if(!wajibAdmin()) return
 
-    Promise.all([
-        usersRef.child(uid).remove(),
-        manualUsersRef.child(uid).remove(),
-        daftarBlokir[uid] ? adminApi("unblock", uid) : Promise.resolve()
-    ]).then(() => {
+    adminApi("delete", uid).then(() => {
         hapusLokal([uid])
         showPopup("Berhasil", `Akun "${nama}" berhasil dihapus ✅`)
     }).catch(e => {
@@ -1174,14 +1187,7 @@ function konfirmasiHapusDuplikat(){
     if(uidList.length === 0) return
     if(!wajibAdmin()) return
 
-    const promises = []
-    uidList.forEach(uid => {
-        promises.push(usersRef.child(uid).remove())
-        promises.push(manualUsersRef.child(uid).remove())
-        if(daftarBlokir[uid]) promises.push(adminApi("unblock", uid))
-    })
-
-    Promise.all(promises).then(() => {
+    adminApiMany("delete", uidList).then(() => {
         hapusLokal(uidList)
         showPopup("Berhasil", `Berhasil menghapus ${uidList.length} akun duplikat, tidak ada yang disisakan ✅`)
     }).catch(e => {
