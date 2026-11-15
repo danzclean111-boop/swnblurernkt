@@ -74,10 +74,11 @@ const APPCHECK_SITE_KEYS = {
 };
 
 
-// Jenis provider App Check per project. Harus SAMA dengan jenis key di
-// Firebase Console -> App Check -> Apps ("reCAPTCHA v3" atau "reCAPTCHA Enterprise").
-// Kalau tidak tertulis di sini, dipakai "v3".
 const APPCHECK_PROVIDER_TYPE = {
+    "danzclean-auth":   "enterprise",
+    "danzzclean":       "enterprise",
+    "danzclean-verify": "enterprise",
+    "preset-9ebb6":     "enterprise",
     "chatglobal-72ac4": "enterprise"
 };
 
