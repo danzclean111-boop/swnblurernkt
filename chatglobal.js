@@ -812,11 +812,11 @@ function toggleMenu() {
         set("status", "mengukur...");
         var t0 = performance.now();
         try {
-            if (typeof APPCHECK_SKIP !== "undefined" && APPCHECK_SKIP[database.app.options.projectId]) set("appcheck", "dilewati (sengaja)");
+            if (typeof APPCHECK_SKIP !== "undefined" && APPCHECK_SKIP[database.app.options.projectId] && !/[?&]ac=1/.test(location.search)) set("appcheck", "dilewati (sengaja)");
             else if (firebase.appCheck) {
                 var a0 = performance.now();
                 firebase.appCheck(database.app).getToken().then(function (r) {
-                    set("appcheck", Math.round(performance.now() - a0) + " ms " + (r && r.token ? "OK" : "tanpa token"));
+                    set("appcheck", Math.round(performance.now() - a0) + " ms " + (r && r.token ? "OK" : "tanpa token") + (firebase.appCheck.ReCaptchaEnterpriseProvider ? " (Enterprise)" : " (v3!)"));
                 }).catch(function (e) {
                     set("appcheck", "GAGAL " + ((e && (e.code || e.message)) || "") + " (" + Math.round(performance.now() - a0) + " ms)");
                 });
