@@ -198,6 +198,7 @@ function toggleMenu() {
 
     function render(key, m) {
         if (rows[key]) return;
+        watchProfile(m.u);
         clearStateBoxes();
 
         var ts = Number(m.ts) || Date.now();
@@ -467,6 +468,7 @@ function toggleMenu() {
             var p = people[id];
             var b = el("button", "cg-ment" + (i === mentionIdx ? " on" : ""));
             b.type = "button"; b.setAttribute("role", "option");
+            watchProfile(id);
             b.appendChild(makeAvatar(p.n, AV_COLORS[colorIdx(id)], profiles[id], "", id));
             b.appendChild(el("span", "n", p.n));
             b.addEventListener("pointerdown", function (e) { e.preventDefault(); });
@@ -561,7 +563,7 @@ function toggleMenu() {
             if (n) return database.ref("global_chat/seen").update(updates);
         }).catch(function () {});
     }
-    purgeExpired();
+    setTimeout(purgeExpired, 20000);
     setInterval(purgeExpired, 10 * 60 * 1000);
 
     database.ref(".info/connected").on("value", function (s) {
@@ -586,9 +588,20 @@ function toggleMenu() {
         note("Foto profil belum bisa " + what + " (" + ((err && err.code) || "error") + "). Cek rules Firebase global_chat/profiles.");
     }
     function profReadFail(err) { profFail("dimuat", err); }
-    profRef.on("child_added", onProfile, profReadFail);
-    profRef.on("child_changed", onProfile, profReadFail);
-    profRef.on("child_removed", function (snap) { delete profiles[snap.key]; refreshAvatars(snap.key); }, profReadFail);
+    var profWatch = {};
+    var profWatchCount = 0;
+    function watchProfile(uid) {
+        if (!uid || typeof uid !== "string" || profWatch[uid] || profWatchCount >= 200) return;
+        if (!/^[A-Za-z0-9_-]{1,64}$/.test(uid)) return;
+        profWatch[uid] = true;
+        profWatchCount++;
+        profRef.child(uid).on("value", function (snap) {
+            var v = safePhoto(snap.val());
+            if ((profiles[uid] || "") === v) return;
+            profiles[uid] = v;
+            refreshAvatars(uid);
+        }, profReadFail);
+    }
 
     function makeThumb(src, done) {
         var img = new Image();
