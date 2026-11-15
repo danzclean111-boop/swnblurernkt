@@ -901,10 +901,17 @@ function resetUploadState() {
 <script>
 document.body.style.display = "none";
 
+// Failsafe: kalau Firebase/App Check tidak merespons, tampilkan halaman tetap
+// (sebelumnya body disembunyikan selamanya -> dashboard kosong)
+const showBodyFailsafe = setTimeout(() => {
+    document.body.style.display = "block";
+}, 4000);
+
 const maintenanceRef = firebase.database().ref("maintenance");
 
 maintenanceRef.once("value")
 .then(snap => {
+    clearTimeout(showBodyFailsafe);
     const data = snap.val();
     const isOwner = localStorage.getItem("isOwner");
 
@@ -940,6 +947,7 @@ maintenanceRef.once("value")
 })
 .catch(err => {
     
+    clearTimeout(showBodyFailsafe);
     console.error("Firebase error:", err);
     document.body.style.display = "block";
 });
