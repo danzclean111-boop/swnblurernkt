@@ -75,10 +75,6 @@ const APPCHECK_SITE_KEYS = {
 
 
 const APPCHECK_PROVIDER_TYPE = {
-    "danzclean-auth":   "enterprise",
-    "danzzclean":       "enterprise",
-    "danzclean-verify": "enterprise",
-    "preset-9ebb6":     "enterprise",
     "chatglobal-72ac4": "enterprise"
 };
 
