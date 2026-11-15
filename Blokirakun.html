@@ -1007,12 +1007,19 @@ function hapusLokal(uids){
     jadwalkanSimpanCache()
 }
 
+const DAFTAR_ADMIN = ["caisen004@gmail.com","yeonj7725@gmail.com","vizomzomi@gmail.com","oktabae491@gmail.com"]
+
 function wajibAdmin(){
     var u = null
     try{ u = firebase.auth && firebase.auth().currentUser }catch(e){}
-    if(u && u.email) return true
+    var mail = u && u.email ? String(u.email).toLowerCase() : ""
+    if(mail && DAFTAR_ADMIN.indexOf(mail) !== -1) return true
     tampilkanLoginAdmin()
-    showPopup("Login Admin Diperlukan", "Tekan tombol \"Login Admin (Google)\" di bawah layar, pilih akun owner, lalu ulangi aksinya.")
+    showPopup(
+        "Login Admin Diperlukan",
+        (mail ? "Saat ini login sebagai " + mail + ", bukan akun owner. " : "Belum login admin. ") +
+        "Tekan tombol \"Login Admin (Google)\" di bawah layar, pilih email owner, lalu ulangi aksinya."
+    )
     return false
 }
 
