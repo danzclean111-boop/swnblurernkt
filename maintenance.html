@@ -215,17 +215,24 @@ firebase.database()
 const maintenanceRef =
 db.ref("maintenance")
 
-dzAdminGuard(maintenanceRef, firebase.app());
-
-;(function(){
-var _set = maintenanceRef.set
-maintenanceRef.set = function(){
-return _set.apply(maintenanceRef, arguments).catch(function(e){
+function simpanMaintenance(data){
+return dzAdminEnsure(firebase.app()).then(function(u){
+return u.getIdToken()
+}).then(function(token){
+return fetch("/api/admin-maintenance", {
+method:"POST",
+headers:{"Content-Type":"application/json","Authorization":"Bearer " + token},
+body:JSON.stringify({action:"set", enabled:data.enabled, message:data.message, image:data.image})
+})
+}).then(function(r){
+return r.json().catch(function(){ return {} }).then(function(j){
+if(!r.ok) throw new Error(j.error || ("Permintaan ditolak server (" + r.status + ")"))
+})
+}).catch(function(e){
 showPopup("Gagal", (e && e.message) || "Gagal menyimpan, akses ditolak")
 throw e
 })
 }
-})()
 
 let selectedImage = ""
 
@@ -264,7 +271,7 @@ document
 .value
 .trim()
 
-maintenanceRef.set({
+simpanMaintenance({
 
 enabled:true,
 
@@ -301,7 +308,7 @@ document.getElementById("imageFile").value = ""
 
 function disableMaintenance(){
 
-maintenanceRef.set({
+simpanMaintenance({
 
 enabled:false,
 
