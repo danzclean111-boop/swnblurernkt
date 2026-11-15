@@ -86,12 +86,34 @@ module.exports = async function handler(req, res) {
 
   const body = readBody(req);
   const action = body.action;
+  const uidPattern = /^[A-Za-z0-9_-]{1,128}$/;
+
+  if (action === "delete") {
+    const list = Array.isArray(body.uids) ? body.uids : [body.uid];
+    if (list.length < 1 || list.length > 500 || !list.every((u) => typeof u === "string" && uidPattern.test(u))) {
+      return res.status(400).json({ error: "UID tidak valid" });
+    }
+    const updates = {};
+    list.forEach((u) => {
+      updates["users/" + u] = null;
+      updates["manual_users/" + u] = null;
+      updates["blocked_users/" + u] = null;
+    });
+    try {
+      await admin.database().ref().update(updates);
+      return res.status(200).json({ ok: true, deleted: list.length });
+    } catch (e) {
+      console.error("[admin-blocked] delete:", e.message);
+      return res.status(500).json({ error: "Gagal menghapus dari database" });
+    }
+  }
+
   const uid = body.uid;
 
   if (action !== "block" && action !== "unblock") {
     return res.status(400).json({ error: "Aksi tidak dikenal" });
   }
-  if (typeof uid !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(uid)) {
+  if (typeof uid !== "string" || !uidPattern.test(uid)) {
     return res.status(400).json({ error: "UID tidak valid" });
   }
 
