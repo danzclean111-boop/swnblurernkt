@@ -815,7 +815,7 @@ function toggleMenu() {
         set("status", "mengukur...");
         var t0 = performance.now();
         try {
-            if (typeof APPCHECK_SKIP !== "undefined" && APPCHECK_SKIP[database.app.options.projectId] && !/[?&]ac=1/.test(location.search)) set("appcheck", "dilewati (sengaja)");
+            if (typeof APPCHECK_SKIP !== "undefined" && APPCHECK_SKIP[database.app.options.projectId] && !(firebase.appCheck && firebase.appCheck.ReCaptchaEnterpriseProvider)) set("appcheck", "dilewati (sengaja)");
             else if (firebase.appCheck) {
                 var a0 = performance.now();
                 firebase.appCheck(database.app).getToken().then(function (r) {
