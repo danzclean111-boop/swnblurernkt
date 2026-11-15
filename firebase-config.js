@@ -73,8 +73,9 @@ const APPCHECK_SITE_KEYS = {
     "chatglobal-72ac4": "6Lccwh8uAAAAAMJSCFtTQrZsCz3_gSkhktGmV6YW"
 };
 
-// Project yang dilewati App Check-nya (token reCAPTCHA menggantung -> koneksi realtime tertahan).
-// Hapus baris ini kalau App Check untuk chat sudah beres dan ingin diaktifkan lagi.
+// Project yang App Check-nya dilewati HANYA di halaman yang masih memakai Firebase SDK 8
+// (tidak punya provider Enterprise -> token gagal -> koneksi realtime tertahan).
+// Halaman dengan SDK 9 compat (mis. chatglobal.html) memakai App Check asli.
 const APPCHECK_SKIP = { "chatglobal-72ac4": true };
 
 (function () {
@@ -89,7 +90,7 @@ const APPCHECK_SKIP = { "chatglobal-72ac4": true };
         try {
             var pid = app.options && app.options.projectId;
             var key = APPCHECK_SITE_KEYS[pid];
-            if (APPCHECK_SKIP[pid] && !/[?&]ac=1/.test(location.search) && typeof firebase.appCheck === "function") {
+            if (APPCHECK_SKIP[pid] && typeof firebase.appCheck === "function" && !firebase.appCheck.ReCaptchaEnterpriseProvider) {
                 // App Check tetap "diaktifkan" tapi pakai token kosong yang langsung jadi,
                 // supaya SDK database tidak gagal (use-before-activation) dan tidak menunggu reCAPTCHA.
                 var fake = { getToken: function () { return Promise.resolve({ token: "dz-skip", expireTimeMillis: Date.now() + 3600000 }); } };
