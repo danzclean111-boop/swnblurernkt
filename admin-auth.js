@@ -11,10 +11,22 @@
     var sdkPromise = null;
     var verifyCache = {};
 
+    function sessionKey() {
+        try {
+            var x = JSON.parse(localStorage.getItem("danzclean_logged_user") || "{}") || {};
+            return String(x.email || x.uid || x.username || "anon").toLowerCase().trim();
+        } catch (e) { return "anon"; }
+    }
+
     function setOwnerFlag(v) {
         try {
-            if (v) localStorage.setItem("isOwner", "true");
-            else localStorage.removeItem("isOwner");
+            if (v) {
+                localStorage.setItem("isOwner", "true");
+                localStorage.setItem("isOwnerFor", sessionKey());
+            } else {
+                localStorage.removeItem("isOwner");
+                localStorage.removeItem("isOwnerFor");
+            }
         } catch (e) {}
     }
 
