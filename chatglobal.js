@@ -119,7 +119,6 @@ function toggleMenu() {
     pillEl.addEventListener("click", toBottom);
 
     var rows = {}, msgs = {}, people = {}, mineRows = {};
-    var removedKeys = {};
     var pending = {}, othersSeen = 0;
     var last = { u: null, ts: 0, day: "" };
     var loaded = false, maxTs = 0;
@@ -576,7 +575,6 @@ function toggleMenu() {
     });
     query.on("child_removed", function (snap) {
         var key = snap.key, row = rows[key];
-        removedKeys[key] = true;
         if (menuKey === key) closeMenu(true);
         if (row) {
             row.classList.add("gone");
@@ -602,53 +600,12 @@ function toggleMenu() {
     setTimeout(purgeExpired, 20000);
     setInterval(purgeExpired, 10 * 60 * 1000);
 
-    var isConn = false, reconnecting = false, downTimer = null;
-    function kick() {
-        if (reconnecting) return;
-        reconnecting = true;
-        try { database.goOffline(); } catch (e) {}
-        setTimeout(function () {
-            try { database.goOnline(); } catch (e) {}
-            reconnecting = false;
-        }, 350);
-    }
-
-    var syncing = false;
-    function syncNew() {
-        if (!loaded || syncing || document.visibilityState !== "visible") return;
-        syncing = true;
-        var from = Math.max(maxTs, Date.now() - TTL_MS);
-        ref.orderByChild("ts").startAt(from).limitToLast(HISTORY_LIMIT).once("value").then(function (snap) {
-            snap.forEach(function (c) {
-                var m = c.val();
-                if (m && typeof m === "object" && !rows[c.key] && !removedKeys[c.key]) render(c.key, m);
-            });
-        }).catch(function () {}).then(function () { syncing = false; });
-    }
-    setInterval(syncNew, 4000);
-
     database.ref(".info/connected").on("value", function (s) {
         var on = s.val() === true;
-        isConn = on;
         dotEl.classList.toggle("on", on);
         stateEl.textContent = on ? "Terhubung" : "Menyambung...";
-        clearTimeout(downTimer);
-        if (on) { updatePeopleCount(); syncNew(); markSeen(); }
-        else {
-            downTimer = setTimeout(function () {
-                if (!isConn && document.visibilityState === "visible") { note("Menyambung ulang ke server..."); kick(); }
-            }, 5000);
-        }
+        if (on) updatePeopleCount();
     });
-
-    document.addEventListener("visibilitychange", function () {
-        if (document.visibilityState !== "visible") return;
-        if (!isConn) kick();
-        syncNew();
-    });
-    window.addEventListener("online", kick);
-    window.addEventListener("focus", function () { if (!isConn) kick(); syncNew(); });
-    window.addEventListener("pageshow", function (e) { if (e.persisted) { kick(); syncNew(); } });
 
     var profRef = database.ref("global_chat/profiles");
     function onProfile(snap) {
@@ -738,12 +695,6 @@ function toggleMenu() {
         hideMentions(); clearReply(); syncSend();
         inputEl.focus();
 
-        setTimeout(function () {
-            if (!pending[key]) return;
-            note("Koneksi lambat, menyambung ulang...");
-            kick();
-        }, 6000);
-
         newRef.set(payload).then(function () {
             delete pending[key];
             refreshTicks();
@@ -797,52 +748,6 @@ function toggleMenu() {
             try { render(it[0], it[1]); n++; } catch (e) {}
         });
         if (n) toBottom();
-    })();
-
-    (function debugPanel() {
-        if (!/[?&]debug=1/.test(location.search)) return;
-        var box = document.createElement("div");
-        box.style.cssText = "position:fixed;left:8px;right:8px;top:72px;z-index:99999;background:rgba(0,0,0,.9);color:#9fe;font:11px/1.6 monospace;padding:8px 10px;border-radius:10px;white-space:pre-wrap;pointer-events:none";
-        document.body.appendChild(box);
-        var L = {};
-        function set(k, v) {
-            L[k] = v;
-            box.textContent = "DEBUG KONEKSI\n" + Object.keys(L).map(function (x) { return x + ": " + L[x]; }).join("\n");
-        }
-        set("versi", "chatglobal.js v20261115e");
-        set("alamat", location.pathname + location.search);
-        set("sdk", (firebase.SDK_VERSION || "?") + (firebase.appCheck && firebase.appCheck.ReCaptchaEnterpriseProvider ? " (ada Enterprise)" : " (TANPA Enterprise)"));
-        set("status", "mengukur...");
-        var t0 = performance.now();
-        try {
-            if (firebase.appCheck) {
-                var a0 = performance.now();
-                firebase.appCheck(database.app).getToken().then(function (r) {
-                    set("appcheck", Math.round(performance.now() - a0) + " ms " + (r && r.token ? "OK" : "tanpa token") + (firebase.appCheck.ReCaptchaEnterpriseProvider ? " (Enterprise)" : " (v3!)"));
-                }).catch(function (e) {
-                    set("appcheck", "GAGAL " + ((e && (e.code || e.message)) || "") + " (" + Math.round(performance.now() - a0) + " ms)");
-                });
-            } else set("appcheck", "tidak aktif");
-        } catch (e) { set("appcheck", "err " + e.message); }
-        try {
-            var host = new URL(FIREBASE_CONFIG_CHAT.databaseURL).host;
-            var w0 = performance.now();
-            var ws = new WebSocket("wss://" + host + "/.ws?v=5&ns=" + host.split(".")[0]);
-            var to = setTimeout(function () { set("websocket", "TIMEOUT >8 dtk (kemungkinan diblokir)"); try { ws.close(); } catch (e) {} }, 8000);
-            ws.onopen = function () { clearTimeout(to); set("websocket", "terbuka " + Math.round(performance.now() - w0) + " ms"); ws.close(); };
-            ws.onerror = function () { clearTimeout(to); set("websocket", "ERROR / diblokir"); };
-        } catch (e) { set("websocket", "err " + e.message); }
-        database.ref(".info/connected").on("value", function (s) {
-            set("firebase", s.val() ? "terhubung +" + Math.round(performance.now() - t0) + " ms" : "putus");
-        });
-        function ping() {
-            var p0 = performance.now();
-            database.ref("global_chat/seen/" + myId).set(firebase.database.ServerValue.TIMESTAMP).then(function () {
-                set("ack tulis", Math.round(performance.now() - p0) + " ms");
-            }).catch(function (e) { set("ack tulis", "gagal " + (e && e.code)); });
-        }
-        setTimeout(ping, 1500);
-        setInterval(ping, 8000);
     })();
 
 })();

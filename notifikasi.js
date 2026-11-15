@@ -32,9 +32,9 @@
         return firebase.app(NOTIF_APP_NAME).database();
     }
 
-
     function adminReady() {
-        const go = () => window.dzAdminEnsure();
+        getMainDb();
+        const go = () => window.dzAdminEnsure(firebase.app(NOTIF_APP_NAME));
         if (window.dzAdminEnsure) return go();
         return new Promise((res, rej) => {
             const s = document.createElement("script");

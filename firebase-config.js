@@ -73,12 +73,6 @@ const APPCHECK_SITE_KEYS = {
     "chatglobal-72ac4": "6Lccwh8uAAAAAMJSCFtTQrZsCz3_gSkhktGmV6YW"
 };
 
-// Jenis kunci reCAPTCHA tiap project di Firebase Console > App Check.
-// "Fraud Defense (reCAPTCHA Enterprise)" -> "enterprise"; "reCAPTCHA" biasa -> "v3" (default).
-const APPCHECK_PROVIDER_TYPE = {
-    "chatglobal-72ac4": "enterprise"
-};
-
 (function () {
     if (typeof firebase === "undefined" || !firebase.initializeApp || firebase.__dzAppCheckWrapped) return;
     firebase.__dzAppCheckWrapped = true;
@@ -91,13 +85,9 @@ const APPCHECK_PROVIDER_TYPE = {
         try {
             var key = APPCHECK_SITE_KEYS[app.options && app.options.projectId];
             if (key && key.indexOf("ISI_") !== 0 && typeof firebase.appCheck === "function") {
-                var type = APPCHECK_PROVIDER_TYPE[app.options.projectId] || "v3";
-                var provider = key;
-                if (type === "enterprise" && firebase.appCheck.ReCaptchaEnterpriseProvider) {
-                    provider = new firebase.appCheck.ReCaptchaEnterpriseProvider(key);
-                } else if (firebase.appCheck.ReCaptchaV3Provider) {
-                    provider = new firebase.appCheck.ReCaptchaV3Provider(key);
-                }
+                var provider = (firebase.appCheck.ReCaptchaEnterpriseProvider)
+                    ? new firebase.appCheck.ReCaptchaEnterpriseProvider(key)
+                    : key;
                 firebase.appCheck(app).activate(provider, true);
             }
         } catch (e) { console.warn("[AppCheck]", e && e.message); }
