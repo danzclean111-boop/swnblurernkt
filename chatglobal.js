@@ -122,6 +122,25 @@ function toggleMenu() {
     var pending = {}, othersSeen = 0;
     var last = { u: null, ts: 0, day: "" };
     var loaded = false, maxTs = 0;
+    var CACHE_KEY = "dz_chat_cache_v1";
+    var cacheKeys = {};
+    var cacheTimer = null;
+    function scheduleCache() {
+        if (cacheTimer) return;
+        cacheTimer = setTimeout(function () {
+            cacheTimer = null;
+            try {
+                var keys = Object.keys(msgs).sort(function (x, y) {
+                    return (Number(msgs[x].ts) || 0) - (Number(msgs[y].ts) || 0);
+                }).slice(-60);
+                var items = keys.map(function (k) {
+                    var m = msgs[k];
+                    return [k, { n: m.n, u: m.u, t: m.t, ts: m.ts, o: m.o, mn: m.mn, r: m.r }];
+                });
+                localStorage.setItem(CACHE_KEY, JSON.stringify(items));
+            } catch (e) {}
+        }, 1200);
+    }
     var replyTo = null;
 
     function stateFor(key, ts) {
@@ -287,6 +306,7 @@ function toggleMenu() {
         }
         if (loaded) { markRead(); if (!mine) markSeen(); }
         updatePeopleCount();
+        scheduleCache();
     }
 
     function jumpTo(key) {
@@ -523,7 +543,19 @@ function toggleMenu() {
     });
 
     var query = ref.orderByChild("ts").startAt(Date.now() - TTL_MS).limitToLast(HISTORY_LIMIT);
-    query.once("value").then(function () {
+    query.once("value").then(function (snap) {
+        var fresh = {};
+        snap.forEach(function (c) { fresh[c.key] = 1; });
+        Object.keys(cacheKeys).forEach(function (k) {
+            if (fresh[k]) return;
+            var row = rows[k];
+            if (menuKey === k) closeMenu(true);
+            if (row) row.remove();
+            delete rows[k]; delete mineRows[k]; delete msgs[k];
+        });
+        cacheKeys = {};
+        pruneDays();
+        scheduleCache();
         loaded = true;
         markSeen(); markRead();
         if (skelEl && skelEl.parentNode) skelEl.remove();
@@ -531,6 +563,7 @@ function toggleMenu() {
         toBottom();
     }).catch(function () {
         if (skelEl && skelEl.parentNode) skelEl.remove();
+        if (listEl.querySelector(".cg-row")) return note("Belum tersinkron, menampilkan pesan terakhir.");
         var box = el("div", "cg-state-box");
         box.innerHTML = '<div class="ico">' + ICON.chat + '</div><b>Gagal memuat chat</b>Cek koneksi atau rules Firebase, lalu coba lagi.';
         listEl.appendChild(box);
@@ -549,6 +582,7 @@ function toggleMenu() {
             delete rows[key]; delete mineRows[key]; delete msgs[key];
         }
         if (loaded) setTimeout(showEmpty, 200);
+        scheduleCache();
     });
 
     function purgeExpired() {
@@ -701,5 +735,19 @@ function toggleMenu() {
     inputEl.addEventListener("blur", function () {
         setTimeout(function () { document.documentElement.classList.remove("cg-typing"); hideMentions(); }, 120);
     });
+
+    (function restoreCache() {
+        var raw;
+        try { raw = JSON.parse(localStorage.getItem(CACHE_KEY) || "[]"); } catch (e) { return; }
+        if (!Array.isArray(raw) || !raw.length) return;
+        var min = Date.now() - TTL_MS, n = 0;
+        raw.forEach(function (it) {
+            if (!Array.isArray(it) || typeof it[0] !== "string" || !it[1] || typeof it[1] !== "object") return;
+            if ((Number(it[1].ts) || 0) < min) return;
+            cacheKeys[it[0]] = true;
+            try { render(it[0], it[1]); n++; } catch (e) {}
+        });
+        if (n) toBottom();
+    })();
 
 })();
