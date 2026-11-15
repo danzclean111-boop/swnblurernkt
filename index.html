@@ -3,6 +3,26 @@
 
 <head>
     <script src="/func/api/anti-devtools.js"></script>
+<script>
+(function () {
+    if (!/[?&]dbg=1/.test(location.search)) return;
+    var box = document.createElement("div");
+    box.style.cssText = "position:fixed;left:6px;right:6px;top:6px;z-index:2147483647;background:rgba(120,0,0,.95);color:#fff;font:11px/1.5 monospace;padding:8px 10px;border-radius:8px;white-space:pre-wrap;max-height:60vh;overflow:auto";
+    box.textContent = "DEBUG ERROR (dbg=1) - menunggu error...";
+    function show(t) {
+        if (!document.body) { document.addEventListener("DOMContentLoaded", function () { document.body.appendChild(box); box.textContent += "\n" + t; }); }
+        else { if (!box.isConnected) document.body.appendChild(box); box.textContent += "\n" + t; }
+    }
+    window.addEventListener("error", function (e) {
+        show("JS ERROR: " + e.message + " @ " + (e.filename || "?") + ":" + e.lineno + ":" + e.colno);
+    });
+    window.addEventListener("unhandledrejection", function (e) {
+        show("PROMISE REJECT: " + (e.reason && (e.reason.message || e.reason) || e.reason));
+    });
+    if (document.body) document.body.appendChild(box);
+    else document.addEventListener("DOMContentLoaded", function () { document.body.appendChild(box); });
+})();
+</script>
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://danzclean.arisu.biz.id">
 <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
@@ -875,7 +895,7 @@ function resetUploadState() {
     <script src="admin-auth.js?v=3"></script>
     <script>
         (function() {
-            if (!firebase.apps.some(function (a) { return a.name === "[DEFAULT]"; })) {
+            if (!firebase.apps.length) {
                 firebase.initializeApp(FIREBASE_CONFIG_AUTH);
             }
             const db = firebase.database();
@@ -901,17 +921,10 @@ function resetUploadState() {
 <script>
 document.body.style.display = "none";
 
-// Failsafe: kalau Firebase/App Check tidak merespons, tampilkan halaman tetap
-// (sebelumnya body disembunyikan selamanya -> dashboard kosong)
-const showBodyFailsafe = setTimeout(() => {
-    document.body.style.display = "block";
-}, 4000);
-
 const maintenanceRef = firebase.database().ref("maintenance");
 
 maintenanceRef.once("value")
 .then(snap => {
-    clearTimeout(showBodyFailsafe);
     const data = snap.val();
     const isOwner = localStorage.getItem("isOwner");
 
@@ -947,7 +960,6 @@ maintenanceRef.once("value")
 })
 .catch(err => {
     
-    clearTimeout(showBodyFailsafe);
     console.error("Firebase error:", err);
     document.body.style.display = "block";
 });
