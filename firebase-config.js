@@ -88,7 +88,15 @@ const APPCHECK_SKIP = { "chatglobal-72ac4": true };
         var app = origInit.apply(null, arguments);
         try {
             var pid = app.options && app.options.projectId;
-            var key = APPCHECK_SKIP[pid] ? null : APPCHECK_SITE_KEYS[pid];
+            var key = APPCHECK_SITE_KEYS[pid];
+            if (APPCHECK_SKIP[pid] && typeof firebase.appCheck === "function") {
+                // App Check tetap "diaktifkan" tapi pakai token kosong yang langsung jadi,
+                // supaya SDK database tidak gagal (use-before-activation) dan tidak menunggu reCAPTCHA.
+                var fake = { getToken: function () { return Promise.resolve({ token: "dz-skip", expireTimeMillis: Date.now() + 3600000 }); } };
+                var skipProv = firebase.appCheck.CustomProvider ? new firebase.appCheck.CustomProvider(fake) : fake;
+                firebase.appCheck(app).activate(skipProv, false);
+                return app;
+            }
             if (key && key.indexOf("ISI_") !== 0 && typeof firebase.appCheck === "function") {
                 var provider = (firebase.appCheck.ReCaptchaEnterpriseProvider)
                     ? new firebase.appCheck.ReCaptchaEnterpriseProvider(key)
