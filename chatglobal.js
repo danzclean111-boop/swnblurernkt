@@ -809,6 +809,9 @@ function toggleMenu() {
             L[k] = v;
             box.textContent = "DEBUG KONEKSI\n" + Object.keys(L).map(function (x) { return x + ": " + L[x]; }).join("\n");
         }
+        set("versi", "chatglobal.js v20261115c");
+        set("alamat", location.pathname + location.search);
+        set("sdk", (firebase.SDK_VERSION || "?") + (firebase.appCheck && firebase.appCheck.ReCaptchaEnterpriseProvider ? " (ada Enterprise)" : " (TANPA Enterprise)"));
         set("status", "mengukur...");
         var t0 = performance.now();
         try {
