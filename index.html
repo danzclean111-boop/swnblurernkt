@@ -875,7 +875,7 @@ function resetUploadState() {
     <script src="admin-auth.js?v=3"></script>
     <script>
         (function() {
-            if (!firebase.apps.length) {
+            if (!firebase.apps.some(function (a) { return a.name === "[DEFAULT]"; })) {
                 firebase.initializeApp(FIREBASE_CONFIG_AUTH);
             }
             const db = firebase.database();

@@ -207,7 +207,7 @@ document
 
 }
 
-if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG_AUTH);
+if (!firebase.apps.some(function (a) { return a.name === "[DEFAULT]"; })) firebase.initializeApp(FIREBASE_CONFIG_AUTH);
 
 const db =
 firebase.database()

@@ -232,7 +232,7 @@
         });
     </script>
     <script>
-        if (!firebase.apps.length) {
+        if (!firebase.apps.some(function (a) { return a.name === "[DEFAULT]"; })) {
             firebase.initializeApp(FIREBASE_CONFIG_AUTH);
         }
 
