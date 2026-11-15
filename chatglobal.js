@@ -629,8 +629,11 @@ function toggleMenu() {
     setInterval(purgeExpired, 10 * 60 * 1000);
 
     var isConn = false, reconnecting = false, downTimer = null;
-    function kick() {
+    var lastKick = 0;
+    function kick(force) {
         if (reconnecting) return;
+        if (force !== true && Date.now() - lastKick < 30000) return;
+        lastKick = Date.now();
         reconnecting = true;
         try { database.goOffline(); } catch (e) {}
         setTimeout(function () {
@@ -653,6 +656,34 @@ function toggleMenu() {
     }
     setInterval(syncNew, 4000);
 
+    var restBusy = false;
+    function restSync() {
+        if (isConn || restBusy || document.visibilityState !== "visible") return;
+        if (typeof FIREBASE_CONFIG_CHAT === "undefined" || !FIREBASE_CONFIG_CHAT.databaseURL) return;
+        restBusy = true;
+        var ctl = typeof AbortController === "function" ? new AbortController() : null;
+        var tm = setTimeout(function () { if (ctl) ctl.abort(); }, 8000);
+        var url = String(FIREBASE_CONFIG_CHAT.databaseURL).replace(/\/+$/, "") + "/" + CHAT_PATH + ".json?orderBy=" + encodeURIComponent('"$key"') + "&limitToLast=40";
+        fetch(url, { cache: "no-store", signal: ctl ? ctl.signal : undefined })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+                if (!data || typeof data !== "object") return;
+                var min = Date.now() - TTL_MS;
+                Object.keys(data).map(function (k) { return [k, data[k]]; })
+                    .filter(function (it) {
+                        var v = it[1];
+                        return v && typeof v === "object" && typeof v.t === "string" && (Number(v.ts) || 0) >= min;
+                    })
+                    .sort(function (a, b) { return (Number(a[1].ts) || 0) - (Number(b[1].ts) || 0); })
+                    .forEach(function (it) {
+                        if (!rows[it[0]] && !removedKeys[it[0]]) render(it[0], it[1]);
+                    });
+            })
+            .catch(function () {})
+            .then(function () { clearTimeout(tm); restBusy = false; });
+    }
+    setInterval(restSync, 3000);
+
     database.ref(".info/connected").on("value", function (s) {
         var on = s.val() === true;
         isConn = on;
@@ -663,7 +694,7 @@ function toggleMenu() {
         else {
             downTimer = setTimeout(function () {
                 if (!isConn && document.visibilityState === "visible") { note("Menyambung ulang ke server..."); kick(); }
-            }, 5000);
+            }, 35000);
         }
     });
 
@@ -672,9 +703,9 @@ function toggleMenu() {
         if (!isConn) kick();
         syncNew();
     });
-    window.addEventListener("online", kick);
+    window.addEventListener("online", function () { kick(true); });
     window.addEventListener("focus", function () { if (!isConn) kick(); syncNew(); });
-    window.addEventListener("pageshow", function (e) { if (e.persisted) { kick(); syncNew(); } });
+    window.addEventListener("pageshow", function (e) { if (e.persisted) { kick(true); syncNew(); } });
 
     var profRef = database.ref("global_chat/profiles");
     function onProfile(snap) {
