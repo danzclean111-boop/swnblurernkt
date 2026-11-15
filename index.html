@@ -1414,29 +1414,22 @@ closeGroupModal.addEventListener("click", () => {
     };
 
     window.commitGroups = async function (opt) {
-        const ref = groupsRef();
-        const updates = { seeded: true, updatedAt: firebase.database.ServerValue.TIMESTAMP };
-        const base = Date.now();
-        if (groupsFallback) {
-            DEFAULT_GROUPS.forEach((g, i) => {
-                if (g.url === opt.removeUrl) return;
-                const edited = opt.edit && g.url === opt.edit.oldUrl;
-                updates["items/" + ref.child("items").push().key] = {
-                    name: edited ? opt.edit.name : g.name,
-                    url: edited ? opt.edit.url : cleanGroupUrl(g.url),
-                    order: base + i
-                };
-            });
-        }
-        if (opt.add) {
-            updates["items/" + ref.child("items").push().key] = { name: opt.add.name, url: opt.add.url, order: base + 1000 };
-        }
-        if (opt.removeKey) updates["items/" + opt.removeKey] = null;
-        if (opt.edit && !groupsFallback && opt.edit.key) {
-            updates["items/" + opt.edit.key + "/name"] = opt.edit.name;
-            updates["items/" + opt.edit.key + "/url"] = opt.edit.url;
-        }
-        await ref.update(updates);
+        const user = await dzAdminEnsure(firebase.app("verifyApp"));
+        const token = await user.getIdToken();
+        const r = await fetch("/api/admin-groups", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+            body: JSON.stringify({
+                defaults: groupsFallback ? DEFAULT_GROUPS.map(g => ({ name: g.name, url: g.url })) : [],
+                add: opt.add || null,
+                edit: opt.edit || null,
+                removeKey: opt.removeKey || null,
+                removeUrl: opt.removeUrl || null
+            })
+        });
+        let j = {};
+        try { j = await r.json(); } catch (e) {}
+        if (!r.ok) throw new Error(j.error || ("Permintaan ditolak server (" + r.status + ")"));
     };
 
     try {
