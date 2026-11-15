@@ -812,7 +812,8 @@ function toggleMenu() {
         set("status", "mengukur...");
         var t0 = performance.now();
         try {
-            if (firebase.appCheck) {
+            if (typeof APPCHECK_SKIP !== "undefined" && APPCHECK_SKIP[database.app.options.projectId]) set("appcheck", "dilewati (sengaja)");
+            else if (firebase.appCheck) {
                 var a0 = performance.now();
                 firebase.appCheck(database.app).getToken().then(function (r) {
                     set("appcheck", Math.round(performance.now() - a0) + " ms " + (r && r.token ? "OK" : "tanpa token"));
