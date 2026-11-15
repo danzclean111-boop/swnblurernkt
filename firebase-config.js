@@ -73,10 +73,11 @@ const APPCHECK_SITE_KEYS = {
     "chatglobal-72ac4": "6Lccwh8uAAAAAMJSCFtTQrZsCz3_gSkhktGmV6YW"
 };
 
-// Project yang App Check-nya dilewati HANYA di halaman yang masih memakai Firebase SDK 8
-// (tidak punya provider Enterprise -> token gagal -> koneksi realtime tertahan).
-// Halaman dengan SDK 9 compat (mis. chatglobal.html) memakai App Check asli.
-const APPCHECK_SKIP = { "chatglobal-72ac4": true };
+// Jenis kunci reCAPTCHA tiap project di Firebase Console > App Check.
+// "Fraud Defense (reCAPTCHA Enterprise)" -> "enterprise"; "reCAPTCHA" biasa -> "v3" (default).
+const APPCHECK_PROVIDER_TYPE = {
+    "chatglobal-72ac4": "enterprise"
+};
 
 (function () {
     if (typeof firebase === "undefined" || !firebase.initializeApp || firebase.__dzAppCheckWrapped) return;
@@ -88,20 +89,15 @@ const APPCHECK_SKIP = { "chatglobal-72ac4": true };
     firebase.initializeApp = function () {
         var app = origInit.apply(null, arguments);
         try {
-            var pid = app.options && app.options.projectId;
-            var key = APPCHECK_SITE_KEYS[pid];
-            if (APPCHECK_SKIP[pid] && typeof firebase.appCheck === "function" && !firebase.appCheck.ReCaptchaEnterpriseProvider) {
-                // App Check tetap "diaktifkan" tapi pakai token kosong yang langsung jadi,
-                // supaya SDK database tidak gagal (use-before-activation) dan tidak menunggu reCAPTCHA.
-                var fake = { getToken: function () { return Promise.resolve({ token: "dz-skip", expireTimeMillis: Date.now() + 3600000 }); } };
-                var skipProv = firebase.appCheck.CustomProvider ? new firebase.appCheck.CustomProvider(fake) : fake;
-                firebase.appCheck(app).activate(skipProv, false);
-                return app;
-            }
+            var key = APPCHECK_SITE_KEYS[app.options && app.options.projectId];
             if (key && key.indexOf("ISI_") !== 0 && typeof firebase.appCheck === "function") {
-                var provider = (firebase.appCheck.ReCaptchaEnterpriseProvider)
-                    ? new firebase.appCheck.ReCaptchaEnterpriseProvider(key)
-                    : key;
+                var type = APPCHECK_PROVIDER_TYPE[app.options.projectId] || "v3";
+                var provider = key;
+                if (type === "enterprise" && firebase.appCheck.ReCaptchaEnterpriseProvider) {
+                    provider = new firebase.appCheck.ReCaptchaEnterpriseProvider(key);
+                } else if (firebase.appCheck.ReCaptchaV3Provider) {
+                    provider = new firebase.appCheck.ReCaptchaV3Provider(key);
+                }
                 firebase.appCheck(app).activate(provider, true);
             }
         } catch (e) { console.warn("[AppCheck]", e && e.message); }

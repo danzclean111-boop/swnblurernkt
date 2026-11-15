@@ -251,13 +251,13 @@ function dzBootNotif() {
     saveCfg();
 
     if (typeof firebase === "undefined") {
-      await dzLoadScript("https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js");
+      await dzLoadScript("https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js");
     }
     if (typeof firebase !== "undefined" && !firebase.appCheck) {
-      try { await dzLoadScript("https://www.gstatic.com/firebasejs/8.10.1/firebase-app-check.js"); } catch (e) {}
+      try { await dzLoadScript("https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js"); } catch (e) {}
     }
     if (typeof firebase !== "undefined" && !firebase.database) {
-      await dzLoadScript("https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js");
+      await dzLoadScript("https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js");
     }
 
     if (!saveCfg()) {

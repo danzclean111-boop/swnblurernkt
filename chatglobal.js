@@ -809,14 +809,13 @@ function toggleMenu() {
             L[k] = v;
             box.textContent = "DEBUG KONEKSI\n" + Object.keys(L).map(function (x) { return x + ": " + L[x]; }).join("\n");
         }
-        set("versi", "chatglobal.js v20261115c");
+        set("versi", "chatglobal.js v20261115e");
         set("alamat", location.pathname + location.search);
         set("sdk", (firebase.SDK_VERSION || "?") + (firebase.appCheck && firebase.appCheck.ReCaptchaEnterpriseProvider ? " (ada Enterprise)" : " (TANPA Enterprise)"));
         set("status", "mengukur...");
         var t0 = performance.now();
         try {
-            if (typeof APPCHECK_SKIP !== "undefined" && APPCHECK_SKIP[database.app.options.projectId] && !(firebase.appCheck && firebase.appCheck.ReCaptchaEnterpriseProvider)) set("appcheck", "dilewati (sengaja)");
-            else if (firebase.appCheck) {
+            if (firebase.appCheck) {
                 var a0 = performance.now();
                 firebase.appCheck(database.app).getToken().then(function (r) {
                     set("appcheck", Math.round(performance.now() - a0) + " ms " + (r && r.token ? "OK" : "tanpa token") + (firebase.appCheck.ReCaptchaEnterpriseProvider ? " (Enterprise)" : " (v3!)"));

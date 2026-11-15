@@ -1,6 +1,6 @@
 (function () {
     "use strict";
-    var AUTH_SDK = "https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js";
+    var AUTH_SDK = "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js";
     var AUTH_APP_NAME = "dzAdminAuthApp";
     var inflight = {};
     var sdkPromise = null;
