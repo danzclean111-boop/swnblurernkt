@@ -799,4 +799,47 @@ function toggleMenu() {
         if (n) toBottom();
     })();
 
+    (function debugPanel() {
+        if (!/[?&]debug=1/.test(location.search)) return;
+        var box = document.createElement("div");
+        box.style.cssText = "position:fixed;left:8px;right:8px;top:72px;z-index:99999;background:rgba(0,0,0,.9);color:#9fe;font:11px/1.6 monospace;padding:8px 10px;border-radius:10px;white-space:pre-wrap;pointer-events:none";
+        document.body.appendChild(box);
+        var L = {};
+        function set(k, v) {
+            L[k] = v;
+            box.textContent = "DEBUG KONEKSI\n" + Object.keys(L).map(function (x) { return x + ": " + L[x]; }).join("\n");
+        }
+        set("status", "mengukur...");
+        var t0 = performance.now();
+        try {
+            if (firebase.appCheck) {
+                var a0 = performance.now();
+                firebase.appCheck(database.app).getToken().then(function (r) {
+                    set("appcheck", Math.round(performance.now() - a0) + " ms " + (r && r.token ? "OK" : "tanpa token"));
+                }).catch(function (e) {
+                    set("appcheck", "GAGAL " + ((e && (e.code || e.message)) || "") + " (" + Math.round(performance.now() - a0) + " ms)");
+                });
+            } else set("appcheck", "tidak aktif");
+        } catch (e) { set("appcheck", "err " + e.message); }
+        try {
+            var host = new URL(FIREBASE_CONFIG_CHAT.databaseURL).host;
+            var w0 = performance.now();
+            var ws = new WebSocket("wss://" + host + "/.ws?v=5&ns=" + host.split(".")[0]);
+            var to = setTimeout(function () { set("websocket", "TIMEOUT >8 dtk (kemungkinan diblokir)"); try { ws.close(); } catch (e) {} }, 8000);
+            ws.onopen = function () { clearTimeout(to); set("websocket", "terbuka " + Math.round(performance.now() - w0) + " ms"); ws.close(); };
+            ws.onerror = function () { clearTimeout(to); set("websocket", "ERROR / diblokir"); };
+        } catch (e) { set("websocket", "err " + e.message); }
+        database.ref(".info/connected").on("value", function (s) {
+            set("firebase", s.val() ? "terhubung +" + Math.round(performance.now() - t0) + " ms" : "putus");
+        });
+        function ping() {
+            var p0 = performance.now();
+            database.ref("global_chat/seen/" + myId).set(firebase.database.ServerValue.TIMESTAMP).then(function () {
+                set("ack tulis", Math.round(performance.now() - p0) + " ms");
+            }).catch(function (e) { set("ack tulis", "gagal " + (e && e.code)); });
+        }
+        setTimeout(ping, 1500);
+        setInterval(ping, 8000);
+    })();
+
 })();
