@@ -592,11 +592,35 @@
     form.append("username", usernameAkun);
     form.append("verified", "true"); 
 
+    // ===== ANTI UPLOAD MACET =====
+    // Kadang koneksi nyangkut (upload 15-20MB bisa lama, tapi refresh langsung normal).
+    // Kalau kecepatan terlalu rendah selama beberapa detik DAN file belum selesai terkirim,
+    // upload dibatalkan lalu dikirim ulang lewat koneksi baru (token JWT masih berlaku).
+    // Aman dari kirim dobel: server baru memproses setelah file diterima lengkap.
+    const MAKS_PERCOBAAN_UPLOAD = 3;      // total percobaan (1 awal + 2 ulang)
+    const JENDELA_CEK_MS = 10000;         // cek kemajuan tiap 10 detik
+    const MIN_BYTE_PER_JENDELA = 500 * 1024; // < ~50 KB/s dianggap macet
+    let percobaanUpload = 0;
+
+    const kirimXhr = () => {
+    percobaanUpload++;
+    const percobaanKe = percobaanUpload;
     const xhr = new XMLHttpRequest();
+
+    let terakhirPersen = -1;
+    let bytesTerkirim = 0;
+    let bytesTotal = 0;
+    let watchdog = null;
+
+    const hentikanWatchdog = () => { if (watchdog) { clearInterval(watchdog); watchdog = null; } };
 
     xhr.upload.onprogress = function (e) {
         if (e.lengthComputable) {
+            bytesTerkirim = e.loaded;
+            bytesTotal = e.total;
             const percentComplete = Math.round((e.loaded / e.total) * 100);
+            if (percentComplete === terakhirPersen) return; // jangan update DOM kalau persen sama
+            terakhirPersen = percentComplete;
             const displayPercent = Math.round(percentComplete * 0.95);
 
             document.getElementById("status").innerHTML = `Memproses video... (${percentComplete}%)`;
@@ -609,6 +633,7 @@
     };
 
     xhr.onload = function () {
+        hentikanWatchdog();
         if (xhr.status >= 200 && xhr.status < 300) {
             try {
                 const res = JSON.parse(xhr.responseText);
@@ -845,9 +870,11 @@ const intervalCek = setInterval(async () => {
     let bodyTerkirim = false;
     xhr.upload.onload = function () {
         bodyTerkirim = true;
+        hentikanWatchdog();
     };
 
     xhr.onerror = function () {
+        hentikanWatchdog();
         console.warn("[XHR NETWORK ERROR] bodyTerkirim =", bodyTerkirim);
         resetUploadState();
 
@@ -871,6 +898,7 @@ const intervalCek = setInterval(async () => {
     xhr.timeout = 300000;
 
     xhr.ontimeout = function () {
+        hentikanWatchdog();
         console.warn("[XHR TIMEOUT] bodyTerkirim =", bodyTerkirim);
         resetUploadState();
         document.getElementById("status").innerHTML = "Gagal memproses " + jenisMedia + ".";
@@ -886,6 +914,37 @@ const intervalCek = setInterval(async () => {
     xhr.open("POST", API + "/upload", true);
     xhr.setRequestHeader("Authorization", "Bearer " + tokenUpload);
     xhr.send(form);
+
+    // Watchdog: hanya aktif kalau masih ada sisa percobaan
+    if (percobaanKe < MAKS_PERCOBAAN_UPLOAD) {
+        let bytesJendelaLalu = 0;
+        watchdog = setInterval(() => {
+            if (bodyTerkirim) { hentikanWatchdog(); return; }
+
+            const kemajuan = bytesTerkirim - bytesJendelaLalu;
+            bytesJendelaLalu = bytesTerkirim;
+
+            // sudah hampir selesai (>90%) -> biarkan lanjut, jangan diulang
+            if (bytesTotal > 0 && bytesTerkirim / bytesTotal > 0.9) return;
+
+            if (kemajuan < MIN_BYTE_PER_JENDELA) {
+                console.warn(`[UPLOAD MACET] percobaan ${percobaanKe}/${MAKS_PERCOBAAN_UPLOAD}, kemajuan ${Math.round(kemajuan / 1024)} KB / ${JENDELA_CEK_MS / 1000}s -> kirim ulang`);
+                hentikanWatchdog();
+                xhr.abort();
+
+                const pBar2 = document.getElementById("btnProgressBar");
+                const pText2 = document.getElementById("btnProgressText");
+                if (pBar2) pBar2.style.width = "0%";
+                if (pText2) pText2.innerText = `KONEKSI LAMBAT, ULANG... (${percobaanKe + 1}/${MAKS_PERCOBAAN_UPLOAD})`;
+                document.getElementById("status").innerHTML = "Koneksi lambat, mencoba kirim ulang lewat koneksi baru...";
+
+                setTimeout(kirimXhr, 800);
+            }
+        }, JENDELA_CEK_MS);
+    }
+    };
+
+    kirimXhr();
 }
 
 function resetUploadState() {
