@@ -441,6 +441,12 @@
     const uploadBox = document.querySelector(".upload-box");
     const btn = document.getElementById("uploadBtn");
     const file = fileInput.files[0];
+    const jenisMedia = file && /\.(jpe?g|png)$/i.test(file.name || "") ? "foto" : "video";
+    const pesanGagal = "Gagal memproses " + jenisMedia + ". Silakan coba lagi.";
+    const pesanAman = (mentah) => {
+        const t = String(mentah || "");
+        return /terlalu besar|ukuran file|hanya file video|foto ditolak|pornografi|tidak pantas|tidak ada di grup|masuk group/i.test(t) ? t : pesanGagal;
+    };
 
     if (btn) {
         btn.disabled = true;
@@ -616,9 +622,25 @@
                     if (pText) pText.innerText = "PROSES HD... (96%)"; 
 
                     let gagalCekProgress = 0;
+                    let idHilang = 0;
+                    let totalCek = 0;
+
+const berhentiDenganError = (judul, pesan) => {
+    console.warn("[PROGRESS STOP]", judul, pesan);
+    clearInterval(intervalCek);
+    resetUploadState();
+    document.getElementById("status").innerHTML = "Gagal memproses " + jenisMedia + ".";
+    showCustomModal("error", "Gagal Memproses", pesanGagal + " Cek WhatsApp dulu sebelum upload ulang, " + jenisMedia + " mungkin sudah terkirim.");
+};
 
 const intervalCek = setInterval(async () => {
     try {
+        totalCek++;
+        if (totalCek > 200) {
+            berhentiDenganError("Proses Terlalu Lama", "Server belum selesai setelah 10 menit. Cek WhatsApp dulu, video mungkin sudah terkirim, jadi jangan upload ulang sebelum memastikan.");
+            return;
+        }
+
         const controller = new AbortController();
 
         const timeoutProgress = setTimeout(() => {
@@ -642,6 +664,11 @@ const intervalCek = setInterval(async () => {
         if (!cekReq.ok) {
             gagalCekProgress++;
 
+            if (gagalCekProgress >= 10) {
+                berhentiDenganError("Koneksi Terganggu", "Server beberapa kali membalas error. Cek WhatsApp dulu sebelum upload ulang, lalu coba lagi nanti.");
+                return;
+            }
+
             document.getElementById("status").innerHTML =
                 "Koneksi ke server terganggu, mencoba lagi...";
 
@@ -658,6 +685,8 @@ const intervalCek = setInterval(async () => {
         gagalCekProgress = 0;
 
         if (statusData.status === "proses") {
+
+            idHilang = 0;
 
             document.getElementById("status").innerHTML =
                 statusData.message ||
@@ -699,12 +728,20 @@ const intervalCek = setInterval(async () => {
 
             const pesanError =
                 statusData.message || "";
+            const pesanTampil = pesanAman(pesanError);
 
             if (
                 pesanError
                     .toLowerCase()
                     .includes("id tidak ditemukan")
             ) {
+
+                idHilang++;
+
+                if (idHilang >= 20) {
+                    berhentiDenganError("Proses Tidak Ditemukan", "Server tidak lagi menemukan proses videomu. Kemungkinan proses gagal atau server restart. Cek WhatsApp dulu, lalu coba upload ulang kalau video belum masuk.");
+                    return;
+                }
 
                 document.getElementById("status").innerHTML =
                     "Menunggu server memproses video...";
@@ -726,12 +763,12 @@ const intervalCek = setInterval(async () => {
             resetUploadState();
 
             document.getElementById("status").innerHTML =
-                pesanError;
+                pesanTampil;
 
             showCustomModal(
                 "error",
                 "Gagal Memproses",
-                pesanError
+                pesanTampil
             );
         }
 
@@ -778,18 +815,30 @@ const intervalCek = setInterval(async () => {
 
                 } else {
                     resetUploadState();
-                    document.getElementById("status").innerHTML = res.error || "Gagal memproses";
-                    showCustomModal("error", "Gagal Memproses", res.error || "Terjadi kesalahan backend.");
+                    const pesanTampil = pesanAman(res.error);
+                    console.warn("[UPLOAD DITOLAK]", res.error);
+                    document.getElementById("status").innerHTML = pesanTampil === pesanGagal ? "Gagal memproses " + jenisMedia + "." : pesanTampil;
+                    showCustomModal("error", "Gagal Memproses", pesanTampil);
                 }
             } catch (err) {
                 resetUploadState();
-                document.getElementById("status").innerHTML = "Respon server rusak.";
-                showCustomModal("error", "Gagal Memproses", "Server mengirimkan respon HTML/Rusak (Bukan JSON).");
+                const rawResp = String(xhr.responseText || "");
+                const ctResp = String(xhr.getResponseHeader("Content-Type") || "-").split(";")[0].replace(/[^a-zA-Z0-9\/+.\-]/g, "").slice(0, 40) || "-";
+                const kosong = rawResp.trim() === "";
+                const mirip = /^\s*</.test(rawResp);
+                console.warn("[UPLOAD RESPON BUKAN JSON]", xhr.status, ctResp, rawResp.slice(0, 300));
+                document.getElementById("status").innerHTML = "Gagal memproses " + jenisMedia + ".";
+                showCustomModal(
+                    "error",
+                    "Gagal Memproses",
+                    pesanGagal + " Cek WhatsApp dulu sebelum upload ulang, " + jenisMedia + " mungkin sudah terkirim."
+                );
             }
         } else {
             resetUploadState();
-            document.getElementById("status").innerHTML = `Server Error (${xhr.status})`;
-            showCustomModal("error", "Server Error", `Gagal mengunggah file. Server merespon dengan status ${xhr.status}.`);
+            console.warn("[UPLOAD HTTP ERROR]", xhr.status);
+            document.getElementById("status").innerHTML = "Gagal memproses " + jenisMedia + ".";
+            showCustomModal("error", "Gagal Memproses", pesanGagal);
         }
     };
 
@@ -803,11 +852,11 @@ const intervalCek = setInterval(async () => {
         resetUploadState();
 
         if (bodyTerkirim) {
-            document.getElementById("status").innerHTML = "Respons server tidak diterima.";
+            document.getElementById("status").innerHTML = "Gagal memproses " + jenisMedia + ".";
             showCustomModal(
                 "error",
-                "Respons Tidak Diterima",
-                "Video sudah terkirim tapi balasan server tidak sampai. Cek grup WhatsApp dulu, kalau 1-2 menit belum ada hasil baru upload ulang."
+                "Gagal Memproses",
+                pesanGagal + " Cek WhatsApp dulu, kalau 1-2 menit belum ada hasil baru upload ulang."
             );
         } else {
             document.getElementById("status").innerHTML = "Upload terputus.";
@@ -824,13 +873,13 @@ const intervalCek = setInterval(async () => {
     xhr.ontimeout = function () {
         console.warn("[XHR TIMEOUT] bodyTerkirim =", bodyTerkirim);
         resetUploadState();
-        document.getElementById("status").innerHTML = "Upload terlalu lama.";
+        document.getElementById("status").innerHTML = "Gagal memproses " + jenisMedia + ".";
         showCustomModal(
             "error",
-            "Upload Terlalu Lama",
+            "Gagal Memproses",
             bodyTerkirim
-                ? "Video sudah terkirim tapi server belum membalas. Cek grup WhatsApp dulu sebelum upload ulang."
-                : "Upload tidak selesai dalam 5 menit. Coba pakai koneksi yang lebih stabil atau kompres videonya dulu, lalu coba lagi."
+                ? pesanGagal + " Cek WhatsApp dulu sebelum upload ulang."
+                : "Upload tidak selesai dalam 5 menit. Coba pakai koneksi yang lebih stabil atau kompres dulu ukurannya, lalu coba lagi."
         );
     };
 
@@ -897,7 +946,6 @@ function resetUploadState() {
             }
         })();
     </script>
-    <script src="Blockcheck.js"></script>
 <script>
 document.body.style.display = "none";
 
@@ -917,32 +965,16 @@ maintenanceRef.once("value")
     const isOwner = localStorage.getItem("isOwner");
 
     if (data && data.enabled === true && isOwner !== "true") {
-        
-        document.body.innerHTML = `
-        <div class="maintenance-page">
-            <div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div>
-            <div class="maintenance-card">
-                <div class="maintenance-icon"><svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 20 9-16 9 16z"/><path d="M12 10v5M12 18h.01"/></svg></div>
-                <div class="maintenance-title">WEBSITE MAINTENANCE</div>
-                ${data.image ? `
-                <div class="maintenance-image-wrapper">
-                    <div class="maintenance-image-line"></div>
-                    <img src="${data.image}" class="maintenance-image">
-                </div>` : ''}
-                <div class="maintenance-desc">${data.message || "Website sedang diperbaiki"}</div>
-                <div class="loader"><div class="loader-line"></div><div class="loader-line"></div></div>
-            </div>
-            <a href="https://whatsapp.com/channel/0029VbCPkeX2UPBEbTumgG2Y" target="_blank" class="channel-btn">Informasi</a>
-        </div>`;
-    } else {
-        
-        setTimeout(() => {
-            const donationPopup = document.getElementById("donationPopup");
-            if (donationPopup) {
-                donationPopup.classList.add("show");
-            }
-        }, 1500);
+        setTimeout(showBody, 1500);
+        return;
     }
+
+    setTimeout(() => {
+        const donationPopup = document.getElementById("donationPopup");
+        if (donationPopup) {
+            donationPopup.classList.add("show");
+        }
+    }, 1500);
 
     bodyShown = true;
     document.body.style.display = "block";
