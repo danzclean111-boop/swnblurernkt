@@ -31,7 +31,9 @@
         .dn-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
         .dn-ic { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 
-        /* ---------- Hero ---------- */
+        .dn-page button, .dn-page button:hover, .dn-page button:active { box-shadow: none; filter: none; }
+        .dn-page button:hover { transform: none; }
+
         .dn-hero {
             position: relative;
             padding: 26px 22px 22px;
@@ -76,13 +78,11 @@
         .dn-live[data-on="1"] { color: var(--text-2); }
         @keyframes dnPulse { 70% { box-shadow: 0 0 0 7px rgba(54, 226, 168, 0); } 100% { box-shadow: 0 0 0 0 rgba(54, 226, 168, 0); } }
 
-        /* ---------- Section ---------- */
         .dn-sec { margin-top: 34px; }
         .dn-sec-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
         .dn-sec-head h2 { font-size: 19px; font-weight: 800; letter-spacing: -.01em; color: var(--text-main); }
         .dn-sec-head span { font-size: 12.5px; color: var(--text-muted); }
 
-        /* ---------- Avatar ---------- */
         .dn-av {
             --c: var(--primary-300);
             flex: none; width: 42px; height: 42px; border-radius: 50%;
@@ -96,7 +96,6 @@
         .dn-av[data-t="3"] { --c: #a99bff; }
         .dn-av[data-t="4"] { --c: #ff8ea1; }
 
-        /* ---------- Podium ---------- */
         .dn-podium { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .dn-pod {
             position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px;
@@ -125,7 +124,6 @@
         .dn-pod[data-r="3"] { --rc: var(--bronze); }
         .dn-crown { display: none; width: 22px; height: 22px; color: var(--gold); fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; flex: none; align-self: flex-start; margin-left: auto; }
 
-        /* Peringkat 4+ */
         .dn-rows { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
         .dn-row { position: relative; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--line); overflow: hidden; }
         .dn-row .dn-n { width: 22px; text-align: center; font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); flex: none; }
@@ -136,7 +134,6 @@
         .dn-row-amt { font-size: 14px; font-weight: 600; color: var(--text-main); flex: none; }
         .dn-bar { position: absolute; left: 0; bottom: 0; height: 2px; background: linear-gradient(90deg, var(--primary), var(--primary-300)); opacity: .75; transform-origin: left; }
 
-        /* ---------- Toolbar ---------- */
         .dn-tools { position: sticky; top: calc(var(--topbar-h) + 8px); z-index: 5; display: grid; gap: 10px; padding: 12px; margin: 0 -12px 14px;
             background: color-mix(in srgb, var(--bg) 82%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-radius: var(--r-lg); border: 1px solid var(--line); }
         .dn-field label { display: block; font-size: 12px; font-weight: 600; color: var(--text-2); margin: 0 0 6px 2px; }
@@ -162,7 +159,6 @@
         .dn-count { font-size: 12.5px; color: var(--text-muted); margin: 0 2px 10px; min-height: 18px; }
         .dn-count b { color: var(--text-2); font-weight: 600; }
 
-        /* ---------- Donation item ---------- */
         .dn-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
         .dn-item { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 12px; padding: 14px; border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--line); }
         .dn-item .dn-av { grid-row: 1 / 2; }
@@ -178,9 +174,8 @@
         @keyframes dnNew { 0% { background: rgba(54, 226, 168, .16); transform: translateY(-6px); opacity: 0; } 25% { opacity: 1; transform: none; } 100% { background: var(--surface); } }
 
         .dn-more { display: block; width: 100%; min-height: var(--tap); margin-top: 14px; border-radius: var(--r-md); border: 1px solid var(--line-strong); background: transparent; color: var(--primary-300); font-weight: 700; font-size: 14px; cursor: pointer; transition: background var(--dur-2) var(--ease); }
-        .dn-more:hover { background: rgba(77, 124, 255, .08); }
+        @media (hover: hover) { .dn-more:hover { background: rgba(77, 124, 255, .08); } }
 
-        /* ---------- States ---------- */
         .dn-state { text-align: center; padding: 34px 18px; border-radius: var(--r-lg); border: 1px dashed var(--line-strong); color: var(--text-2); font-size: 14px; line-height: 1.55; }
         .dn-state strong { display: block; color: var(--text-main); font-size: 15.5px; margin-bottom: 4px; }
         .dn-state button { margin-top: 14px; min-height: var(--tap); padding: 0 18px; border-radius: var(--r-md); border: 1px solid var(--line-strong); background: var(--surface-2); color: var(--text-main); font-weight: 700; cursor: pointer; }
@@ -226,7 +221,6 @@
 
     <main class="dn-page">
 
-        <!-- Hero -->
         <section class="dn-hero" aria-labelledby="dnTitle">
             <div class="dn-eyebrow">Dukungan komunitas</div>
             <h1 id="dnTitle">Donasi</h1>
@@ -244,7 +238,6 @@
             <div class="dn-live" id="dnLive" data-on="0"><i></i><span id="dnLiveTxt">Menghubungkan…</span></div>
         </section>
 
-        <!-- Top donatur -->
         <section class="dn-sec" aria-labelledby="dnTopTitle" id="dnTopSec" aria-busy="true">
             <div class="dn-sec-head">
                 <h2 id="dnTopTitle">Top Donatur</h2>
@@ -256,7 +249,6 @@
             </div>
         </section>
 
-        <!-- Semua donasi -->
         <section class="dn-sec" aria-labelledby="dnAllTitle" id="dnAllSec" aria-busy="true">
             <div class="dn-sec-head">
                 <h2 id="dnAllTitle">Semua Donasi</h2>
@@ -317,7 +309,6 @@
             var shown = PAGE;
             var shownTotal = 0;
 
-            /* ---------- util ---------- */
             function rp(n) { return "Rp\u00a0" + nf.format(n); }
             function el(tag, cls, text) {
                 var e = document.createElement(tag);
@@ -366,7 +357,6 @@
                 node.appendChild(document.createTextNode(text.slice(i + q.length)));
             }
 
-            /* ---------- data ---------- */
             function donors() {
                 var map = {};
                 rows.forEach(function (r) {
@@ -379,14 +369,12 @@
                     .sort(function (a, b) { return b.total - a.total || b.n - a.n; });
             }
 
-            /* ---------- render: hero ---------- */
             function renderHero() {
                 var unique = {};
                 rows.forEach(function (r) { unique[r.name.trim().toLowerCase()] = 1; });
                 $("dnDonors").textContent = nf.format(Object.keys(unique).length);
             }
 
-            /* ---------- render: top ---------- */
             function renderTop() {
                 var box = $("dnTop");
                 box.textContent = "";
@@ -436,7 +424,6 @@
                 }
             }
 
-            /* ---------- render: list ---------- */
             function filtered() {
                 var q = query;
                 var arr = q ? rows.filter(function (r) { return r.name.toLowerCase().indexOf(q) > -1; }) : rows.slice();
@@ -519,7 +506,6 @@
                 $("dnAllSec").setAttribute("aria-busy", "false");
             }
 
-            /* ---------- toast ---------- */
             var toastT = null;
             function toast(r) {
                 var t = $("dnToast");
@@ -531,7 +517,6 @@
                 toastT = setTimeout(function () { t.classList.remove("show"); }, 4500);
             }
 
-            /* ---------- live ---------- */
             function setLive(on, txt) {
                 $("dnLive").dataset.on = on ? "1" : "0";
                 $("dnLiveTxt").textContent = txt;
@@ -605,7 +590,6 @@
             }
             document.addEventListener("visibilitychange", function () { if (!document.hidden) load(); });
 
-            /* ---------- events ---------- */
             var debounce = null;
             var input = $("dnSearch"), clearBtn = $("dnClear");
             function applyQuery() {
