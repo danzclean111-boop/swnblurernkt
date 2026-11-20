@@ -177,10 +177,11 @@ const MN_MORE = [
 
 const MN_NAV = [
   { key: "home", label: "Dashboard", icon: "home", img: "./media/dashboard.png", href: "/" },
-  { key: "dl", label: "Downloader", icon: "download", img: "./media/downloader.png", popup: "dl", list: MN_DOWNLOADER },
+  { key: "dl", label: "Unduh", icon: "download", img: "./media/downloader.png", popup: "dl", list: MN_DOWNLOADER },
   { key: "preset", label: "Preset", icon: "layers", img: "./media/preset.png", popup: "preset", list: MN_PRESET },
   { key: "stats", label: "Statistik", icon: "chart", img: "./media/statistik.png", alts: ["stats", "statistic", "statistics", "stat", "grafik", "chart"], href: "/stats.html" },
   { key: "chat", label: "Chat", icon: "chat", img: "./media/chat.png", href: "/chatglobal.html" },
+  { key: "donasi", label: "Donasi", icon: "heart", img: "./media/donasi.png", href: "/donasi.html" },
   { key: "more", label: "Lainnya", icon: "grid", img: "./media/lainnya.png", popup: "more", list: MN_MORE },
 ];
 
@@ -191,6 +192,7 @@ const MN_ICONS = {
   chart: '<path d="M5 20v-8"/><path d="M12 20V4"/><path d="M19 20v-5"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
   chat: '<path d="M5 5h14a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 17h-7l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 5 5z"/><path d="M8 10h8M8 13h5"/>',
+  heart: '<path d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z"/>',
   grid: '<rect x="4" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.8"/>',
 };
 
