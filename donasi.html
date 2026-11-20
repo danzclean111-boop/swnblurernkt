@@ -190,9 +190,6 @@
         .dn-skel::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(150, 170, 255, .08), transparent); animation: dnShimmer 1.4s infinite; }
         @keyframes dnShimmer { to { transform: translateX(100%); } }
 
-        .dn-note { margin-top: 28px; display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; line-height: 1.55; color: var(--text-muted); }
-        .dn-note .dn-ic { margin-top: 2px; color: var(--accent); }
-
         .dn-toast { position: fixed; left: 50%; bottom: calc(var(--dock-clear) + 6px); transform: translate(-50%, 20px); opacity: 0; pointer-events: none; z-index: 60;
             max-width: min(92vw, 420px); padding: 12px 16px; border-radius: var(--r-md); background: var(--surface-3); border: 1px solid var(--accent); box-shadow: var(--shadow-2); font-size: 13.5px; color: var(--text-main);
             transition: opacity var(--dur-2) var(--ease), transform var(--dur-3) var(--ease-spring); }
@@ -291,10 +288,6 @@
             <button type="button" class="dn-more" id="dnMore" hidden>Tampilkan lebih banyak</button>
         </section>
 
-        <p class="dn-note">
-            <svg class="dn-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5.5c0 4.4-3 8-7 9.5-4-1.5-7-5.1-7-9.5V6z"/><path d="M9 12l2.2 2.2L15.5 10"/></svg>
-            <span>Hanya nama, nominal, dan pesan yang ditampilkan. Email donatur tidak pernah disimpan atau dibagikan.</span>
-        </p>
     </main>
 
     <div class="dn-toast" id="dnToast" role="status" aria-live="polite"></div>
@@ -579,7 +572,7 @@
                 next.forEach(function (r) { known[r.id] = 1; });
                 rows = next;
                 firstLoad = false;
-                setLive(true, "Diperbarui otomatis \u00b7 donasi baru muncul sendiri");
+                setLive(true, "Online");
                 renderAll();
             }
 
