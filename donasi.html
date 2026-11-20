@@ -227,7 +227,7 @@
             <p class="dn-lead">Setiap donasi membantu DanzClean tetap menyala, cepat, dan gratis untuk semua orang.</p>
 
             <div class="dn-metrics">
-                <span class="dn-chip"><b id="dnDonors">0</b> donatur</span>
+                <span class="dn-chip"><b id="dnDonors">0</b> donasi</span>
             </div>
 
             <a class="dn-cta" href="https://saweria.co/Danztsuyoi" target="_blank" rel="noopener noreferrer">
@@ -240,7 +240,7 @@
 
         <section class="dn-sec" aria-labelledby="dnTopTitle" id="dnTopSec" aria-busy="true">
             <div class="dn-sec-head">
-                <h2 id="dnTopTitle">Top Donatur</h2>
+                <h2 id="dnTopTitle">Top Donasi</h2>
                 <span>Berdasarkan total donasi</span>
             </div>
             <div id="dnTop">
@@ -259,7 +259,7 @@
                     <label for="dnSearch">Cari username</label>
                     <div class="dn-input">
                         <svg class="dn-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-                        <input id="dnSearch" type="search" inputmode="search" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="60" placeholder="Ketik nama donatur…">
+                        <input id="dnSearch" type="search" inputmode="search" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="60" placeholder="Ketik username…">
                         <button type="button" class="dn-clear" id="dnClear" aria-label="Hapus pencarian">
                             <svg class="dn-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
                         </button>
@@ -381,8 +381,8 @@
                 var list = donors().slice(0, TOP_MAX);
                 if (!list.length) {
                     var st = el("div", "dn-state");
-                    st.appendChild(el("strong", "", "Belum ada top donatur"));
-                    st.appendChild(document.createTextNode("Jadilah donatur pertama yang muncul di sini."));
+                    st.appendChild(el("strong", "", "Belum ada top donasi"));
+                    st.appendChild(document.createTextNode("Jadilah yang pertama muncul di sini."));
                     box.appendChild(st);
                     return;
                 }
