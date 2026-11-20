@@ -6297,14 +6297,15 @@ html:has(#dzLoader) .cs-hint-tooltip {
 .mn-nav {
     --mn-h: 64px;
     --mn-bar: #0e1635;
-    max-width: 424px;
+    width: calc(100% - 16px);
+    max-width: 472px;
     bottom: calc(12px + env(safe-area-inset-bottom, 0px));
 }
 .mn-shadow {
     box-shadow: 0 0 0 1px var(--line-strong), 0 18px 40px rgba(0, 0, 0, 0.6);
 }
 .mn-item { color: #94a0cf; gap: 4px; }
-.mn-label { font-size: 11px; font-weight: 600; letter-spacing: 0; }
+.mn-label { font-size: 10.5px; font-weight: 600; letter-spacing: 0; max-width: 100%; padding: 0 2px; text-align: center; overflow: hidden; text-overflow: ellipsis; }
 .mn-item.active { color: #fff; }
 .mn-item.active .mn-label { font-weight: 700; }
 .mn-item:focus-visible { outline: none; }
@@ -6317,7 +6318,7 @@ html:has(#dzLoader) .cs-hint-tooltip {
 .mn-scrim { background: rgba(4, 6, 16, .55); }
 .mn-pop {
     bottom: calc(12px + 64px + 30px + env(safe-area-inset-bottom, 0px));
-    max-width: 424px;
+    max-width: 472px;
     background: rgba(13, 20, 48, 0.96);
     border: 1px solid var(--line-strong);
     border-radius: var(--r-xl);
@@ -6329,8 +6330,8 @@ html:has(#dzLoader) .cs-hint-tooltip {
 .mn-pop-ico { color: var(--primary-300); background: rgba(77,124,255,.14); }
 
 @media (min-width: 1024px) {
-    .mn-nav { max-width: 460px; --mn-h: 68px; }
-    .mn-pop { max-width: 460px; }
+    .mn-nav { max-width: 520px; --mn-h: 68px; }
+    .mn-pop { max-width: 520px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
