@@ -65,6 +65,17 @@ const FIREBASE_CONFIG_CHAT = {
   measurementId: "G-7Z33G70N8G"
 };
 
+const FIREBASE_CONFIG_DONASI = {
+  apiKey: "AIzaSyCNdIqat2FbiKap-3_stnt-IAwAohP6qtA",
+  authDomain: "donasi-69866.firebaseapp.com",
+  databaseURL: "https://donasi-69866-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "donasi-69866",
+  storageBucket: "donasi-69866.firebasestorage.app",
+  messagingSenderId: "783075654400",
+  appId: "1:783075654400:web:dec05816c8ee7cb62c91e5",
+  measurementId: "G-NH8VB3CTBL"
+};
+
 const APPCHECK_SITE_KEYS = {
     "danzclean-auth":   "6Ld7hR8uAAAAAMqaueNKm5vSkPL23IQgBZVcq_el",
     "danzzclean":       "6LeqwR8uAAAAAMNfODpYA4r-UuGbxlMBR0g7XUP1",
