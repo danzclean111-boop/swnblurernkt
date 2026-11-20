@@ -176,7 +176,7 @@ const MN_MORE = [
 ];
 
 const MN_NAV = [
-  { key: "home", label: "Dashboard", icon: "home", img: "./media/dashboard.png", href: "/" },
+  { key: "home", label: "Beranda", icon: "home", img: "./media/dashboard.png", href: "/" },
   { key: "dl", label: "Unduh", icon: "download", img: "./media/downloader.png", popup: "dl", list: MN_DOWNLOADER },
   { key: "preset", label: "Preset", icon: "layers", img: "./media/preset.png", popup: "preset", list: MN_PRESET },
   { key: "stats", label: "Statistik", icon: "chart", img: "./media/statistik.png", alts: ["stats", "statistic", "statistics", "stat", "grafik", "chart"], href: "/stats.html" },
