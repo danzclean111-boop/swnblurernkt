@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <script src="/func/api/anti-devtools.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#060913">
+    <title>Donasi - DanzClean</title>
+
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .dn-page {
+            --gold: var(--amber);
+            --silver: #c4cbe8;
+            --bronze: #e0a07a;
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+            padding: calc(var(--topbar-h) + 76px) var(--gutter) var(--dock-clear);
+        }
+        @media (min-width: 900px) { .dn-page { max-width: 760px; } }
+
+        .dn-page h1, .dn-page h2, .dn-page p { margin: 0; }
+        .dn-mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+        .dn-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+        .dn-ic { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+        /* ---------- Hero ---------- */
+        .dn-hero {
+            position: relative;
+            padding: 26px 22px 22px;
+            border-radius: var(--r-xl);
+            background:
+                radial-gradient(420px 220px at 100% 0%, rgba(255, 191, 71, .12), transparent 70%),
+                linear-gradient(160deg, var(--surface-2), var(--surface) 70%);
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow-1);
+            overflow: hidden;
+        }
+        .dn-hero::before, .dn-hero::after {
+            content: ""; position: absolute; width: 18px; height: 18px; pointer-events: none;
+            border: 2px solid var(--amber); opacity: .8;
+        }
+        .dn-hero::before { top: 12px; left: 12px; border-right: 0; border-bottom: 0; border-top-left-radius: 6px; }
+        .dn-hero::after  { bottom: 12px; right: 12px; border-left: 0; border-top: 0; border-bottom-right-radius: 6px; }
+
+        .dn-eyebrow { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--amber); }
+        .dn-hero h1 { font-size: clamp(28px, 7.4vw, 38px); font-weight: 800; letter-spacing: -.02em; line-height: 1.1; margin-top: 8px; color: var(--text-main); }
+        .dn-hero .dn-lead { margin-top: 8px; font-size: 14.5px; line-height: 1.55; color: var(--text-2); max-width: 46ch; }
+
+        .dn-metrics { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+        .dn-chip { display: inline-flex; align-items: baseline; gap: 6px; padding: 8px 12px; border-radius: 999px; background: rgba(255, 255, 255, .04); border: 1px solid var(--line); font-size: 12.5px; color: var(--text-2); }
+        .dn-chip b { font-family: var(--font-mono); font-size: 14px; color: var(--text-main); font-weight: 600; }
+
+        .dn-cta {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            margin-top: 20px; min-height: var(--tap); padding: 0 20px; width: 100%;
+            border-radius: var(--r-md); background: var(--amber); color: #1b1303;
+            font-weight: 700; font-size: 15px; text-decoration: none; border: 0; cursor: pointer;
+            transition: transform var(--dur-1) var(--ease), filter var(--dur-2) var(--ease), box-shadow var(--dur-2) var(--ease);
+            box-shadow: 0 8px 24px rgba(255, 191, 71, .22);
+        }
+        .dn-cta:hover { filter: brightness(1.06); }
+        .dn-cta:active { transform: scale(.98); }
+        @media (min-width: 560px) { .dn-cta { width: auto; } }
+
+        .dn-live { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-muted); margin-top: 14px; }
+        .dn-live i { width: 7px; height: 7px; border-radius: 50%; background: var(--text-3); }
+        .dn-live[data-on="1"] i { background: var(--accent); box-shadow: 0 0 0 0 var(--accent-glow); animation: dnPulse 2.2s infinite; }
+        .dn-live[data-on="1"] { color: var(--text-2); }
+        @keyframes dnPulse { 70% { box-shadow: 0 0 0 7px rgba(54, 226, 168, 0); } 100% { box-shadow: 0 0 0 0 rgba(54, 226, 168, 0); } }
+
+        /* ---------- Section ---------- */
+        .dn-sec { margin-top: 34px; }
+        .dn-sec-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+        .dn-sec-head h2 { font-size: 19px; font-weight: 800; letter-spacing: -.01em; color: var(--text-main); }
+        .dn-sec-head span { font-size: 12.5px; color: var(--text-muted); }
+
+        /* ---------- Avatar ---------- */
+        .dn-av {
+            --c: var(--primary-300);
+            flex: none; width: 42px; height: 42px; border-radius: 50%;
+            display: grid; place-items: center;
+            font-weight: 800; font-size: 15px; letter-spacing: .02em; color: var(--c);
+            background: color-mix(in srgb, var(--c) 16%, var(--surface));
+            border: 1px solid color-mix(in srgb, var(--c) 38%, transparent);
+        }
+        .dn-av[data-t="1"] { --c: var(--accent); }
+        .dn-av[data-t="2"] { --c: var(--amber); }
+        .dn-av[data-t="3"] { --c: #a99bff; }
+        .dn-av[data-t="4"] { --c: #ff8ea1; }
+
+        /* ---------- Podium ---------- */
+        .dn-podium { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .dn-pod {
+            position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px;
+            padding: 18px 12px 16px; border-radius: var(--r-lg);
+            background: var(--surface); border: 1px solid var(--line);
+            min-width: 0;
+        }
+        .dn-pod .dn-av { width: 50px; height: 50px; font-size: 17px; margin-bottom: 6px; }
+        .dn-pod-name { max-width: 100%; font-size: 14.5px; font-weight: 700; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .dn-pod-amt { font-size: 15px; font-weight: 600; color: var(--text-main); }
+        .dn-pod-sub { font-size: 12px; color: var(--text-muted); }
+        .dn-rank {
+            position: absolute; top: 10px; left: 10px; min-width: 26px; height: 26px; padding: 0 7px; border-radius: 999px;
+            display: grid; place-items: center; font-family: var(--font-mono); font-size: 12px; font-weight: 600;
+            color: var(--rc); background: color-mix(in srgb, var(--rc) 14%, transparent); border: 1px solid color-mix(in srgb, var(--rc) 45%, transparent);
+        }
+        .dn-pod[data-r="1"] { --rc: var(--gold); grid-column: 1 / -1; flex-direction: row; text-align: left; gap: 14px; padding: 20px 18px 20px 52px;
+            background: radial-gradient(360px 160px at 0% 0%, rgba(255, 191, 71, .14), transparent 70%), var(--surface);
+            border-color: rgba(255, 191, 71, .4); box-shadow: 0 10px 34px rgba(255, 191, 71, .08); }
+        .dn-pod[data-r="1"] .dn-av { width: 58px; height: 58px; font-size: 20px; margin: 0; }
+        .dn-pod[data-r="1"] .dn-pod-body { min-width: 0; flex: 1; }
+        .dn-pod[data-r="1"] .dn-pod-name { font-size: 17px; }
+        .dn-pod[data-r="1"] .dn-pod-amt { font-size: 22px; color: var(--gold); margin-top: 2px; }
+        .dn-pod[data-r="1"] .dn-crown { display: block; }
+        .dn-pod[data-r="2"] { --rc: var(--silver); }
+        .dn-pod[data-r="3"] { --rc: var(--bronze); }
+        .dn-crown { display: none; width: 22px; height: 22px; color: var(--gold); fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; flex: none; align-self: flex-start; margin-left: auto; }
+
+        /* Peringkat 4+ */
+        .dn-rows { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
+        .dn-row { position: relative; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--line); overflow: hidden; }
+        .dn-row .dn-n { width: 22px; text-align: center; font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); flex: none; }
+        .dn-row .dn-av { width: 36px; height: 36px; font-size: 13px; }
+        .dn-row-main { min-width: 0; flex: 1; }
+        .dn-row-name { font-size: 14px; font-weight: 600; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .dn-row-sub { font-size: 12px; color: var(--text-muted); }
+        .dn-row-amt { font-size: 14px; font-weight: 600; color: var(--text-main); flex: none; }
+        .dn-bar { position: absolute; left: 0; bottom: 0; height: 2px; background: linear-gradient(90deg, var(--primary), var(--primary-300)); opacity: .75; transform-origin: left; }
+
+        /* ---------- Toolbar ---------- */
+        .dn-tools { position: sticky; top: calc(var(--topbar-h) + 8px); z-index: 5; display: grid; gap: 10px; padding: 12px; margin: 0 -12px 14px;
+            background: color-mix(in srgb, var(--bg) 82%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-radius: var(--r-lg); border: 1px solid var(--line); }
+        .dn-field label { display: block; font-size: 12px; font-weight: 600; color: var(--text-2); margin: 0 0 6px 2px; }
+        .dn-input { position: relative; }
+        .dn-input .dn-ic { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-3); pointer-events: none; }
+        .dn-input input {
+            width: 100%; height: 46px; padding: 0 46px 0 42px; border-radius: var(--r-md);
+            background: var(--surface); border: 1px solid var(--line-strong); color: var(--text-main);
+            font-size: 16px; outline: none; transition: border-color var(--dur-2) var(--ease), box-shadow var(--dur-2) var(--ease);
+            -webkit-appearance: none; appearance: none;
+        }
+        .dn-input input::placeholder { color: var(--text-3); }
+        .dn-input input:focus-visible { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+        .dn-input input::-webkit-search-cancel-button { display: none; }
+        .dn-clear { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border: 0; background: transparent; color: var(--text-muted); display: none; place-items: center; cursor: pointer; border-radius: 50%; }
+        .dn-clear:hover { color: var(--text-main); }
+        .dn-clear.show { display: grid; }
+
+        .dn-seg { display: grid; grid-template-columns: 1fr 1fr; padding: 4px; gap: 4px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--line); }
+        .dn-seg button { min-height: 40px; border: 0; border-radius: 10px; background: transparent; color: var(--text-2); font-size: 13.5px; font-weight: 600; cursor: pointer; transition: background var(--dur-2) var(--ease), color var(--dur-2) var(--ease); }
+        .dn-seg button[aria-pressed="true"] { background: var(--surface-3); color: var(--text-main); box-shadow: inset 0 0 0 1px var(--line-strong); }
+
+        .dn-count { font-size: 12.5px; color: var(--text-muted); margin: 0 2px 10px; min-height: 18px; }
+        .dn-count b { color: var(--text-2); font-weight: 600; }
+
+        /* ---------- Donation item ---------- */
+        .dn-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+        .dn-item { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 12px; padding: 14px; border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--line); }
+        .dn-item .dn-av { grid-row: 1 / 2; }
+        .dn-who { min-width: 0; align-self: center; }
+        .dn-name { font-size: 14.5px; font-weight: 700; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .dn-name mark, .dn-row-name mark { background: rgba(255, 191, 71, .22); color: var(--amber); border-radius: 3px; padding: 0 1px; }
+        .dn-time { font-size: 12px; color: var(--text-muted); }
+        .dn-amt { align-self: center; font-size: 14.5px; font-weight: 600; color: var(--amber); white-space: nowrap; }
+        .dn-msg { grid-column: 1 / -1; margin-top: 8px; padding: 10px 12px; border-radius: var(--r-sm); background: rgba(255, 255, 255, .035); border-left: 2px solid var(--primary); font-size: 14px; line-height: 1.5; color: var(--text-2); overflow-wrap: anywhere; white-space: pre-wrap;
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
+        .dn-msg.open { display: block; -webkit-line-clamp: unset; }
+        .dn-item.is-new { animation: dnNew 1.6s var(--ease) 1; border-color: var(--accent); }
+        @keyframes dnNew { 0% { background: rgba(54, 226, 168, .16); transform: translateY(-6px); opacity: 0; } 25% { opacity: 1; transform: none; } 100% { background: var(--surface); } }
+
+        .dn-more { display: block; width: 100%; min-height: var(--tap); margin-top: 14px; border-radius: var(--r-md); border: 1px solid var(--line-strong); background: transparent; color: var(--primary-300); font-weight: 700; font-size: 14px; cursor: pointer; transition: background var(--dur-2) var(--ease); }
+        .dn-more:hover { background: rgba(77, 124, 255, .08); }
+
+        /* ---------- States ---------- */
+        .dn-state { text-align: center; padding: 34px 18px; border-radius: var(--r-lg); border: 1px dashed var(--line-strong); color: var(--text-2); font-size: 14px; line-height: 1.55; }
+        .dn-state strong { display: block; color: var(--text-main); font-size: 15.5px; margin-bottom: 4px; }
+        .dn-state button { margin-top: 14px; min-height: var(--tap); padding: 0 18px; border-radius: var(--r-md); border: 1px solid var(--line-strong); background: var(--surface-2); color: var(--text-main); font-weight: 700; cursor: pointer; }
+
+        .dn-skel { position: relative; overflow: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); height: 74px; }
+        .dn-skel.tall { height: 96px; }
+        .dn-skel::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(150, 170, 255, .08), transparent); animation: dnShimmer 1.4s infinite; }
+        @keyframes dnShimmer { to { transform: translateX(100%); } }
+
+        .dn-note { margin-top: 28px; display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; line-height: 1.55; color: var(--text-muted); }
+        .dn-note .dn-ic { margin-top: 2px; color: var(--accent); }
+
+        .dn-toast { position: fixed; left: 50%; bottom: calc(var(--dock-clear) + 6px); transform: translate(-50%, 20px); opacity: 0; pointer-events: none; z-index: 60;
+            max-width: min(92vw, 420px); padding: 12px 16px; border-radius: var(--r-md); background: var(--surface-3); border: 1px solid var(--accent); box-shadow: var(--shadow-2); font-size: 13.5px; color: var(--text-main);
+            transition: opacity var(--dur-2) var(--ease), transform var(--dur-3) var(--ease-spring); }
+        .dn-toast.show { opacity: 1; transform: translate(-50%, 0); }
+        .dn-toast b { color: var(--amber); font-family: var(--font-mono); font-weight: 600; }
+
+        .dn-cta:focus-visible, .dn-seg button:focus-visible, .dn-more:focus-visible, .dn-clear:focus-visible, .dn-state button:focus-visible, .dn-msg:focus-visible {
+            outline: 2px solid var(--primary-300); outline-offset: 2px; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .dn-skel::after, .dn-live[data-on="1"] i, .dn-item.is-new { animation: none; }
+            .dn-toast { transition: opacity .01s; }
+        }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app-check.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="firebase-config.js"></script>
+</head>
+
+<body>
+
+    <div id="pageLoader" style="display:none;"></div>
+
+    <div class="topbar">
+        <div class="menu-btn" onclick="toggleMenu()">☰</div>
+    </div>
+
+    <div class="sidebar" id="sidebar"></div>
+    <script src="sidebar.js"></script>
+
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <main class="dn-page">
+
+        <!-- Hero -->
+        <section class="dn-hero" aria-labelledby="dnTitle">
+            <div class="dn-eyebrow">Dukungan komunitas</div>
+            <h1 id="dnTitle">Donasi</h1>
+            <p class="dn-lead">Setiap donasi membantu DanzClean tetap menyala, cepat, dan gratis untuk semua orang.</p>
+
+            <div class="dn-metrics">
+                <span class="dn-chip"><b id="dnDonors">0</b> donatur</span>
+            </div>
+
+            <a class="dn-cta" href="https://saweria.co/Danztsuyoi" target="_blank" rel="noopener noreferrer">
+                <svg class="dn-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z"/></svg>
+                Donasi lewat Saweria
+            </a>
+
+            <div class="dn-live" id="dnLive" data-on="0"><i></i><span id="dnLiveTxt">Menghubungkan…</span></div>
+        </section>
+
+        <!-- Top donatur -->
+        <section class="dn-sec" aria-labelledby="dnTopTitle" id="dnTopSec" aria-busy="true">
+            <div class="dn-sec-head">
+                <h2 id="dnTopTitle">Top Donatur</h2>
+                <span>Berdasarkan total donasi</span>
+            </div>
+            <div id="dnTop">
+                <div class="dn-skel tall" style="margin-bottom:10px"></div>
+                <div class="dn-podium"><div class="dn-skel tall"></div><div class="dn-skel tall"></div></div>
+            </div>
+        </section>
+
+        <!-- Semua donasi -->
+        <section class="dn-sec" aria-labelledby="dnAllTitle" id="dnAllSec" aria-busy="true">
+            <div class="dn-sec-head">
+                <h2 id="dnAllTitle">Semua Donasi</h2>
+            </div>
+
+            <div class="dn-tools">
+                <div class="dn-field">
+                    <label for="dnSearch">Cari username</label>
+                    <div class="dn-input">
+                        <svg class="dn-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                        <input id="dnSearch" type="search" inputmode="search" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="60" placeholder="Ketik nama donatur…">
+                        <button type="button" class="dn-clear" id="dnClear" aria-label="Hapus pencarian">
+                            <svg class="dn-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="dn-seg" role="group" aria-label="Urutkan donasi">
+                    <button type="button" data-sort="new" aria-pressed="true">Terbaru</button>
+                    <button type="button" data-sort="big" aria-pressed="false">Terbesar</button>
+                </div>
+            </div>
+
+            <p class="dn-count" id="dnResult" role="status" aria-live="polite"></p>
+
+            <ul class="dn-list" id="dnList">
+                <li class="dn-skel"></li><li class="dn-skel"></li><li class="dn-skel"></li><li class="dn-skel"></li>
+            </ul>
+            <div id="dnEmpty"></div>
+            <button type="button" class="dn-more" id="dnMore" hidden>Tampilkan lebih banyak</button>
+        </section>
+
+        <p class="dn-note">
+            <svg class="dn-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5.5c0 4.4-3 8-7 9.5-4-1.5-7-5.1-7-9.5V6z"/><path d="M9 12l2.2 2.2L15.5 10"/></svg>
+            <span>Hanya nama, nominal, dan pesan yang ditampilkan. Email donatur tidak pernah disimpan atau dibagikan.</span>
+        </p>
+    </main>
+
+    <div class="dn-toast" id="dnToast" role="status" aria-live="polite"></div>
+
+    <script>
+        function toggleMenu() {
+            document.getElementById("sidebar").classList.toggle("active");
+            document.getElementById("overlay").classList.toggle("active");
+        }
+
+        (function () {
+            "use strict";
+
+            var PAGE = 25;
+            var TOP_MAX = 10;
+            var ANON = /^(orang baik|someone|anonim|anonymous|anon|hamba allah|)$/i;
+            var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+            var nf = new Intl.NumberFormat("id-ID");
+            var $ = function (id) { return document.getElementById(id); };
+
+            var rows = [];
+            var known = {};
+            var firstLoad = true;
+            var newIds = {};
+            var sortMode = "new";
+            var query = "";
+            var shown = PAGE;
+            var shownTotal = 0;
+
+            /* ---------- util ---------- */
+            function rp(n) { return "Rp\u00a0" + nf.format(n); }
+            function el(tag, cls, text) {
+                var e = document.createElement(tag);
+                if (cls) e.className = cls;
+                if (text != null) e.textContent = text;
+                return e;
+            }
+            function svg(path, cls) {
+                var s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                s.setAttribute("viewBox", "0 0 24 24");
+                s.setAttribute("aria-hidden", "true");
+                s.setAttribute("class", cls || "dn-ic");
+                s.innerHTML = path;
+                return s;
+            }
+            function hash(str) { var h = 0; for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0; return Math.abs(h); }
+            function initials(name) {
+                var parts = Array.from(name.trim()).length ? name.trim().split(/\s+/) : ["?"];
+                var a = Array.from(parts[0])[0] || "?";
+                var b = parts[1] ? (Array.from(parts[1])[0] || "") : "";
+                return (a + b).toUpperCase();
+            }
+            function avatar(name) {
+                var a = el("div", "dn-av", initials(name));
+                a.dataset.t = String(hash(name.toLowerCase()) % 5);
+                a.setAttribute("aria-hidden", "true");
+                return a;
+            }
+            function ago(ts) {
+                var s = Math.max(0, (Date.now() - ts) / 1000);
+                if (s < 60) return "baru saja";
+                if (s < 3600) return Math.floor(s / 60) + " menit lalu";
+                if (s < 86400) return Math.floor(s / 3600) + " jam lalu";
+                if (s < 7 * 86400) return Math.floor(s / 86400) + " hari lalu";
+                return new Date(ts).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+            }
+            function fullDate(ts) {
+                return new Date(ts).toLocaleString("id-ID", { dateStyle: "long", timeStyle: "short" });
+            }
+            function highlight(node, text, q) {
+                if (!q) { node.textContent = text; return; }
+                var i = text.toLowerCase().indexOf(q);
+                if (i < 0) { node.textContent = text; return; }
+                node.appendChild(document.createTextNode(text.slice(0, i)));
+                node.appendChild(el("mark", "", text.slice(i, i + q.length)));
+                node.appendChild(document.createTextNode(text.slice(i + q.length)));
+            }
+
+            /* ---------- data ---------- */
+            function donors() {
+                var map = {};
+                rows.forEach(function (r) {
+                    var key = r.name.trim().toLowerCase();
+                    if (ANON.test(key)) return;
+                    var d = map[key] || (map[key] = { name: r.name.trim(), total: 0, n: 0 });
+                    d.total += r.amount; d.n++;
+                });
+                return Object.keys(map).map(function (k) { return map[k]; })
+                    .sort(function (a, b) { return b.total - a.total || b.n - a.n; });
+            }
+
+            /* ---------- render: hero ---------- */
+            function renderHero() {
+                var unique = {};
+                rows.forEach(function (r) { unique[r.name.trim().toLowerCase()] = 1; });
+                $("dnDonors").textContent = nf.format(Object.keys(unique).length);
+            }
+
+            /* ---------- render: top ---------- */
+            function renderTop() {
+                var box = $("dnTop");
+                box.textContent = "";
+                var list = donors().slice(0, TOP_MAX);
+                if (!list.length) {
+                    var st = el("div", "dn-state");
+                    st.appendChild(el("strong", "", "Belum ada top donatur"));
+                    st.appendChild(document.createTextNode("Jadilah donatur pertama yang muncul di sini."));
+                    box.appendChild(st);
+                    return;
+                }
+                var podium = el("div", "dn-podium");
+                list.slice(0, 3).forEach(function (d, i) {
+                    var card = el("div", "dn-pod");
+                    card.dataset.r = String(i + 1);
+                    card.appendChild(el("span", "dn-rank", String(i + 1)));
+                    card.appendChild(avatar(d.name));
+                    var body = el("div", "dn-pod-body");
+                    body.appendChild(el("div", "dn-pod-name", d.name));
+                    body.appendChild(el("div", "dn-pod-amt dn-mono", rp(d.total)));
+                    body.appendChild(el("div", "dn-pod-sub", d.n + (d.n > 1 ? " kali donasi" : " donasi")));
+                    card.appendChild(body);
+                    if (i === 0) card.appendChild(svg('<path d="M3.5 8l4.2 4 4.3-7 4.3 7 4.2-4-1.6 10H5.1z"/><path d="M5.5 21h13"/>', "dn-crown"));
+                    podium.appendChild(card);
+                });
+                box.appendChild(podium);
+
+                if (list.length > 3) {
+                    var ul = el("ol", "dn-rows");
+                    ul.start = 4;
+                    var max = list[0].total;
+                    list.slice(3).forEach(function (d, i) {
+                        var li = el("li", "dn-row");
+                        li.appendChild(el("span", "dn-n", String(i + 4)));
+                        li.appendChild(avatar(d.name));
+                        var m = el("div", "dn-row-main");
+                        m.appendChild(el("div", "dn-row-name", d.name));
+                        m.appendChild(el("div", "dn-row-sub", d.n + (d.n > 1 ? " kali donasi" : " donasi")));
+                        li.appendChild(m);
+                        li.appendChild(el("span", "dn-row-amt dn-mono", rp(d.total)));
+                        var bar = el("i", "dn-bar");
+                        bar.style.width = Math.max(4, Math.round(d.total / max * 100)) + "%";
+                        li.appendChild(bar);
+                        ul.appendChild(li);
+                    });
+                    box.appendChild(ul);
+                }
+            }
+
+            /* ---------- render: list ---------- */
+            function filtered() {
+                var q = query;
+                var arr = q ? rows.filter(function (r) { return r.name.toLowerCase().indexOf(q) > -1; }) : rows.slice();
+                arr.sort(sortMode === "big"
+                    ? function (a, b) { return b.amount - a.amount || b.ts - a.ts; }
+                    : function (a, b) { return b.ts - a.ts; });
+                return arr;
+            }
+
+            function itemNode(r) {
+                var li = el("li", "dn-item" + (newIds[r.id] ? " is-new" : ""));
+                li.appendChild(avatar(r.name));
+                var who = el("div", "dn-who");
+                var nm = el("div", "dn-name");
+                highlight(nm, r.name, query);
+                who.appendChild(nm);
+                var tm = el("div", "dn-time", ago(r.ts));
+                tm.dataset.ts = String(r.ts);
+                tm.title = fullDate(r.ts);
+                who.appendChild(tm);
+                li.appendChild(who);
+                li.appendChild(el("div", "dn-amt dn-mono", rp(r.amount)));
+                if (r.message.trim()) {
+                    var msg = el("div", "dn-msg", r.message.trim());
+                    msg.tabIndex = 0;
+                    msg.setAttribute("role", "button");
+                    msg.setAttribute("aria-label", "Pesan dari " + r.name + ". Tekan untuk buka selengkapnya");
+                    var toggle = function () { msg.classList.toggle("open"); };
+                    msg.addEventListener("click", toggle);
+                    msg.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
+                    li.appendChild(msg);
+                }
+                return li;
+            }
+
+            function renderList() {
+                var arr = filtered();
+                var ul = $("dnList"), empty = $("dnEmpty"), more = $("dnMore"), res = $("dnResult");
+                ul.textContent = ""; empty.textContent = "";
+                var slice = arr.slice(0, shown);
+                var frag = document.createDocumentFragment();
+                slice.forEach(function (r) { frag.appendChild(itemNode(r)); });
+                ul.appendChild(frag);
+                more.hidden = arr.length <= shown;
+
+                res.textContent = "";
+                if (query) {
+                    var sum = arr.reduce(function (s, r) { return s + r.amount; }, 0);
+                    if (arr.length) {
+                        res.appendChild(el("b", "", arr.length + " donasi"));
+                        res.appendChild(document.createTextNode(" untuk \u201c" + query + "\u201d \u00b7 total "));
+                        res.appendChild(el("b", "dn-mono", rp(sum)));
+                    }
+                } else if (arr.length) {
+                    res.appendChild(document.createTextNode("Menampilkan "));
+                    res.appendChild(el("b", "", String(Math.min(shown, arr.length))));
+                    res.appendChild(document.createTextNode(" dari " + nf.format(arr.length) + " donasi"));
+                }
+
+                if (!arr.length) {
+                    var st = el("div", "dn-state");
+                    if (query) {
+                        st.appendChild(el("strong", "", "Username tidak ditemukan"));
+                        st.appendChild(document.createTextNode("Tidak ada donasi atas nama \u201c" + query + "\u201d. Coba ejaan lain."));
+                        var b = el("button", "", "Hapus pencarian");
+                        b.type = "button";
+                        b.addEventListener("click", clearSearch);
+                        st.appendChild(b);
+                    } else {
+                        st.appendChild(el("strong", "", "Belum ada donasi"));
+                        st.appendChild(document.createTextNode("Donasi yang masuk akan langsung muncul di sini."));
+                    }
+                    empty.appendChild(st);
+                }
+            }
+
+            function renderAll() {
+                renderHero(); renderTop(); renderList();
+                $("dnTopSec").setAttribute("aria-busy", "false");
+                $("dnAllSec").setAttribute("aria-busy", "false");
+            }
+
+            /* ---------- toast ---------- */
+            var toastT = null;
+            function toast(r) {
+                var t = $("dnToast");
+                t.textContent = "";
+                t.appendChild(document.createTextNode("Donasi baru dari " + r.name + " "));
+                t.appendChild(el("b", "", rp(r.amount)));
+                t.classList.add("show");
+                clearTimeout(toastT);
+                toastT = setTimeout(function () { t.classList.remove("show"); }, 4500);
+            }
+
+            /* ---------- live ---------- */
+            function setLive(on, txt) {
+                $("dnLive").dataset.on = on ? "1" : "0";
+                $("dnLiveTxt").textContent = txt;
+            }
+
+            function showError(err) {
+                setLive(false, "Terputus");
+                $("dnTop").textContent = "";
+                $("dnList").textContent = "";
+                $("dnMore").hidden = true;
+                $("dnResult").textContent = "";
+                $("dnTopSec").setAttribute("aria-busy", "false");
+                $("dnAllSec").setAttribute("aria-busy", "false");
+                var st = el("div", "dn-state");
+                st.appendChild(el("strong", "", "Daftar donasi belum bisa dimuat"));
+                st.appendChild(document.createTextNode(err && err.status === 500
+                    ? "Server donasi belum siap. Cek variable FIREBASE_SERVICE_ACCOUNT_DONASI di Vercel."
+                    : "Periksa koneksi internet kamu lalu coba lagi."));
+                var b = el("button", "", "Coba lagi");
+                b.type = "button";
+                b.addEventListener("click", connect);
+                st.appendChild(b);
+                $("dnEmpty").textContent = "";
+                $("dnEmpty").appendChild(st);
+            }
+
+            function applyData(list) {
+                var next = [];
+                (list || []).forEach(function (v) {
+                    if (!v || typeof v.amount !== "number" || typeof v.ts !== "number") return;
+                    next.push({ id: String(v.id), name: String(v.name || "Orang Baik").slice(0, 60), amount: v.amount, message: String(v.message || ""), ts: v.ts });
+                });
+                if (!firstLoad) {
+                    next.forEach(function (r) {
+                        if (!known[r.id]) { newIds[r.id] = 1; toast(r); setTimeout(function () { delete newIds[r.id]; }, 6000); }
+                    });
+                }
+                next.forEach(function (r) { known[r.id] = 1; });
+                rows = next;
+                firstLoad = false;
+                setLive(true, "Diperbarui otomatis \u00b7 donasi baru muncul sendiri");
+                renderAll();
+            }
+
+            var busy = false;
+            function load() {
+                if (busy) return;
+                busy = true;
+                var ctl = new AbortController();
+                var to = setTimeout(function () { ctl.abort(); }, 12000);
+                fetch("/api/donasi", { cache: "no-store", signal: ctl.signal })
+                    .then(function (r) {
+                        if (!r.ok) { var e = new Error("http " + r.status); e.status = r.status; throw e; }
+                        return r.json();
+                    })
+                    .then(function (j) { applyData(j.donations); })
+                    .catch(function (e) {
+                        if (firstLoad) showError(e);
+                        else setLive(false, "Koneksi terputus, mencoba lagi\u2026");
+                    })
+                    .then(function () { clearTimeout(to); busy = false; });
+            }
+
+            var pollId = null;
+            function connect() {
+                setLive(false, "Menghubungkan\u2026");
+                $("dnEmpty").textContent = "";
+                load();
+                clearInterval(pollId);
+                pollId = setInterval(function () { if (!document.hidden) load(); }, 10000);
+            }
+            document.addEventListener("visibilitychange", function () { if (!document.hidden) load(); });
+
+            /* ---------- events ---------- */
+            var debounce = null;
+            var input = $("dnSearch"), clearBtn = $("dnClear");
+            function applyQuery() {
+                query = input.value.trim().toLowerCase();
+                clearBtn.classList.toggle("show", !!input.value);
+                shown = PAGE;
+                renderList();
+            }
+            function clearSearch() { input.value = ""; applyQuery(); input.focus(); }
+            input.addEventListener("input", function () { clearBtn.classList.toggle("show", !!input.value); clearTimeout(debounce); debounce = setTimeout(applyQuery, 120); });
+            clearBtn.addEventListener("click", clearSearch);
+
+            document.querySelectorAll(".dn-seg button").forEach(function (b) {
+                b.addEventListener("click", function () {
+                    sortMode = b.dataset.sort;
+                    document.querySelectorAll(".dn-seg button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+                    shown = PAGE;
+                    renderList();
+                });
+            });
+            $("dnMore").addEventListener("click", function () { shown += PAGE; renderList(); });
+
+            setInterval(function () {
+                document.querySelectorAll(".dn-time[data-ts]").forEach(function (t) { t.textContent = ago(Number(t.dataset.ts)); });
+            }, 60000);
+
+            connect();
+        })();
+    </script>
+</body>
+
+</html>
