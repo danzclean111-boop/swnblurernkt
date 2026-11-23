@@ -351,7 +351,7 @@
                 </div>
 
                 <details class="tt-det" id="ttDet" hidden>
-                    <summary>Detail patch</summary>
+                    <summary>Detail video</summary>
                     <dl id="ttDetList"></dl>
                 </details>
 
@@ -781,7 +781,7 @@
             $("ttSizeIn").textContent = fmtBytes(file.size);
             $("ttSizeOut").textContent = fmtBytes(blob.size);
             var save = $("ttSave"); save.href = blobUrl; save.setAttribute("download", outName);
-            renderReport(finalReport);
+            renderInfo(blob, blobUrl);
 
             try { fetch(API + "/jobs/" + jobId, { method: "DELETE", headers: headers() }).catch(function () {}); } catch (e) {}
             cleanupRun();
@@ -794,20 +794,93 @@
             }, 450);
         }
 
-        function renderReport(h) {
+        function boxType(dv, p) { return String.fromCharCode(dv.getUint8(p + 4), dv.getUint8(p + 5), dv.getUint8(p + 6), dv.getUint8(p + 7)); }
+        function walk(dv, s, e, cb) {
+            var p = s;
+            while (p + 8 <= e) {
+                var sz = dv.getUint32(p), hs = 8;
+                if (sz === 1) { sz = dv.getUint32(p + 12); hs = 16; } else if (sz === 0) sz = e - p;
+                if (sz < hs) break;
+                if (cb(boxType(dv, p), p + hs, Math.min(p + sz, e)) === false) break;
+                p += sz;
+            }
+        }
+        function parseTrak(dv, s, e) {
+            var tr = { handler: "", w: 0, h: 0, ts: 0, count: 0, ticks: 0, codec: "" };
+            walk(dv, s, e, function (t, s1, e1) {
+                if (t === "tkhd") {
+                    var o = dv.getUint8(s1) === 1 ? 88 : 76;
+                    tr.w = Math.round(dv.getUint32(s1 + o) / 65536);
+                    tr.h = Math.round(dv.getUint32(s1 + o + 4) / 65536);
+                } else if (t === "mdia") {
+                    walk(dv, s1, e1, function (t2, s2, e2) {
+                        if (t2 === "mdhd") tr.ts = dv.getUint32(s2 + (dv.getUint8(s2) === 1 ? 20 : 12));
+                        else if (t2 === "hdlr") tr.handler = String.fromCharCode(dv.getUint8(s2 + 8), dv.getUint8(s2 + 9), dv.getUint8(s2 + 10), dv.getUint8(s2 + 11));
+                        else if (t2 === "minf") {
+                            walk(dv, s2, e2, function (t3, s3, e3) {
+                                if (t3 !== "stbl") return;
+                                walk(dv, s3, e3, function (t4, s4, e4) {
+                                    if (t4 === "stts") {
+                                        var n = dv.getUint32(s4 + 4);
+                                        for (var k = 0; k < n && s4 + 8 + k * 8 + 8 <= e4; k++) {
+                                            var c = dv.getUint32(s4 + 8 + k * 8), d = dv.getUint32(s4 + 12 + k * 8);
+                                            tr.count += c; tr.ticks += c * d;
+                                        }
+                                    } else if (t4 === "stsd") {
+                                        tr.codec = String.fromCharCode(dv.getUint8(s4 + 12), dv.getUint8(s4 + 13), dv.getUint8(s4 + 14), dv.getUint8(s4 + 15));
+                                    }
+                                });
+                            });
+                        }
+                    });
+                }
+            });
+            return tr;
+        }
+        var CODEC_NAME = { avc1: "H.264", avc3: "H.264", hvc1: "H.265", hev1: "H.265", av01: "AV1", vp09: "VP9" };
+        function readVideoInfo(blob) {
+            return blob.slice(0, 6 * 1024 * 1024).arrayBuffer().then(function (buf) {
+                var dv = new DataView(buf), found = null;
+                walk(dv, 0, buf.byteLength, function (t, s, e) {
+                    if (t !== "moov") return;
+                    walk(dv, s, e, function (t2, s2, e2) {
+                        if (t2 === "trak" && !found) {
+                            var tr = parseTrak(dv, s2, e2);
+                            if (tr.handler === "vide") found = tr;
+                        }
+                    });
+                    return false;
+                });
+                if (!found || !found.ts || !found.ticks) return null;
+                var dur = found.ticks / found.ts;
+                return { w: found.w, h: found.h, fps: found.count / dur, dur: dur, codec: CODEC_NAME[found.codec] || found.codec };
+            }).catch(function () { return null; });
+        }
+        function metaFallback(url) {
+            return new Promise(function (res) {
+                var v = document.createElement("video");
+                v.preload = "metadata"; v.muted = true;
+                v.onloadedmetadata = function () { res({ w: v.videoWidth, h: v.videoHeight, fps: 0, dur: v.duration, codec: "" }); v.removeAttribute("src"); v.load(); };
+                v.onerror = function () { res(null); };
+                v.src = url;
+            });
+        }
+        function fmtDur(sec) { sec = Math.round(sec); return Math.floor(sec / 60) + ":" + ("0" + (sec % 60)).slice(-2); }
+        function renderInfo(blob, url) {
             var det = $("ttDet"), list = $("ttDetList");
             list.innerHTML = ""; det.hidden = true;
-            if (!h) return;
-            var obj = null;
-            try { obj = JSON.parse(decodeURIComponent(h)); } catch (e) { return; }
-            if (!obj || typeof obj !== "object") return;
-            var html = "";
-            Object.keys(obj).slice(0, 12).forEach(function (k) {
-                var v = obj[k];
-                if (v === null || v === undefined || v === "") return;
-                html += "<div><dt>" + esc(k) + "</dt><dd>" + esc(typeof v === "object" ? JSON.stringify(v) : v) + "</dd></div>";
+            readVideoInfo(blob).then(function (i) { return i || metaFallback(url); }).then(function (i) {
+                if (!i || !i.w) return;
+                var rows = [["Resolusi", i.w + " \u00d7 " + i.h]];
+                if (i.fps) rows.push(["FPS", (Math.round(i.fps * 100) / 100) + " fps"]);
+                if (i.dur && isFinite(i.dur)) {
+                    rows.push(["Durasi", fmtDur(i.dur)]);
+                    rows.push(["Bitrate", (blob.size * 8 / i.dur / 1e6).toFixed(1) + " Mbps"]);
+                }
+                if (i.codec) rows.push(["Codec", i.codec]);
+                list.innerHTML = rows.map(function (r) { return "<div><dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd></div>"; }).join("");
+                det.hidden = false;
             });
-            if (html) { list.innerHTML = html; det.hidden = false; }
         }
 
         function fail(msg) {
