@@ -170,7 +170,7 @@
         .tt-ok p { margin-top: 2px; font-size: 13px; color: var(--text-muted); }
         .tt-prev { margin-top: 16px; border-radius: var(--r-lg); overflow: hidden; background: #000; border: 1px solid var(--line-strong); }
         .tt-prev video { display: block; width: 100%; max-height: 360px; object-fit: contain; background: #000; }
-        .tt-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+        .tt-stats { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 12px; }
         .tt-stat { padding: 12px 14px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--line); }
         .tt-stat small { display: block; font-size: 12px; color: var(--text-muted); }
         .tt-stat b { display: block; margin-top: 3px; font-family: var(--font-mono); font-size: 16px; font-weight: 600; color: var(--text-main); }
@@ -346,8 +346,7 @@
                 <div class="tt-prev"><video id="ttPrev" controls playsinline preload="metadata"></video></div>
 
                 <div class="tt-stats">
-                    <div class="tt-stat"><small>Ukuran asli</small><b id="ttSizeIn">0 MB</b></div>
-                    <div class="tt-stat hd"><small>Hasil HD</small><b id="ttSizeOut">0 MB</b></div>
+                    <div class="tt-stat"><small>Ukuran video</small><b id="ttSizeOut">0 MB</b></div>
                 </div>
 
                 <details class="tt-det" id="ttDet" hidden>
@@ -778,7 +777,6 @@
 
             $("ttDoneName").textContent = outName;
             $("ttPrev").src = blobUrl;
-            $("ttSizeIn").textContent = fmtBytes(file.size);
             $("ttSizeOut").textContent = fmtBytes(blob.size);
             var save = $("ttSave"); save.href = blobUrl; save.setAttribute("download", outName);
             renderInfo(blob, blobUrl);
