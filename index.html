@@ -11,7 +11,7 @@
     (function() {
         const loggedUser = localStorage.getItem("danzclean_logged_user");
         if (!loggedUser) {
-            window.location.replace("/danzclean.html"); 
+            window.location.replace("/danzclean.html");
         }
     })();
 </script>
@@ -70,7 +70,7 @@
             50% { transform: scale(1.08); }
             100% { transform: scale(1); }
         }
-    
+
         body.gm-open .rating-float-track {
             opacity: 0 !important;
             visibility: hidden !important;
@@ -263,7 +263,7 @@
         .gc-owner-msg { min-height: 16px; font-size: 12.5px; text-align: center; color: var(--text-2); }
         .gc-owner-msg.err { color: #ff7e96; }
         .gc-owner-msg.ok { color: #36e2a8; }
-    </style>
+</style>
 </head>
 
 <body>
@@ -283,11 +283,11 @@
     <div class="container idx-page">
         <nav class="mode-switch" id="modeSwitch" data-active="wa" aria-label="Pilih jenis upload">
             <a class="ms-tab" href="/" aria-current="page">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 17h-7l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 5 5z"/><path d="M8.5 11l2 2 4-4"/></svg>
+                <span class="ms-ic"><img src="./media/wa.png" alt="" width="34" height="34" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><svg class="ms-fb" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 17h-7l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 5 5z"/><path d="M8.5 11l2 2 4-4"/></svg></span>
                 <span>Status WA HD</span>
             </a>
             <a class="ms-tab" href="/tiktokhd">
-                <img src="./media/tiktok.png" alt="" width="20" height="20">
+                <span class="ms-ic"><img src="./media/tiktok.png" alt="" width="34" height="34"></span>
                 <span>Upload TikTok HD</span>
             </a>
             <span class="ms-pill" aria-hidden="true"></span>
@@ -391,7 +391,7 @@
         function toggleMenu() {
             document.getElementById("sidebar").classList.toggle("active");
             document.getElementById("overlay").classList.toggle("active");
-            document.body.classList.toggle("sidebar-open"); 
+            document.body.classList.toggle("sidebar-open");
         }
 
         function showCustomModal(type, title, message) {
@@ -576,7 +576,7 @@
     }
 
     document.getElementById("status").innerHTML = "Connecting to server...";
-    
+
     if (fileInput) fileInput.disabled = true;
     if (uploadBox) {
         uploadBox.style.pointerEvents = "none";
@@ -586,7 +586,7 @@
 
     if (btn) {
         btn.disabled = true;
-        btn.style.opacity = "1"; 
+        btn.style.opacity = "1";
         btn.innerHTML = `
             <span id="btnProgressText">PREPARING... (0%)</span>
             <div class="btn-progress-container">
@@ -602,16 +602,11 @@
     form.append("nomor", nomorBersih);
     form.append("email", emailAkun);
     form.append("username", usernameAkun);
-    form.append("verified", "true"); 
+    form.append("verified", "true");
 
-    // ===== ANTI UPLOAD MACET =====
-    // Kadang koneksi nyangkut (upload 15-20MB bisa lama, tapi refresh langsung normal).
-    // Kalau kecepatan terlalu rendah selama beberapa detik DAN file belum selesai terkirim,
-    // upload dibatalkan lalu dikirim ulang lewat koneksi baru (token JWT masih berlaku).
-    // Aman dari kirim dobel: server baru memproses setelah file diterima lengkap.
-    const MAKS_PERCOBAAN_UPLOAD = 3;      // total percobaan (1 awal + 2 ulang)
-    const JENDELA_CEK_MS = 10000;         // cek kemajuan tiap 10 detik
-    const MIN_BYTE_PER_JENDELA = 500 * 1024; // < ~50 KB/s dianggap macet
+    const MAKS_PERCOBAAN_UPLOAD = 3;
+    const JENDELA_CEK_MS = 10000;
+    const MIN_BYTE_PER_JENDELA = 500 * 1024;
     let percobaanUpload = 0;
 
     const kirimXhr = () => {
@@ -631,12 +626,12 @@
             bytesTerkirim = e.loaded;
             bytesTotal = e.total;
             const percentComplete = Math.round((e.loaded / e.total) * 100);
-            if (percentComplete === terakhirPersen) return; // jangan update DOM kalau persen sama
+            if (percentComplete === terakhirPersen) return;
             terakhirPersen = percentComplete;
             const displayPercent = Math.round(percentComplete * 0.95);
 
             document.getElementById("status").innerHTML = `Memproses video... (${percentComplete}%)`;
-            
+
             const pBar = document.getElementById("btnProgressBar");
             const pText = document.getElementById("btnProgressText");
             if (pBar) pBar.style.width = displayPercent + "%";
@@ -656,7 +651,7 @@
                     const pBar = document.getElementById("btnProgressBar");
                     const pText = document.getElementById("btnProgressText");
                     if (pBar) pBar.style.width = "96%";
-                    if (pText) pText.innerText = "PROSES HD... (96%)"; 
+                    if (pText) pText.innerText = "PROSES HD... (96%)";
 
                     let gagalCekProgress = 0;
                     let idHilang = 0;
@@ -927,7 +922,6 @@ const intervalCek = setInterval(async () => {
     xhr.setRequestHeader("Authorization", "Bearer " + tokenUpload);
     xhr.send(form);
 
-    // Watchdog: hanya aktif kalau masih ada sisa percobaan
     if (percobaanKe < MAKS_PERCOBAAN_UPLOAD) {
         let bytesJendelaLalu = 0;
         watchdog = setInterval(() => {
@@ -936,7 +930,6 @@ const intervalCek = setInterval(async () => {
             const kemajuan = bytesTerkirim - bytesJendelaLalu;
             bytesJendelaLalu = bytesTerkirim;
 
-            // sudah hampir selesai (>90%) -> biarkan lanjut, jangan diulang
             if (bytesTotal > 0 && bytesTerkirim / bytesTotal > 0.9) return;
 
             if (kemajuan < MIN_BYTE_PER_JENDELA) {
@@ -986,7 +979,7 @@ function resetUploadState() {
     document.getElementById("file-name").innerText = "Tap di sini buat masukin video / foto";
 }
 
-    </script>
+</script>
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js"></script>
@@ -1000,7 +993,7 @@ function resetUploadState() {
             }
             const db = firebase.database();
             const ref = db.ref("total_visitors");
-            
+
             const key = "danzclean_visitor_main";
             if (!localStorage.getItem(key)) {
                 ref.transaction((curr) => (curr || 0) + 1, (err, comm) => {
@@ -1008,7 +1001,7 @@ function resetUploadState() {
                 });
             }
         })();
-    </script>
+</script>
     <script>
         (function() {
             const existing = firebase.apps.find(a => a.name === "verifyApp");
@@ -1016,7 +1009,7 @@ function resetUploadState() {
                 firebase.initializeApp(FIREBASE_CONFIG_VERIFY, "verifyApp");
             }
         })();
-    </script>
+</script>
 <script>
 document.body.style.display = "none";
 
@@ -1051,7 +1044,7 @@ maintenanceRef.once("value")
     document.body.style.display = "block";
 })
 .catch(err => {
-    
+
     console.error("Firebase error:", err);
     showBody();
 });
@@ -1197,7 +1190,7 @@ div.remove()
         reviewLoopStarted = true;
         startReviewLoop();
     }
-}); 
+});
 
 </script>
 
@@ -1251,10 +1244,10 @@ div.remove()
     <script src="tutorial.js"></script>
     
     <script>
-    
+
     const DEFAULT_GROUPS = [
         { name: "DANZCLEAN SW", url: "https://chat.whatsapp.com/0Rh8kaAGwtfJoCK2iGAyqn?s=cl&p=a&iam=2"},
-            
+
     ];
     let whatsappGroups = DEFAULT_GROUPS.slice();
     let groupsRev = 0;
@@ -1297,7 +1290,7 @@ const GROUP_POLL_MS = 12 * 1000;
             const data = await res.json();
             if (data && data.ok) status = data.active ? "online" : "offline";
         } catch (e) {
-            status = "unknown"; 
+            status = "unknown";
         } finally {
             clearTimeout(timer);
         }
@@ -1340,7 +1333,7 @@ const GROUP_POLL_MS = 12 * 1000;
     const ICON_TRASH = `<svg ${SVG_ATTR}><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>`;
     const ICON_EDIT = `<svg ${SVG_ATTR}><path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3zM14 7l3 3"/></svg>`;
     const ICON_FAIL = `<svg ${SVG_ATTR}><path d="M6 6l12 12M18 6L6 18"/></svg>`;
-    
+
     function refreshGroupStatuses() {
     groupListContainer.querySelectorAll(".gc-item").forEach(item => {
         checkGroupStatus(item.dataset.url).then(st => {
@@ -1458,7 +1451,7 @@ item.appendChild(copyBtn);
     }
 
     const groupModalOverlay = document.getElementById("groupModalOverlay");
-    
+
     document.body.appendChild(groupModalOverlay);
     new MutationObserver(() => {
         const open = groupModalOverlay.classList.contains("show");
