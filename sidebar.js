@@ -1043,6 +1043,7 @@ function initDanzNav() {
     }, 60);
   });
   mo.observe(document.body, { childList: true, subtree: true });
+  setTimeout(function () { mo.disconnect(); }, 8000);
 }
 
 if (document.body) {
