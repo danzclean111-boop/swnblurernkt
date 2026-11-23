@@ -459,7 +459,7 @@
             var last = logLines[logLines.length - 1];
             if (key && last && last.key === key) { last.msg = msg; last.cls = cls || ""; }
             else logLines.push({ msg: msg, key: key || "", cls: cls || "" });
-            if (logLines.length > 7) logLines.shift();
+            if (logLines.length > 12) logLines.shift();
             $("ttLog").innerHTML = logLines.map(function (l, i) {
                 return '<div class="tt-ln' + (i === logLines.length - 1 ? " cur" : "") + (l.cls ? " " + l.cls : "") + '">' + esc(l.msg) + "</div>";
             }).join("");
@@ -620,11 +620,11 @@
 
         function logPhase() {
             if (!sending) return;
-            if (phase === "upload") log("Mengirim video...", "up");
-            else if (phase === "saving") log("Video terkirim, server menyimpan...", "up");
-            else if (phase === "queue") log("Menunggu giliran...", "proc");
-            else if (phase === "process") log((serverLabel || "Memproses ke HD") + "...", "proc");
-            else if (phase === "download") log("Mengunduh hasil...", "dl");
+            if (phase === "upload") log("Mengirim video...");
+            else if (phase === "saving") log("Video terkirim, server menyimpan...");
+            else if (phase === "queue") log("Menunggu giliran...");
+            else if (phase === "process") log((serverLabel || "Memproses ke HD") + "...");
+            else if (phase === "download") log("Mengunduh hasil...");
         }
 
         var lastRenderT = 0;
@@ -700,7 +700,7 @@
             xhr.onload = function () {
                 var j = safeJSON(xhr.responseText);
                 if (xhr.status >= 200 && xhr.status < 300 && j && j.id) {
-                    jobId = j.id; log("Video diterima server", "up"); phase = "queue"; serverProg = 0; render(); poll();
+                    jobId = j.id; log("Video diterima server"); phase = "queue"; serverProg = 0; render(); poll();
                 } else {
                     fail((j && j.error) || "Server menolak video (HTTP " + xhr.status + ").");
                 }
