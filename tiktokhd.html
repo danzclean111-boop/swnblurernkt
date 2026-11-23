@@ -339,7 +339,7 @@
                     <div class="tt-ok-ic"><svg class="tt-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
                     <div>
                         <h2>Video HD siap</h2>
-                        <p id="ttDoneName">video_hd.mp4</p>
+                        <p id="ttDoneName">video_danzclean_hdtiktok.mp4</p>
                     </div>
                 </div>
 
@@ -766,11 +766,11 @@
             frac = 1; target = 100;
             if (!raf) raf = requestAnimationFrame(loop);
             setStage("Selesai", "Video HD sudah siap");
-            log("Selesai! " + (file.name.replace(/\.[^.]+$/, "") || "video") + "_hd.mp4 siap disimpan (" + fmtBytes(blob.size) + ")", "", "ok");
+            var base = (file.name.replace(/\.[^.]+$/, "").replace(/(_danzclean_hdtiktok)+$/i, "") || "video");
+            var outName = base + "_danzclean_hdtiktok.mp4";
+            log("Selesai! " + outName + " siap disimpan (" + fmtBytes(blob.size) + ")", "", "ok");
             [].forEach.call($("ttTrack").children, function (li) { li.className = "done"; });
 
-            var base = (file.name.replace(/\.[^.]+$/, "") || "video");
-            var outName = base + "_hd.mp4";
             if (blobUrl) URL.revokeObjectURL(blobUrl);
             blobUrl = URL.createObjectURL(new Blob([blob], { type: "video/mp4" }));
 
