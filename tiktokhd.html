@@ -313,7 +313,7 @@
 
                 <div class="tt-stage">
                     <h2 id="ttStageTitle">Menyiapkan…</h2>
-                    <p id="ttStageSub" role="status" aria-live="polite">Tunggu sebentar</p>
+                    <p id="ttStageSub" aria-live="off">Tunggu sebentar</p>
                 </div>
 
                 <div class="tt-bar" id="ttBar"><i id="ttBarFill"></i></div>
@@ -375,7 +375,7 @@
             </div>
         </section>
 
-        <div class="tt-log" id="ttLog" role="log" aria-live="polite" aria-label="Log proses"></div>
+        <div class="tt-log" id="ttLog" role="log" aria-live="off" aria-label="Log proses"></div>
         <div class="footer">DanzClean</div>
 
     </main>
@@ -566,7 +566,7 @@
             if (pctEl.textContent !== String(n)) {
                 pctEl.textContent = n;
                 pb.setAttribute("aria-valuenow", n);
-                document.title = n + "% · Upload TikTok HD";
+                if (n % 5 === 0) document.title = n + "% · Upload TikTok HD";
             }
         }
 
@@ -622,13 +622,19 @@
         function logPhase() {
             var pc;
             if (!sending) return;
-            if (phase === "upload") { pc = Math.floor(frac * 100); log("Mengirim video... " + pc + "% (" + fmtBytes(loadedB) + " / " + fmtBytes(totalB) + ")", "up"); }
+            if (phase === "upload") { pc = Math.floor(frac * 100); log("Mengirim video... " + pc + "%", "up"); }
             else if (phase === "saving") log("Video terkirim, server menyimpan...", "up");
             else if (phase === "queue") log(queuePos > 0 ? "Menunggu antrian ke-" + queuePos : "Menunggu giliran...", "proc");
             else if (phase === "process") log((serverLabel || "Memproses ke HD") + "... " + Math.round(serverProg) + "%", "proc");
-            else if (phase === "download") { pc = Math.floor(frac * 100); log("Mengunduh hasil... " + pc + "% (" + fmtBytes(loadedB) + " / " + fmtBytes(totalB) + ")", "dl"); }
+            else if (phase === "download") { pc = Math.floor(frac * 100); log("Mengunduh hasil... " + pc + "%", "dl"); }
         }
 
+        var lastRenderT = 0;
+        function renderSoon() {
+            var now = performance.now();
+            if (now - lastRenderT < 250) { kick(); return; }
+            lastRenderT = now; render();
+        }
         function render() {
             setSteps();
             if (phase === "upload") setStage("Mengirim video", xferText());
@@ -690,7 +696,7 @@
                 if (!e.lengthComputable) return;
                 frac = e.loaded / e.total;
                 track(e.loaded, e.total);
-                render();
+                renderSoon();
             };
             xhr.upload.onload = function () { frac = 1; phase = "saving"; render(); };
             xhr.onload = function () {
@@ -745,7 +751,7 @@
                 var total = e.lengthComputable ? e.total : (outSize || file.size);
                 frac = Math.min(1, total ? e.loaded / total : 0);
                 track(e.loaded, total);
-                render();
+                renderSoon();
             };
             xhr.onload = function () {
                 if (xhr.status === 200 && xhr.response) {
