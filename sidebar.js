@@ -1055,9 +1055,12 @@ if (document.body) {
   ["gesturestart", "gesturechange", "gestureend"].forEach(function (ev) {
     document.addEventListener(ev, function (e) { e.preventDefault(); }, { passive: false });
   });
-  document.addEventListener("touchmove", function (e) {
-    if (e.touches && e.touches.length > 1) e.preventDefault();
-  }, { passive: false });
+
+  try {
+    var tast = document.createElement("style");
+    tast.textContent = "html,body{touch-action:pan-x pan-y}";
+    (document.head || document.documentElement).appendChild(tast);
+  } catch (e) {}
   var lastTouchEnd = 0;
   document.addEventListener("touchend", function (e) {
     var now = Date.now();
