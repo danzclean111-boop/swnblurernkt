@@ -1,7 +1,7 @@
 const crypto = require("crypto");
 
 const ALLOWED_ORIGINS = ["https://danzclean.arisu.biz.id"];
-const TTL_SEC = 10 * 60; // token berlaku 10 menit
+const TTL_SEC = 10 * 60; 
 
 module.exports = function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
