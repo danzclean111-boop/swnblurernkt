@@ -18,9 +18,9 @@ module.exports = async function handler(req, res) {
   }
 
   const secret = process.env.TIKTOK_HD_TOKEN_SECRET;
-  const cfSecret = process.env.TURNSTILE_SERVER_SECRET || process.env.TURNSTILE_SECRET_KEY;
+  const cfSecret = process.env.TURNSTILE_SECRET_KEY;
   if (!secret || !cfSecret) {
-    console.error("[tiktok-token] TIKTOK_HD_TOKEN_SECRET / TURNSTILE_SERVER_SECRET belum diisi");
+    console.error("[tiktok-token] TIKTOK_HD_TOKEN_SECRET / TURNSTILE_SECRET_KEY belum diisi");
     return res.status(500).json({ error: "Server belum dikonfigurasi" });
   }
 
