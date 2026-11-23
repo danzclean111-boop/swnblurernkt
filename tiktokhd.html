@@ -464,7 +464,7 @@
                 return '<div class="tt-ln' + (i === logLines.length - 1 ? " cur" : "") + (l.cls ? " " + l.cls : "") + '">' + esc(l.msg) + "</div>";
             }).join("");
         }
-        function logReset(msg) { logLines = []; lastLogMsg = ""; log(msg); }
+        function logReset(msg) { logLines = []; lastLogMsg = ""; if (msg) log(msg); else $("ttLog").innerHTML = ""; }
         logReset("Waiting upload...");
 
         var toastT;
@@ -668,8 +668,7 @@
                 return;
             }
             $("ttMsg").textContent = "";
-            logReset("Verifikasi Cloudflare OK");
-            log("Meminta izin upload...");
+            logReset();
             resetProgress();
             setState("busy");
             lockScreen();
@@ -677,7 +676,7 @@
             render();
 
             getPermit(cf)
-                .then(function () { resetCf(); log("Izin upload diterima"); if (!cancelled) sendUpload(); })
+                .then(function () { resetCf(); if (!cancelled) sendUpload(); })
                 .catch(function (e) { resetCf(); fail((e && e.message) || "Gagal mengambil izin upload."); });
         }
 
