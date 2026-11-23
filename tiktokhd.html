@@ -620,13 +620,12 @@
         }
 
         function logPhase() {
-            var pc;
             if (!sending) return;
-            if (phase === "upload") { pc = Math.floor(frac * 100); log("Mengirim video... " + pc + "%", "up"); }
+            if (phase === "upload") log("Mengirim video...", "up");
             else if (phase === "saving") log("Video terkirim, server menyimpan...", "up");
-            else if (phase === "queue") log(queuePos > 0 ? "Menunggu antrian ke-" + queuePos : "Menunggu giliran...", "proc");
-            else if (phase === "process") log((serverLabel || "Memproses ke HD") + "... " + Math.round(serverProg) + "%", "proc");
-            else if (phase === "download") { pc = Math.floor(frac * 100); log("Mengunduh hasil... " + pc + "%", "dl"); }
+            else if (phase === "queue") log("Menunggu giliran...", "proc");
+            else if (phase === "process") log((serverLabel || "Memproses ke HD") + "...", "proc");
+            else if (phase === "download") log("Mengunduh hasil...", "dl");
         }
 
         var lastRenderT = 0;
