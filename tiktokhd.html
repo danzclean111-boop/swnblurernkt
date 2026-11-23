@@ -30,6 +30,10 @@
         #tt[data-state="error"] .tt-view-error { display: block; animation: ttIn .45s var(--ease) both; }
         @keyframes ttIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
+        /* mode ringan selama upload/proses: matikan blur & animasi tak berujung supaya HP kelas menengah tidak macet */
+        .tt-busy *, .tt-busy *::before, .tt-busy *::after { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+        .tt-busy .tt-ring-glow, .tt-busy .tt-bar.proc i::after, .tt-busy .topbar *, .tt-busy .csTopbarPulse { animation: none !important; }
+
         .tt-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
         /* ---------- palet TikTok (pembeda dari halaman Status WA) ---------- */
@@ -721,6 +725,7 @@
             xhr.send(fd);
         }
 
+        var lastPollSig = "";
         function poll() {
             if (cancelled || !jobId) return;
             fetch(API + "/jobs/" + jobId, { headers: headers(), cache: "no-store" })
@@ -733,9 +738,10 @@
                     outSize = j.outSize || outSize;
                     if (j.status === "error") { fail(j.error || "Video gagal diproses."); return; }
                     if (j.status === "done") { serverProg = 100; phase = "process"; render(); download(); return; }
+                    var sig = j.status + "|" + (j.position || 0) + "|" + (j.progress || 0) + "|" + (j.label || "");
                     if (j.status === "queued") { phase = "queue"; queuePos = j.position || 0; serverProg = 0; }
                     else { phase = "process"; serverProg = j.progress || 0; serverLabel = j.label || ""; }
-                    render();
+                    if (sig !== lastPollSig) { lastPollSig = sig; render(); }
                     pollTimer = setTimeout(poll, 450);
                 })
                 .catch(function (e) {
@@ -851,13 +857,14 @@
         function warnLeave(e) { e.preventDefault(); e.returnValue = ""; return ""; }
 
         function lockScreen() {
+            document.documentElement.classList.add("tt-busy");
             try {
                 if (navigator.wakeLock && navigator.wakeLock.request) {
                     navigator.wakeLock.request("screen").then(function (l) { wakeLock = l; }).catch(function () {});
                 }
             } catch (e) {}
         }
-        function releaseScreen() { try { if (wakeLock) wakeLock.release(); } catch (e) {} wakeLock = null; }
+        function releaseScreen() { document.documentElement.classList.remove("tt-busy"); try { if (wakeLock) wakeLock.release(); } catch (e) {} wakeLock = null; }
         document.addEventListener("visibilitychange", function () {
             if (!document.hidden && root.getAttribute("data-state") === "busy" && !wakeLock) lockScreen();
         });
