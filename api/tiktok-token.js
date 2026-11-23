@@ -7,7 +7,6 @@ const VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
 
-  // Klien (tiktokhd.html) mengirim POST berisi { turnstileToken }
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method tidak diizinkan" });
@@ -19,9 +18,9 @@ module.exports = async function handler(req, res) {
   }
 
   const secret = process.env.TIKTOK_HD_TOKEN_SECRET;
-  const cfSecret = process.env.TURNSTILE_SECRET_KEY;
+  const cfSecret = process.env.TURNSTILE_SERVER_SECRET || process.env.TURNSTILE_SECRET_KEY;
   if (!secret || !cfSecret) {
-    console.error("[tiktok-token] TIKTOK_HD_TOKEN_SECRET / TURNSTILE_SECRET_KEY belum diisi");
+    console.error("[tiktok-token] TIKTOK_HD_TOKEN_SECRET / TURNSTILE_SERVER_SECRET belum diisi");
     return res.status(500).json({ error: "Server belum dikonfigurasi" });
   }
 
@@ -34,7 +33,6 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: "Verifikasi Cloudflare belum selesai." });
   }
 
-  // Cek token Turnstile ke Cloudflare
   try {
     const params = new URLSearchParams({ secret: cfSecret, response: cf });
     const ip = (req.headers["x-forwarded-for"] || "").split(",")[0].trim();
