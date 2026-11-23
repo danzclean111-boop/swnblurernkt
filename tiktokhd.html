@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <script src="/func/api/anti-devtools.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#060913">
+    <title>Upload TikTok HD - DanzClean</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .tt-page { padding-bottom: max(var(--dock-clear), 96px); }
+        .tt-page h2, .tt-page p { margin: 0; }
+        .tt-mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+        .tt-ic { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+        /* ---------- state switching ---------- */
+        .tt-view { display: none; }
+        #tt[data-state="idle"]  .tt-view-idle,
+        #tt[data-state="ready"] .tt-view-ready,
+        #tt[data-state="busy"]  .tt-view-busy,
+        #tt[data-state="done"]  .tt-view-done,
+        #tt[data-state="error"] .tt-view-error { display: block; animation: ttIn .45s var(--ease) both; }
+        @keyframes ttIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+        .tt-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+        /* ---------- idle : dropzone (pakai .upload-box) ---------- */
+        .tt-drop.tt-drag { border-color: var(--accent) !important; background: rgba(54, 226, 168, .06) !important; }
+        .tt-drop.tt-drag::before { opacity: 1; inset: 8px; }
+        .tt-msg { min-height: 20px; margin-top: 12px; font-size: 13px; line-height: 1.4; color: var(--danger); }
+        .tt-steps-hint { display: grid; gap: 8px; margin-top: 22px; padding: 0; list-style: none; text-align: left; counter-reset: tt; }
+        .tt-steps-hint li { counter-increment: tt; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--line); font-size: 13.5px; color: var(--text-2); }
+        .tt-steps-hint li::before { content: counter(tt); flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--primary-300); background: rgba(77, 124, 255, .12); border: 1px solid rgba(77, 124, 255, .3); }
+
+        /* ---------- kartu umum ---------- */
+        .tt-card { position: relative; padding: 22px 18px 20px; border-radius: var(--r-xl); text-align: left; overflow: hidden;
+            background: radial-gradient(420px 220px at 100% 0%, rgba(77, 124, 255, .10), transparent 70%), linear-gradient(160deg, var(--surface-2), var(--surface) 70%);
+            border: 1px solid var(--line); box-shadow: var(--shadow-1); }
+        .tt-card::before, .tt-card::after { content: ""; position: absolute; width: 18px; height: 18px; pointer-events: none; border: 2px solid var(--primary); opacity: .75; }
+        .tt-card::before { top: 12px; left: 12px; border-right: 0; border-bottom: 0; border-top-left-radius: 6px; }
+        .tt-card::after  { bottom: 12px; right: 12px; border-left: 0; border-top: 0; border-bottom-right-radius: 6px; }
+
+        /* ---------- tombol ---------- */
+        .tt-btn { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; min-height: 52px; padding: 0 20px; margin-top: 12px;
+            border: 0; border-radius: var(--r-md); cursor: pointer; font-family: var(--font); font-size: 15px; font-weight: 800; letter-spacing: .03em; text-decoration: none;
+            color: #fff; background: var(--cta-grad); box-shadow: 0 10px 28px var(--primary-glow), 0 1px 0 rgba(255,255,255,.22) inset;
+            -webkit-tap-highlight-color: transparent; transition: transform var(--dur-1) var(--ease), filter var(--dur-2) var(--ease); }
+        .tt-btn:active { transform: scale(.98); }
+        .tt-btn:focus-visible { outline: 2px solid var(--primary-300); outline-offset: 3px; }
+        .tt-btn.ghost { color: var(--text-main); background: rgba(255,255,255,.05); border: 1px solid var(--line-strong); box-shadow: none; font-weight: 700; letter-spacing: 0; }
+        .tt-btn.mint { color: #04170f; background: var(--accent); box-shadow: 0 10px 28px var(--accent-glow); }
+        .tt-btn.danger { color: var(--danger); background: var(--danger-soft); border: 1px solid rgba(255, 93, 115, .35); box-shadow: none; letter-spacing: 0; font-weight: 700; }
+        @media (hover: hover) { .tt-btn:hover { filter: brightness(1.08); } .tt-btn.ghost:hover { background: rgba(255,255,255,.09); filter: none; } }
+
+        /* ---------- ready : file terpilih ---------- */
+        .tt-file { display: flex; align-items: center; gap: 14px; }
+        .tt-thumb { flex: none; width: 64px; height: 84px; border-radius: var(--r-sm); overflow: hidden; background: #000; border: 1px solid var(--line-strong); }
+        .tt-thumb video { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .tt-file-main { min-width: 0; flex: 1; }
+        .tt-file-name { font-size: 15px; font-weight: 700; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .tt-file-meta { margin-top: 4px; font-size: 12.5px; color: var(--text-muted); }
+        .tt-file-meta b { font-family: var(--font-mono); font-weight: 600; color: var(--text-2); }
+        .tt-chip { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 5px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); background: rgba(54, 226, 168, .1); border: 1px solid rgba(54, 226, 168, .3); }
+        .tt-change { flex: none; min-width: var(--tap); min-height: var(--tap); padding: 0 12px; border-radius: var(--r-md); border: 1px solid var(--line-strong); background: rgba(255,255,255,.05); color: var(--text-2); font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; }
+        .tt-change:focus-visible { outline: 2px solid var(--primary-300); outline-offset: 2px; }
+
+        /* ---------- busy : progress ---------- */
+        .tt-ring-wrap { position: relative; width: 176px; height: 176px; margin: 4px auto 0; }
+        .tt-ring { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .tt-ring circle { fill: none; stroke-width: 9; }
+        .tt-ring .trk { stroke: rgba(150, 170, 255, .12); }
+        .tt-ring .val { stroke: url(#ttGrad); stroke-linecap: round; stroke-dasharray: 439.82; stroke-dashoffset: 439.82; }
+        .tt-ring-glow { position: absolute; inset: 14px; border-radius: 50%; background: radial-gradient(closest-side, rgba(77, 124, 255, .22), transparent 72%); animation: ttBreath 2.6s ease-in-out infinite; pointer-events: none; }
+        @keyframes ttBreath { 50% { opacity: .45; transform: scale(.94); } }
+        .tt-pct { position: absolute; inset: 0; display: grid; grid-auto-flow: column; place-content: center; align-items: baseline; font-family: var(--font-mono); font-weight: 600; color: var(--text-main); }
+        .tt-pct span { font-size: 52px; line-height: 1; letter-spacing: -.04em; }
+        .tt-pct small { font-size: 18px; color: var(--text-muted); margin-left: 2px; }
+
+        .tt-stage { margin-top: 14px; text-align: center; }
+        .tt-stage h2 { font-size: 18px; font-weight: 800; letter-spacing: -.01em; color: var(--text-main); }
+        .tt-stage p { margin-top: 6px; min-height: 36px; font-size: 13px; line-height: 1.5; color: var(--text-muted); }
+        .tt-stage p b { font-family: var(--font-mono); font-weight: 600; color: var(--text-2); }
+
+        .tt-bar { position: relative; height: 8px; margin-top: 18px; border-radius: 999px; background: rgba(150, 170, 255, .12); overflow: hidden; }
+        .tt-bar i { position: absolute; inset: 0 auto 0 0; width: 100%; border-radius: inherit; transform-origin: left; transform: scaleX(0); background: linear-gradient(90deg, var(--primary), var(--primary-300) 60%, var(--accent)); }
+        .tt-bar.proc i::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent); transform: translateX(-100%); animation: ttSheen 1.3s linear infinite; }
+        @keyframes ttSheen { to { transform: translateX(100%); } }
+
+        .tt-track { display: grid; grid-template-columns: repeat(3, 1fr); margin: 22px 0 0; padding: 0; list-style: none; }
+        .tt-track li { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--text-3); }
+        .tt-track li::before { content: ""; position: absolute; top: 14px; right: 50%; width: 100%; height: 2px; background: rgba(150, 170, 255, .14); }
+        .tt-track li:first-child::before { display: none; }
+        .tt-track li.done::before, .tt-track li.on::before { background: var(--primary); }
+        .tt-dot { position: relative; z-index: 1; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--text-3); background: var(--surface); border: 2px solid rgba(150, 170, 255, .2); transition: background var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease), color var(--dur-2) var(--ease); }
+        .tt-dot svg { display: none; width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+        .tt-track li.on { color: var(--text-main); }
+        .tt-track li.on .tt-dot { color: #fff; background: var(--primary); border-color: var(--primary-300); box-shadow: 0 0 0 5px rgba(77, 124, 255, .18); }
+        .tt-track li.done { color: var(--text-2); }
+        .tt-track li.done .tt-dot { color: #04170f; background: var(--accent); border-color: var(--accent); }
+        .tt-track li.done .tt-dot span { display: none; }
+        .tt-track li.done .tt-dot svg { display: block; }
+
+        .tt-keep { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 18px; font-size: 12.5px; color: var(--text-muted); }
+        .tt-keep .tt-ic { width: 16px; height: 16px; color: var(--amber); }
+
+        /* ---------- done ---------- */
+        .tt-ok { display: flex; align-items: center; gap: 12px; }
+        .tt-ok-ic { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: var(--accent); background: rgba(54, 226, 168, .12); border: 1px solid rgba(54, 226, 168, .35); }
+        .tt-ok-ic .tt-ic { width: 22px; height: 22px; stroke-width: 2.4; }
+        .tt-ok h2 { font-size: 19px; font-weight: 800; letter-spacing: -.01em; color: var(--text-main); }
+        .tt-ok p { margin-top: 2px; font-size: 13px; color: var(--text-muted); }
+        .tt-prev { margin-top: 16px; border-radius: var(--r-lg); overflow: hidden; background: #000; border: 1px solid var(--line-strong); }
+        .tt-prev video { display: block; width: 100%; max-height: 360px; object-fit: contain; background: #000; }
+        .tt-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+        .tt-stat { padding: 12px 14px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--line); }
+        .tt-stat small { display: block; font-size: 12px; color: var(--text-muted); }
+        .tt-stat b { display: block; margin-top: 3px; font-family: var(--font-mono); font-size: 16px; font-weight: 600; color: var(--text-main); }
+        .tt-stat.hd b { color: var(--accent); }
+        .tt-det { margin-top: 12px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--line); }
+        .tt-det summary { display: flex; align-items: center; justify-content: space-between; min-height: var(--tap); padding: 0 14px; font-size: 13px; font-weight: 600; color: var(--text-2); cursor: pointer; list-style: none; }
+        .tt-det summary::-webkit-details-marker { display: none; }
+        .tt-det summary::after { content: ""; width: 8px; height: 8px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); transition: transform var(--dur-2) var(--ease); margin-right: 4px; }
+        .tt-det[open] summary::after { transform: rotate(-135deg); }
+        .tt-det dl { margin: 0; padding: 0 14px 12px; display: grid; gap: 6px; }
+        .tt-det dl div { display: flex; justify-content: space-between; gap: 14px; font-size: 12.5px; }
+        .tt-det dt { color: var(--text-muted); }
+        .tt-det dd { margin: 0; font-family: var(--font-mono); color: var(--text-2); text-align: right; word-break: break-word; }
+        .tt-tip { margin-top: 14px; font-size: 12.5px; line-height: 1.5; color: var(--text-muted); text-align: center; }
+
+        /* ---------- error ---------- */
+        .tt-card.err { border-color: rgba(255, 93, 115, .35); background: radial-gradient(420px 220px at 100% 0%, rgba(255, 93, 115, .10), transparent 70%), linear-gradient(160deg, var(--surface-2), var(--surface) 70%); }
+        .tt-card.err::before, .tt-card.err::after { border-color: var(--danger); }
+        .tt-err-ic { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: var(--danger); background: var(--danger-soft); border: 1px solid rgba(255, 93, 115, .35); }
+        .tt-err-ic .tt-ic { width: 22px; height: 22px; stroke-width: 2.4; }
+        .tt-card.err h2 { margin-top: 14px; font-size: 19px; font-weight: 800; color: var(--text-main); }
+        .tt-card.err p { margin-top: 6px; font-size: 13.5px; line-height: 1.55; color: var(--text-2); word-break: break-word; }
+
+        .tt-toast { position: fixed; left: 50%; bottom: calc(var(--dock-clear) + 6px); z-index: 60; transform: translate(-50%, 12px); opacity: 0; pointer-events: none;
+            max-width: min(92vw, 420px); padding: 12px 16px; border-radius: var(--r-md); background: var(--surface-3); border: 1px solid var(--accent); box-shadow: var(--shadow-2); font-size: 13.5px; color: var(--text-main);
+            transition: opacity var(--dur-2) var(--ease), transform var(--dur-3) var(--ease-spring); }
+        .tt-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+        @media (min-width: 900px) { .tt-page { max-width: 600px; } }
+        @media (prefers-reduced-motion: reduce) {
+            .tt-view, .tt-ring-glow, .tt-bar.proc i::after { animation: none !important; }
+            .tt-toast { transition: none; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="topbar">
+        <div class="menu-btn dashboard-menu" onclick="toggleMenu()">☰</div>
+    </div>
+
+    <script src="notifikasi.js"></script>
+    <div class="sidebar" id="sidebar"></div>
+    <script src="Akun.js"></script>
+    <script src="sidebar.js"></script>
+
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <main class="container tt-page" id="tt" data-state="idle">
+
+        <nav class="mode-switch" id="modeSwitch" data-active="tiktok" aria-label="Pilih jenis upload">
+            <a class="ms-tab" href="/">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 17h-7l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 5 5z"/><path d="M8.5 11l2 2 4-4"/></svg>
+                <span>Status WA HD</span>
+            </a>
+            <a class="ms-tab" href="/tiktokhd" aria-current="page">
+                <img src="./media/tiktok.png" alt="" width="20" height="20">
+                <span>Upload TikTok HD</span>
+            </a>
+            <span class="ms-pill" aria-hidden="true"></span>
+        </nav>
+        <script src="modeswitch.js"></script>
+
+        <div class="logo">
+            <h1>DanzClean</h1>
+            <p>TikTok HD Uploader</p>
+        </div>
+
+        <input type="file" id="ttFile" accept="video/mp4,video/quicktime,video/*" hidden>
+
+        <!-- ===== 1. PILIH VIDEO ===== -->
+        <section class="tt-view tt-view-idle" aria-label="Pilih video">
+            <label for="ttFile" class="upload-box tt-drop" id="ttDrop">
+                <div class="icon"><img src="./media/upload.png" alt=""></div>
+                <p>Tap di sini buat masukin video TikTok</p>
+            </label>
+            <p class="upload-hint" id="ttHint">Video &middot; maks 200 MB &middot; diproses jadi HD</p>
+            <p class="tt-msg" id="ttMsg" role="alert"></p>
+
+            <ol class="tt-steps-hint">
+                <li><span>Pilih video yang mau dijadiin HD</span></li>
+                <li><span>Tekan <b>Proses ke HD</b>, tunggu sampai 100%</span></li>
+                <li><span>Simpan hasilnya, lalu upload ke TikTok</span></li>
+            </ol>
+        </section>
+
+        <!-- ===== 2. SIAP DIPROSES ===== -->
+        <section class="tt-view tt-view-ready" aria-label="Video dipilih">
+            <div class="tt-card">
+                <div class="tt-file">
+                    <div class="tt-thumb"><video id="ttThumb" muted playsinline preload="metadata"></video></div>
+                    <div class="tt-file-main">
+                        <div class="tt-file-name" id="ttName">video.mp4</div>
+                        <div class="tt-file-meta">Ukuran <b id="ttSize">0 MB</b></div>
+                        <span class="tt-chip">Siap diproses</span>
+                    </div>
+                    <button type="button" class="tt-change" id="ttChange">Ganti</button>
+                </div>
+                <button type="button" class="tt-btn" id="ttStart">
+                    <svg class="tt-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V5"/><path d="M7.5 9.5 12 5l4.5 4.5"/><path d="M5 19h14"/></svg>
+                    PROSES KE HD
+                </button>
+            </div>
+        </section>
+
+        <!-- ===== 3. PROSES 0-100 ===== -->
+        <section class="tt-view tt-view-busy" aria-label="Progres">
+            <div class="tt-card">
+                <div class="tt-ring-wrap" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progres upload TikTok HD" id="ttPb">
+                    <div class="tt-ring-glow"></div>
+                    <svg class="tt-ring" viewBox="0 0 160 160" aria-hidden="true">
+                        <defs>
+                            <linearGradient id="ttGrad" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0" stop-color="#4d7cff"/>
+                                <stop offset="1" stop-color="#36e2a8"/>
+                            </linearGradient>
+                        </defs>
+                        <circle class="trk" cx="80" cy="80" r="70"/>
+                        <circle class="val" id="ttRingVal" cx="80" cy="80" r="70"/>
+                    </svg>
+                    <div class="tt-pct" aria-hidden="true"><span id="ttPct">0</span><small>%</small></div>
+                </div>
+
+                <div class="tt-stage">
+                    <h2 id="ttStageTitle">Menyiapkan…</h2>
+                    <p id="ttStageSub" role="status" aria-live="polite">Tunggu sebentar</p>
+                </div>
+
+                <div class="tt-bar" id="ttBar"><i id="ttBarFill"></i></div>
+
+                <ol class="tt-track" id="ttTrack">
+                    <li data-s="1"><span class="tt-dot"><span>1</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>Kirim</li>
+                    <li data-s="2"><span class="tt-dot"><span>2</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>Proses</li>
+                    <li data-s="3"><span class="tt-dot"><span>3</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>Unduh</li>
+                </ol>
+
+                <div class="tt-keep">
+                    <svg class="tt-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 2.8 19a1.2 1.2 0 0 0 1 1.8h16.4a1.2 1.2 0 0 0 1-1.8z"/><path d="M12 10v4.5M12 17.5h.01"/></svg>
+                    Jangan tutup halaman ini sampai 100%
+                </div>
+                <button type="button" class="tt-btn ghost" id="ttCancel">Batalkan</button>
+            </div>
+        </section>
+
+        <!-- ===== 4. SELESAI ===== -->
+        <section class="tt-view tt-view-done" aria-label="Hasil">
+            <div class="tt-card">
+                <div class="tt-ok">
+                    <div class="tt-ok-ic"><svg class="tt-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+                    <div>
+                        <h2>Video HD siap</h2>
+                        <p id="ttDoneName">video_hd.mp4</p>
+                    </div>
+                </div>
+
+                <div class="tt-prev"><video id="ttPrev" controls playsinline preload="metadata"></video></div>
+
+                <div class="tt-stats">
+                    <div class="tt-stat"><small>Ukuran asli</small><b id="ttSizeIn">0 MB</b></div>
+                    <div class="tt-stat hd"><small>Hasil HD</small><b id="ttSizeOut">0 MB</b></div>
+                </div>
+
+                <details class="tt-det" id="ttDet" hidden>
+                    <summary>Detail patch</summary>
+                    <dl id="ttDetList"></dl>
+                </details>
+
+                <a class="tt-btn mint" id="ttSave" href="#" download>
+                    <svg class="tt-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v10.5"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M5 19.5h14"/></svg>
+                    SIMPAN VIDEO
+                </a>
+                <button type="button" class="tt-btn ghost" id="ttAgain">Proses video lain</button>
+                <p class="tt-tip">Buka galeri, lalu upload videonya ke TikTok seperti biasa.</p>
+            </div>
+        </section>
+
+        <!-- ===== 5. GAGAL ===== -->
+        <section class="tt-view tt-view-error" aria-label="Gagal">
+            <div class="tt-card err">
+                <div class="tt-err-ic"><svg class="tt-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7v6M12 16.5h.01"/><circle cx="12" cy="12" r="9"/></svg></div>
+                <h2>Proses gagal</h2>
+                <p id="ttErr" role="alert">Terjadi kesalahan.</p>
+                <button type="button" class="tt-btn" id="ttRetry">Coba lagi</button>
+                <button type="button" class="tt-btn ghost" id="ttPickOther">Pilih video lain</button>
+            </div>
+        </section>
+
+    </main>
+
+    <div class="tt-toast" id="ttToast" role="status" aria-live="polite"></div>
+
+    <script src="config.js"></script>
+    <script>
+        function toggleMenu() {
+            document.getElementById("sidebar").classList.toggle("active");
+            document.getElementById("overlay").classList.toggle("active");
+        }
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+    (function () {
+        "use strict";
+
+        /* ---------- konfigurasi (dari config.js) ---------- */
+        var API = (typeof TIKTOK_HD_API !== "undefined" ? TIKTOK_HD_API : "").replace(/\/+$/, "");
+        var MAX_MB = typeof TIKTOK_HD_MAX_MB !== "undefined" ? TIKTOK_HD_MAX_MB : 200;
+
+        /* bobot progress total 0-100: kirim 45 + proses di server 15 + unduh 40 */
+        var W_UP = 45, W_PROC = 15, W_DOWN = 40;
+
+        function $(id) { return document.getElementById(id); }
+        var root = $("tt");
+
+        $("ttHint").innerHTML = "Video &middot; maks " + MAX_MB + " MB &middot; diproses jadi HD";
+
+        /* ---------- state ---------- */
+        var file = null, thumbUrl = null, blobUrl = null;
+        var xhr = null, jobId = null, pollTimer = null, pollFail = 0;
+        var phase = "idle";          // upload | saving | queue | process | download
+        var frac = 0;                // 0..1 untuk tahap upload/unduh
+        var serverProg = 0;          // 0..100 dari server
+        var serverLabel = "", queuePos = 0, outSize = 0;
+        var target = 0, shown = 0, raf = 0, cancelled = false;
+        var speed = 0, lastT = 0, lastB = 0, loadedB = 0, totalB = 0;
+        var wakeLock = null;
+        var finalReport = "";
+
+        /* ---------- util ---------- */
+        function fmtBytes(n) {
+            if (!isFinite(n) || n <= 0) return "0 KB";
+            if (n < 1024 * 1024) return Math.max(1, Math.round(n / 1024)) + " KB";
+            if (n < 1024 * 1024 * 1024) return (n / 1048576).toFixed(n < 10485760 ? 2 : 1) + " MB";
+            return (n / 1073741824).toFixed(2) + " GB";
+        }
+        function fmtEta(sec) {
+            if (!isFinite(sec) || sec < 0) return "";
+            if (sec < 2) return "sebentar lagi";
+            if (sec < 60) return Math.round(sec) + " dtk";
+            return Math.floor(sec / 60) + " mnt " + Math.round(sec % 60) + " dtk";
+        }
+        function safeJSON(t) { try { return JSON.parse(t); } catch (e) { return null; } }
+        function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+        /* token izin upload: diambil dari Vercel (/api/tiktok-token), berlaku 10 menit */
+        var tok = "", tokExp = 0;
+        function ensureToken() {
+            if (tok && tokExp - Date.now() > 90000) return Promise.resolve(tok);
+            return fetch("/api/tiktok-token", { cache: "no-store" })
+                .then(function (r) { return r.json().then(function (j) { return { r: r, j: j }; }); })
+                .then(function (o) {
+                    if (!o.r.ok || !o.j || !o.j.token) throw new Error((o.j && o.j.error) || "Gagal mengambil izin upload.");
+                    tok = o.j.token; tokExp = o.j.exp * 1000;
+                    return tok;
+                });
+        }
+        function headers() { return tok ? { "x-token": tok } : {}; }
+
+        var toastT;
+        function toast(msg) {
+            var t = $("ttToast");
+            t.textContent = msg; t.classList.add("show");
+            clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove("show"); }, 2600);
+        }
+
+        function setState(s) { root.setAttribute("data-state", s); window.scrollTo({ top: 0, behavior: "smooth" }); }
+
+        /* ---------- pilih file ---------- */
+        function validate(f) {
+            if (!f) return "Pilih video dulu.";
+            var okType = /^video\//.test(f.type) || /\.(mp4|mov|m4v|webm|mkv)$/i.test(f.name);
+            if (!okType) return "Format tidak didukung. Pilih file video (MP4 / MOV).";
+            if (f.size > MAX_MB * 1024 * 1024) return "Video terlalu besar (" + fmtBytes(f.size) + "). Maksimal " + MAX_MB + " MB.";
+            if (f.size < 1024) return "File kosong atau rusak.";
+            return "";
+        }
+
+        function pick(f) {
+            var err = validate(f);
+            $("ttMsg").textContent = err;
+            if (err) { setState("idle"); return; }
+            file = f;
+            $("ttName").textContent = f.name;
+            $("ttSize").textContent = fmtBytes(f.size);
+            if (thumbUrl) URL.revokeObjectURL(thumbUrl);
+            thumbUrl = URL.createObjectURL(f);
+            var v = $("ttThumb");
+            v.src = thumbUrl + "#t=0.5";
+            setState("ready");
+        }
+
+        $("ttFile").addEventListener("change", function () {
+            var f = this.files && this.files[0];
+            this.value = "";
+            if (f) pick(f);
+        });
+
+        var drop = $("ttDrop");
+        ["dragenter", "dragover"].forEach(function (ev) {
+            drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("tt-drag"); });
+        });
+        ["dragleave", "drop"].forEach(function (ev) {
+            drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("tt-drag"); });
+        });
+        drop.addEventListener("drop", function (e) {
+            var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+            if (f) pick(f);
+        });
+
+        $("ttChange").addEventListener("click", function () { $("ttFile").click(); });
+
+        /* ---------- progress UI ---------- */
+        var CIRC = 439.82;
+        var ring = $("ttRingVal"), pctEl = $("ttPct"), pb = $("ttPb"), barFill = $("ttBarFill"), bar = $("ttBar");
+
+        function computeTarget() {
+            if (phase === "upload" || phase === "saving") return W_UP * (phase === "saving" ? 1 : frac);
+            if (phase === "queue" || phase === "process") return W_UP + W_PROC * (serverProg / 100);
+            if (phase === "download") return W_UP + W_PROC + W_DOWN * frac;
+            return 0;
+        }
+
+        function paint(v) {
+            ring.style.strokeDashoffset = (CIRC * (1 - v / 100)).toFixed(2);
+            barFill.style.transform = "scaleX(" + (v / 100).toFixed(4) + ")";
+            var n = Math.min(100, Math.floor(v + 0.0001));
+            if (pctEl.textContent !== String(n)) {
+                pctEl.textContent = n;
+                pb.setAttribute("aria-valuenow", n);
+                document.title = n + "% · Upload TikTok HD";
+            }
+        }
+
+        function loop() {
+            raf = 0;
+            var t = target;
+            var d = t - shown;
+            if (d > 0.02) shown += Math.max(d * 0.16, 0.04);
+            else shown = Math.max(shown, t);
+            if (shown > t) shown = t;
+            paint(shown);
+            if (root.getAttribute("data-state") === "busy" && shown < t - 0.02) raf = requestAnimationFrame(loop);
+        }
+        function kick() { target = Math.max(target, computeTarget()); if (!raf) raf = requestAnimationFrame(loop); }
+
+        function setSteps() {
+            var cur = phase === "download" ? 3 : (phase === "queue" || phase === "process") ? 2 : 1;
+            [].forEach.call($("ttTrack").children, function (li) {
+                var s = +li.getAttribute("data-s");
+                li.className = s < cur ? "done" : s === cur ? "on" : "";
+            });
+            bar.classList.toggle("proc", phase === "process" || phase === "queue" || phase === "saving");
+        }
+
+        function setStage(title, sub) {
+            if ($("ttStageTitle").textContent !== title) $("ttStageTitle").textContent = title;
+            if ($("ttStageSub").innerHTML !== sub) $("ttStageSub").innerHTML = sub;
+        }
+
+        function xferText(verb) {
+            var s = "<b>" + fmtBytes(loadedB) + "</b> dari <b>" + fmtBytes(totalB) + "</b>";
+            if (speed > 0) {
+                s += " &middot; <b>" + fmtBytes(speed) + "/dtk</b>";
+                var eta = fmtEta((totalB - loadedB) / speed);
+                if (eta) s += "<br>sisa " + eta;
+            }
+            return s;
+        }
+
+        function track(loaded, total) {
+            var now = performance.now();
+            loadedB = loaded; totalB = total;
+            if (lastT) {
+                var dt = (now - lastT) / 1000;
+                if (dt > 0.25) {
+                    var inst = (loaded - lastB) / dt;
+                    speed = speed ? speed * 0.7 + inst * 0.3 : inst;
+                    lastT = now; lastB = loaded;
+                }
+            } else { lastT = now; lastB = loaded; }
+        }
+
+        function render() {
+            setSteps();
+            if (phase === "upload") setStage("Mengirim video", xferText());
+            else if (phase === "saving") setStage("Menyimpan di server", "Hampir selesai mengirim…");
+            else if (phase === "queue") setStage("Menunggu giliran", queuePos > 0 ? "Antrian ke-<b>" + queuePos + "</b>, sebentar ya" : "Sebentar ya…");
+            else if (phase === "process") setStage(serverLabel || "Memproses ke HD", "Server lagi mengerjakan videonya.<br>Proses di server <b>" + Math.round(serverProg) + "%</b>");
+            else if (phase === "download") setStage("Mengunduh hasil", xferText());
+            kick();
+        }
+
+        /* ---------- alur utama ---------- */
+        function resetProgress() {
+            phase = "upload"; frac = 0; serverProg = 0; serverLabel = ""; queuePos = 0; outSize = 0;
+            target = 0; shown = 0; speed = 0; lastT = 0; lastB = 0; loadedB = 0; totalB = file ? file.size : 0;
+            pollFail = 0; jobId = null; cancelled = false;
+            paint(0);
+        }
+
+        function start() {
+            if (!file) return;
+            if (!API) { fail("Alamat server belum diatur (TIKTOK_HD_API di config.js)."); return; }
+            resetProgress();
+            setState("busy");
+            lockScreen();
+            window.addEventListener("beforeunload", warnLeave);
+            render();
+
+            ensureToken()
+                .then(function () { if (!cancelled) sendUpload(); })
+                .catch(function (e) { fail((e && e.message) || "Gagal mengambil izin upload."); });
+        }
+
+        function sendUpload() {
+            var fd = new FormData();
+            fd.append("video", file, file.name);
+
+            xhr = new XMLHttpRequest();
+            xhr.open("POST", API + "/jobs");
+            if (tok) xhr.setRequestHeader("x-token", tok);
+
+            xhr.upload.onprogress = function (e) {
+                if (!e.lengthComputable) return;
+                frac = e.loaded / e.total;
+                track(e.loaded, e.total);
+                render();
+            };
+            xhr.upload.onload = function () { frac = 1; phase = "saving"; render(); };
+            xhr.onload = function () {
+                var j = safeJSON(xhr.responseText);
+                if (xhr.status >= 200 && xhr.status < 300 && j && j.id) {
+                    jobId = j.id; phase = "queue"; serverProg = 0; render(); poll();
+                } else {
+                    fail((j && j.error) || "Server menolak video (HTTP " + xhr.status + ").");
+                }
+            };
+            xhr.onerror = function () { if (!cancelled) fail("Tidak bisa terhubung ke server. Cek koneksi internet lalu coba lagi."); };
+            xhr.ontimeout = function () { if (!cancelled) fail("Koneksi ke server terlalu lama."); };
+            xhr.send(fd);
+        }
+
+        function poll() {
+            if (cancelled || !jobId) return;
+            ensureToken()
+                .then(function () { return fetch(API + "/jobs/" + jobId, { headers: headers(), cache: "no-store" }); })
+                .then(function (r) { return r.json().then(function (j) { return { r: r, j: j }; }); })
+                .then(function (o) {
+                    if (cancelled) return;
+                    if (!o.r.ok) throw new Error((o.j && o.j.error) || ("HTTP " + o.r.status));
+                    pollFail = 0;
+                    var j = o.j;
+                    outSize = j.outSize || outSize;
+                    if (j.status === "error") { fail(j.error || "Video gagal diproses."); return; }
+                    if (j.status === "done") { serverProg = 100; phase = "process"; render(); ensureToken().then(download).catch(function (e) { fail(e.message); }); return; }
+                    if (j.status === "queued") { phase = "queue"; queuePos = j.position || 0; serverProg = 0; }
+                    else { phase = "process"; serverProg = j.progress || 0; serverLabel = j.label || ""; }
+                    render();
+                    pollTimer = setTimeout(poll, 450);
+                })
+                .catch(function (e) {
+                    if (cancelled) return;
+                    if (/tidak ditemukan|kedaluwarsa/i.test(e.message)) { fail("Proses kedaluwarsa di server. Coba upload ulang."); return; }
+                    pollFail++;
+                    if (pollFail >= 8) fail("Koneksi ke server terputus saat memproses.");
+                    else pollTimer = setTimeout(poll, 1000);
+                });
+        }
+
+        function download() {
+            phase = "download"; frac = 0; speed = 0; lastT = 0; lastB = 0; loadedB = 0; totalB = outSize || file.size;
+            render();
+            xhr = new XMLHttpRequest();
+            xhr.open("GET", API + "/jobs/" + jobId + "/download");
+            xhr.responseType = "blob";
+            if (tok) xhr.setRequestHeader("x-token", tok);
+            xhr.onprogress = function (e) {
+                var total = e.lengthComputable ? e.total : (outSize || file.size);
+                frac = Math.min(1, total ? e.loaded / total : 0);
+                track(e.loaded, total);
+                render();
+            };
+            xhr.onload = function () {
+                if (xhr.status === 200 && xhr.response) {
+                    finalReport = xhr.getResponseHeader("x-patch-report") || "";
+                    succeed(xhr.response);
+                } else {
+                    fail("Gagal mengunduh hasil (HTTP " + xhr.status + ").");
+                }
+            };
+            xhr.onerror = function () { if (!cancelled) fail("Unduhan terputus. Coba lagi."); };
+            xhr.send();
+        }
+
+        function succeed(blob) {
+            frac = 1; target = 100;
+            if (!raf) raf = requestAnimationFrame(loop);
+            setStage("Selesai", "Video HD sudah siap");
+            [].forEach.call($("ttTrack").children, function (li) { li.className = "done"; });
+
+            var base = (file.name.replace(/\.[^.]+$/, "") || "video");
+            var outName = base + "_hd.mp4";
+            if (blobUrl) URL.revokeObjectURL(blobUrl);
+            blobUrl = URL.createObjectURL(new Blob([blob], { type: "video/mp4" }));
+
+            $("ttDoneName").textContent = outName;
+            $("ttPrev").src = blobUrl;
+            $("ttSizeIn").textContent = fmtBytes(file.size);
+            $("ttSizeOut").textContent = fmtBytes(blob.size);
+            var save = $("ttSave"); save.href = blobUrl; save.setAttribute("download", outName);
+            renderReport(finalReport);
+
+            // bersihkan di server (hasil sudah ada di perangkat)
+            try { fetch(API + "/jobs/" + jobId, { method: "DELETE", headers: headers() }).catch(function () {}); } catch (e) {}
+            cleanupRun();
+
+            setTimeout(function () {
+                paint(100);
+                setState("done");
+                document.title = "Selesai · Upload TikTok HD";
+                if (navigator.vibrate) navigator.vibrate(18);
+            }, 450);
+        }
+
+        function renderReport(h) {
+            var det = $("ttDet"), list = $("ttDetList");
+            list.innerHTML = ""; det.hidden = true;
+            if (!h) return;
+            var obj = null;
+            try { obj = JSON.parse(decodeURIComponent(h)); } catch (e) { return; }
+            if (!obj || typeof obj !== "object") return;
+            var html = "";
+            Object.keys(obj).slice(0, 12).forEach(function (k) {
+                var v = obj[k];
+                if (v === null || v === undefined || v === "") return;
+                html += "<div><dt>" + esc(k) + "</dt><dd>" + esc(typeof v === "object" ? JSON.stringify(v) : v) + "</dd></div>";
+            });
+            if (html) { list.innerHTML = html; det.hidden = false; }
+        }
+
+        function fail(msg) {
+            cancelled = true;
+            clearTimeout(pollTimer);
+            if (xhr) { try { xhr.abort(); } catch (e) {} }
+            if (jobId) { try { fetch(API + "/jobs/" + jobId, { method: "DELETE", headers: headers() }).catch(function () {}); } catch (e) {} }
+            cleanupRun();
+            $("ttErr").textContent = msg;
+            document.title = "Upload TikTok HD - DanzClean";
+            setState("error");
+        }
+
+        function cancel() {
+            cancelled = true;
+            clearTimeout(pollTimer);
+            if (xhr) { try { xhr.abort(); } catch (e) {} }
+            if (jobId) { try { fetch(API + "/jobs/" + jobId, { method: "DELETE", headers: headers() }).catch(function () {}); } catch (e) {} }
+            cleanupRun();
+            document.title = "Upload TikTok HD - DanzClean";
+            setState(file ? "ready" : "idle");
+            toast("Proses dibatalkan");
+        }
+
+        function cleanupRun() {
+            window.removeEventListener("beforeunload", warnLeave);
+            releaseScreen();
+        }
+
+        function warnLeave(e) { e.preventDefault(); e.returnValue = ""; return ""; }
+
+        function lockScreen() {
+            try {
+                if (navigator.wakeLock && navigator.wakeLock.request) {
+                    navigator.wakeLock.request("screen").then(function (l) { wakeLock = l; }).catch(function () {});
+                }
+            } catch (e) {}
+        }
+        function releaseScreen() { try { if (wakeLock) wakeLock.release(); } catch (e) {} wakeLock = null; }
+        document.addEventListener("visibilitychange", function () {
+            if (!document.hidden && root.getAttribute("data-state") === "busy" && !wakeLock) lockScreen();
+        });
+
+        /* ---------- tombol ---------- */
+        $("ttStart").addEventListener("click", start);
+        $("ttCancel").addEventListener("click", cancel);
+        $("ttRetry").addEventListener("click", function () { if (file) start(); else setState("idle"); });
+        $("ttPickOther").addEventListener("click", function () { setState("idle"); $("ttFile").click(); });
+        $("ttAgain").addEventListener("click", function () {
+            if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
+            $("ttPrev").removeAttribute("src"); $("ttPrev").load();
+            file = null; $("ttMsg").textContent = "";
+            setState("idle");
+        });
+        $("ttSave").addEventListener("click", function () { toast("Video disimpan, cek folder Download / galeri"); });
+    })();
+    </script>
+</body>
+
+</html>

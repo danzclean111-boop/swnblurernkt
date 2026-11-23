@@ -568,6 +568,7 @@ function mnNormPath(p) {
 
 function mnActiveIndex() {
   const cur = mnNormPath(location.pathname);
+  if (cur === "/tiktokhd") return 0;
   for (let i = 0; i < MN_NAV.length; i++) {
     const it = MN_NAV[i];
     if (it.href && mnNormPath(it.href) === cur) return i;

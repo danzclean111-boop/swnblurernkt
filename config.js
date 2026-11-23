@@ -3,6 +3,8 @@ const DOWNLOAD_API = "https://dpwndaoomttig-production.up.railway.app";
 const YT_API = "https://api.azbry.com/api/download";
 const EMAIL_API = "https://snsndkskkd-production.up.railway.app/send-email";
 const PRESET_SEARCH_API = "https://presetsearch-production.up.railway.app/api/tiktok";
+const TIKTOK_HD_API = "https://hdtikokjsjs-production.up.railway.app";
+const TIKTOK_HD_MAX_MB = 200; // samakan dengan MAX_MB di server
 const CS_API = "https://gmmitu-production.up.railway.app/api/send-gemini";
 
 const CS_SYSTEM_PROMPT = `

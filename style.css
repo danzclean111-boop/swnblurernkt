@@ -7409,3 +7409,70 @@ html.cg-typing .cg-composer { padding: 8px 10px; }
     .cg-row.owner .cg-bubble, .cg-row.owner .cg-bubble::after { animation: none; }
 }
 
+
+
+/* ===== v4 — Mode switch (Status WA HD / Upload TikTok HD) ===== */
+.mode-switch {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 4px;
+    margin: 0 auto 26px;
+    width: 100%;
+    max-width: 420px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    isolation: isolate;
+}
+.ms-tab {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: var(--tap);
+    padding: 0 10px;
+    border-radius: 999px;
+    font-family: var(--font);
+    font-size: 13.5px;
+    font-weight: 700;
+    letter-spacing: -.005em;
+    color: var(--text-2);
+    text-decoration: none;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    transition: color var(--dur-2) var(--ease);
+}
+.ms-tab svg {
+    width: 18px; height: 18px; flex: none;
+    fill: none; stroke: currentColor; stroke-width: 1.9;
+    stroke-linecap: round; stroke-linejoin: round;
+}
+.ms-tab img {
+    width: 20px; height: 20px; flex: none; object-fit: contain;
+    opacity: .72; transition: opacity var(--dur-2) var(--ease);
+}
+.ms-tab[aria-current="page"] img { opacity: 1; }
+.ms-tab[aria-current="page"] { color: #fff; }
+.ms-tab:focus-visible { outline: 2px solid var(--primary-300); outline-offset: 2px; }
+.ms-pill {
+    position: absolute;
+    z-index: 0;
+    top: 4px; bottom: 4px; left: 4px;
+    width: calc(50% - 6px);
+    border-radius: 999px;
+    background: var(--cta-grad);
+    box-shadow: 0 6px 18px var(--primary-glow), 0 1px 0 rgba(255,255,255,.22) inset;
+    pointer-events: none;
+}
+.mode-switch.ms-anim .ms-pill { transition: transform .38s var(--ease-spring); }
+.mode-switch[data-active="tiktok"] .ms-pill { transform: translateX(calc(100% + 4px)); }
+@media (hover: hover) {
+    .ms-tab:not([aria-current="page"]):hover { color: var(--text-main); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .mode-switch.ms-anim .ms-pill { transition: none; }
+}
