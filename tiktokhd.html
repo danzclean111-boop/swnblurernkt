@@ -21,7 +21,6 @@
         .tt-mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
         .tt-ic { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 
-        /* ---------- state switching ---------- */
         .tt-view { display: none; }
         #tt[data-state="idle"]  .tt-view-form,
         #tt[data-state="ready"] .tt-view-form,
@@ -30,16 +29,13 @@
         #tt[data-state="error"] .tt-view-error { display: block; animation: ttIn .45s var(--ease) both; }
         @keyframes ttIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
-        /* mode ringan selama upload/proses: matikan blur & animasi tak berujung supaya HP kelas menengah tidak macet */
         .tt-busy *, .tt-busy *::before, .tt-busy *::after { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
         .tt-busy .tt-ring-glow, .tt-busy .tt-bar.proc i::after, .tt-busy .topbar *, .tt-busy .csTopbarPulse { animation: none !important; }
 
         .tt-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-        /* ---------- palet TikTok (pembeda dari halaman Status WA) ---------- */
         .tt-page { --tk-cyan: #25F4EE; --tk-pink: #FE2C55; --tk-pink-d: #E5173F; }
 
-        /* ---------- form: dropzone + cf + upload ---------- */
         .tt-drop { background: linear-gradient(180deg, rgba(37, 244, 238, .07), rgba(254, 44, 85, .05)); padding: 38px 20px 42px; margin-bottom: 14px; }
         .tt-drop .icon { margin-bottom: 4px; }
         .tt-drop .icon img { width: 72px; height: 72px; margin-bottom: 10px; }
@@ -73,7 +69,6 @@
         .tt-page .upload-hint { margin: 0 0 14px; }
         .tt-page #cfWidget { display: block; width: 100%; margin: 0 0 14px; border-radius: var(--r-md); overflow: hidden; }
         .tt-page #cfWidget iframe { display: block; width: 100% !important; }
-        /* ---------- pilih perangkat ---------- */
         .tt-plat { display: none; margin: 0 0 14px; text-align: left; }
         #tt[data-state="ready"] .tt-plat { display: block; animation: ttIn .45s var(--ease) both; }
         .tt-plat-lbl { margin: 0 0 10px; font-size: 13px; font-weight: 700; color: var(--text-2); }
@@ -111,7 +106,6 @@
         .tt-up:focus-visible { outline: 2px solid var(--tk-cyan); outline-offset: 4px; }
         .tt-up .tt-ic { width: 20px; height: 20px; stroke-width: 2.3; }
 
-        /* ---------- kartu umum ---------- */
         .tt-card { position: relative; padding: 22px 18px 20px; border-radius: var(--r-xl); text-align: left; overflow: hidden;
             background: radial-gradient(420px 220px at 100% 0%, rgba(77, 124, 255, .10), transparent 70%), linear-gradient(160deg, var(--surface-2), var(--surface) 70%);
             border: 1px solid var(--line); box-shadow: var(--shadow-1); }
@@ -120,7 +114,6 @@
         .tt-card::before { top: 12px; left: 12px; border-right: 0; border-bottom: 0; border-top-left-radius: 6px; }
         .tt-card::after  { bottom: 12px; right: 12px; border-left: 0; border-top: 0; border-bottom-right-radius: 6px; }
 
-        /* ---------- tombol ---------- */
         .tt-btn { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; min-height: 52px; padding: 0 20px; margin-top: 12px;
             border: 0; border-radius: var(--r-md); cursor: pointer; font-family: var(--font); font-size: 15px; font-weight: 800; letter-spacing: .03em; text-decoration: none;
             color: #fff; background: var(--cta-grad); box-shadow: 0 10px 28px var(--primary-glow), 0 1px 0 rgba(255,255,255,.22) inset;
@@ -132,8 +125,7 @@
         .tt-btn.danger { color: var(--danger); background: var(--danger-soft); border: 1px solid rgba(255, 93, 115, .35); box-shadow: none; letter-spacing: 0; font-weight: 700; }
         @media (hover: hover) { .tt-btn:hover { filter: brightness(1.08); } .tt-btn.ghost:hover { background: rgba(255,255,255,.09); filter: none; } }
 
-        /* ---------- busy : progress ---------- */
-        .tt-ring-wrap { position: relative; width: 176px; height: 176px; margin: 4px auto 0; }
+        .tt-ring-wrap { contain: layout paint; position: relative; width: 176px; height: 176px; margin: 4px auto 0; }
         .tt-ring { width: 100%; height: 100%; transform: rotate(-90deg); }
         .tt-ring circle { fill: none; stroke-width: 9; }
         .tt-ring .trk { stroke: rgba(150, 170, 255, .12); }
@@ -171,7 +163,6 @@
         .tt-keep { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 18px; font-size: 12.5px; color: var(--text-muted); }
         .tt-keep .tt-ic { width: 16px; height: 16px; color: var(--amber); }
 
-        /* ---------- done ---------- */
         .tt-ok { display: flex; align-items: center; gap: 12px; }
         .tt-ok-ic { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: var(--accent); background: rgba(54, 226, 168, .12); border: 1px solid rgba(54, 226, 168, .35); }
         .tt-ok-ic .tt-ic { width: 22px; height: 22px; stroke-width: 2.4; }
@@ -195,7 +186,6 @@
         .tt-det dd { margin: 0; font-family: var(--font-mono); color: var(--text-2); text-align: right; word-break: break-word; }
         .tt-tip { margin-top: 14px; font-size: 12.5px; line-height: 1.5; color: var(--text-muted); text-align: center; }
 
-        /* ---------- error ---------- */
         .tt-card.err { border-color: rgba(255, 93, 115, .35); background: radial-gradient(420px 220px at 100% 0%, rgba(255, 93, 115, .10), transparent 70%), linear-gradient(160deg, var(--surface-2), var(--surface) 70%); }
         .tt-card.err::before, .tt-card.err::after { border-color: var(--danger); }
         .tt-err-ic { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: var(--danger); background: var(--danger-soft); border: 1px solid rgba(255, 93, 115, .35); }
@@ -203,7 +193,6 @@
         .tt-card.err h2 { margin-top: 14px; font-size: 19px; font-weight: 800; color: var(--text-main); }
         .tt-card.err p { margin-top: 6px; font-size: 13.5px; line-height: 1.55; color: var(--text-2); word-break: break-word; }
 
-        /* ---------- log ---------- */
         .tt-log { margin-top: 16px; padding: 12px 16px; border-radius: var(--r-md); background: rgba(6, 9, 19, .6); border: 1px solid var(--line); text-align: left;
             font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6; color: var(--text-3); }
         .tt-ln { display: flex; gap: 8px; word-break: break-word; }
@@ -225,7 +214,7 @@
             .tt-view, .tt-ring-glow, .tt-bar.proc i::after { animation: none !important; }
             .tt-toast { transition: none; }
         }
-    </style>
+</style>
 </head>
 
 <body>
@@ -263,7 +252,7 @@
 
         <input type="file" id="ttFile" accept="video/mp4,video/quicktime,video/*" hidden>
 
-        <!-- ===== 1. FORM: PILIH VIDEO + CLOUDFLARE + UPLOAD ===== -->
+        
         <section class="tt-view tt-view-form" aria-label="Upload video TikTok">
             <label for="ttFile" class="upload-box tt-drop" id="ttDrop">
                 <div class="tt-dz-empty">
@@ -304,7 +293,7 @@
             </button>
         </section>
 
-        <!-- ===== 3. PROSES 0-100 ===== -->
+        
         <section class="tt-view tt-view-busy" aria-label="Progres">
             <div class="tt-card">
                 <div class="tt-ring-wrap" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progres upload TikTok HD" id="ttPb">
@@ -343,7 +332,7 @@
             </div>
         </section>
 
-        <!-- ===== 4. SELESAI ===== -->
+        
         <section class="tt-view tt-view-done" aria-label="Hasil">
             <div class="tt-card">
                 <div class="tt-ok">
@@ -375,7 +364,7 @@
             </div>
         </section>
 
-        <!-- ===== 5. GAGAL ===== -->
+        
         <section class="tt-view tt-view-error" aria-label="Gagal">
             <div class="tt-card err">
                 <div class="tt-err-ic"><svg class="tt-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7v6M12 16.5h.01"/><circle cx="12" cy="12" r="9"/></svg></div>
@@ -399,7 +388,7 @@
             document.getElementById("sidebar").classList.toggle("active");
             document.getElementById("overlay").classList.toggle("active");
         }
-    </script>
+</script>
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js"></script>
@@ -410,11 +399,9 @@
     (function () {
         "use strict";
 
-        /* ---------- konfigurasi (dari config.js) ---------- */
         var API = (typeof TIKTOK_HD_API !== "undefined" ? TIKTOK_HD_API : "").replace(/\/+$/, "");
         var MAX_MB = typeof TIKTOK_HD_MAX_MB !== "undefined" ? TIKTOK_HD_MAX_MB : 200;
 
-        /* bobot progress total 0-100: kirim 45 + proses di server 15 + unduh 40 */
         var W_UP = 45, W_PROC = 15, W_DOWN = 40;
 
         function $(id) { return document.getElementById(id); }
@@ -422,19 +409,17 @@
 
         $("ttHint").innerHTML = "Video &middot; maks " + MAX_MB + " MB &middot; diproses jadi HD";
 
-        /* ---------- state ---------- */
         var file = null, platform = null, thumbUrl = null, blobUrl = null;
         var xhr = null, jobId = null, pollTimer = null, pollFail = 0;
-        var phase = "idle";          // upload | saving | queue | process | download
-        var frac = 0;                // 0..1 untuk tahap upload/unduh
-        var serverProg = 0;          // 0..100 dari server
+        var phase = "idle";
+        var frac = 0;
+        var serverProg = 0;
         var serverLabel = "", queuePos = 0, outSize = 0;
         var target = 0, shown = 0, raf = 0, cancelled = false;
         var speed = 0, lastT = 0, lastB = 0, loadedB = 0, totalB = 0;
         var wakeLock = null;
         var finalReport = "";
 
-        /* ---------- util ---------- */
         function fmtBytes(n) {
             if (!isFinite(n) || n <= 0) return "0 KB";
             if (n < 1024 * 1024) return Math.max(1, Math.round(n / 1024)) + " KB";
@@ -449,7 +434,6 @@
         }
         function safeJSON(t) { try { return JSON.parse(t); } catch (e) { return null; } }
         function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
-        /* izin upload: Vercel cek Cloudflare lalu kasih token 30 menit (/api/tiktok-token) */
         var tok = "";
         function headers() { return tok ? { "x-token": tok } : {}; }
         function cfToken() { try { return (window.turnstile && window.turnstile.getResponse()) || ""; } catch (e) { return ""; } }
@@ -469,7 +453,6 @@
                 });
         }
 
-        /* ---------- log ---------- */
         var logLines = [], lastLogMsg = "", sending = false;
         function log(msg, key, cls) {
             if (msg === lastLogMsg) return;
@@ -521,7 +504,6 @@
             if (s === "busy" || s === "done" || s === "error") window.scrollTo({ top: 0, behavior: "smooth" });
         }
 
-        /* ---------- pilih file ---------- */
         function validate(f) {
             if (!f) return "Pilih video dulu.";
             var okType = /^video\//.test(f.type) || /\.(mp4|mov|m4v|webm|mkv)$/i.test(f.name);
@@ -566,7 +548,6 @@
             if (f) pick(f);
         });
 
-        /* ---------- progress UI ---------- */
         var CIRC = 439.82;
         var ring = $("ttRingVal"), pctEl = $("ttPct"), pb = $("ttPb"), barFill = $("ttBarFill"), bar = $("ttBar");
 
@@ -577,10 +558,11 @@
             return 0;
         }
 
+        var lastRingN = -1;
         function paint(v) {
-            ring.style.strokeDashoffset = (CIRC * (1 - v / 100)).toFixed(2);
             barFill.style.transform = "scaleX(" + (v / 100).toFixed(4) + ")";
             var n = Math.min(100, Math.floor(v + 0.0001));
+            if (n !== lastRingN) { lastRingN = n; ring.style.strokeDashoffset = (CIRC * (1 - n / 100)).toFixed(2); }
             if (pctEl.textContent !== String(n)) {
                 pctEl.textContent = n;
                 pb.setAttribute("aria-valuenow", n);
@@ -658,10 +640,9 @@
             kick();
         }
 
-        /* ---------- alur utama ---------- */
         function resetProgress() {
             phase = "upload"; frac = 0; serverProg = 0; serverLabel = ""; queuePos = 0; outSize = 0;
-            target = 0; shown = 0; speed = 0; lastT = 0; lastB = 0; loadedB = 0; totalB = file ? file.size : 0;
+            lastRingN = -1; target = 0; shown = 0; speed = 0; lastT = 0; lastB = 0; loadedB = 0; totalB = file ? file.size : 0;
             pollFail = 0; jobId = null; cancelled = false; sending = false;
             paint(0);
         }
@@ -797,7 +778,6 @@
             var save = $("ttSave"); save.href = blobUrl; save.setAttribute("download", outName);
             renderReport(finalReport);
 
-            // bersihkan di server (hasil sudah ada di perangkat)
             try { fetch(API + "/jobs/" + jobId, { method: "DELETE", headers: headers() }).catch(function () {}); } catch (e) {}
             cleanupRun();
 
@@ -869,7 +849,6 @@
             if (!document.hidden && root.getAttribute("data-state") === "busy" && !wakeLock) lockScreen();
         });
 
-        /* ---------- tombol ---------- */
         $("ttStart").addEventListener("click", start);
         $("ttCancel").addEventListener("click", cancel);
         $("ttRetry").addEventListener("click", function () {
@@ -886,7 +865,7 @@
         });
         $("ttSave").addEventListener("click", function () { toast("Video disimpan, cek folder Download / galeri"); });
     })();
-    </script>
+</script>
 </body>
 
 </html>
