@@ -1,12 +1,15 @@
 const crypto = require("crypto");
 
 const ALLOWED_ORIGINS = ["https://danzclean.arisu.biz.id"];
-const TTL_SEC = 10 * 60; 
+const TTL_SEC = 30 * 60;
+const VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
-module.exports = function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
 
-  if (req.method !== "GET") {
+  // Klien (tiktokhd.html) mengirim POST berisi { turnstileToken }
+  if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method tidak diizinkan" });
   }
 
@@ -16,9 +19,34 @@ module.exports = function handler(req, res) {
   }
 
   const secret = process.env.TIKTOK_HD_TOKEN_SECRET;
-  if (!secret) {
-    console.error("[tiktok-token] TIKTOK_HD_TOKEN_SECRET belum diisi");
+  const cfSecret = process.env.TURNSTILE_SECRET_KEY;
+  if (!secret || !cfSecret) {
+    console.error("[tiktok-token] TIKTOK_HD_TOKEN_SECRET / TURNSTILE_SECRET_KEY belum diisi");
     return res.status(500).json({ error: "Server belum dikonfigurasi" });
+  }
+
+  let body = req.body;
+  if (typeof body === "string") {
+    try { body = JSON.parse(body); } catch (e) { body = {}; }
+  }
+  const cf = body && body.turnstileToken;
+  if (!cf || typeof cf !== "string") {
+    return res.status(400).json({ error: "Verifikasi Cloudflare belum selesai." });
+  }
+
+  // Cek token Turnstile ke Cloudflare
+  try {
+    const params = new URLSearchParams({ secret: cfSecret, response: cf });
+    const ip = (req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+    if (ip) params.set("remoteip", ip);
+    const r = await fetch(VERIFY_URL, { method: "POST", body: params });
+    const j = await r.json();
+    if (!j || !j.success) {
+      return res.status(403).json({ error: "Verifikasi Cloudflare gagal, coba lagi." });
+    }
+  } catch (e) {
+    console.error("[tiktok-token] siteverify error", e);
+    return res.status(502).json({ error: "Gagal menghubungi Cloudflare, coba lagi." });
   }
 
   const exp = Math.floor(Date.now() / 1000) + TTL_SEC;
