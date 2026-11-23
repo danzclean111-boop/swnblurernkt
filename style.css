@@ -1,7 +1,7 @@
 
 
 :root {
-    
+
     --font: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
@@ -21,9 +21,9 @@
     --primary-700: #2c4fc4;
     --primary-300: #8fb0ff;
     --primary-glow: rgba(77, 124, 255, 0.38);
-    --accent: #36e2a8;          
+    --accent: #36e2a8;
     --accent-glow: rgba(54, 226, 168, 0.28);
-    --amber: #ffbf47;           
+    --amber: #ffbf47;
     --danger: #ff5d73;
 
     --text-main: #eef2ff;
@@ -49,9 +49,9 @@
     --cta-grad: linear-gradient(180deg, var(--primary-hi), var(--primary-mid) 55%, var(--primary-lo));
     --danger-soft: rgba(255, 93, 115, .14);
     --tap: 44px;
-    --dur-1: .15s;   
-    --dur-2: .25s;   
-    --dur-3: .4s;    
+    --dur-1: .15s;
+    --dur-2: .25s;
+    --dur-3: .4s;
     --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px;
     --dock-h: 64px;
     --dock-clear: calc(var(--dock-h) + 12px + env(safe-area-inset-bottom, 0px) + 20px);
@@ -7148,7 +7148,7 @@ html.cg-typing .cg-composer { padding: 8px 10px; }
 }
 
 .cg-row.owner .cg-bubble {
-    --cg-owner: 245, 185, 66; 
+    --cg-owner: 245, 185, 66;
     background: #151a36;
     color: #fff;
     isolation: isolate;
@@ -7411,19 +7411,19 @@ html.cg-typing .cg-composer { padding: 8px 10px; }
 
 
 
-/* ===== v4 — Mode switch (Status WA HD / Upload TikTok HD) ===== */
 .mode-switch {
     position: relative;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px;
-    padding: 4px;
-    margin: 0 auto 26px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    padding: 6px;
+    margin: 0 auto 28px;
     width: 100%;
-    max-width: 420px;
-    border-radius: 999px;
-    background: var(--surface);
+    max-width: 440px;
+    border-radius: 22px;
+    background: linear-gradient(180deg, rgba(18, 26, 58, .92), rgba(13, 20, 48, .92));
     border: 1px solid var(--line-strong);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .28), 0 1px 0 rgba(255, 255, 255, .05) inset;
     isolation: isolate;
 }
 .ms-tab {
@@ -7432,47 +7432,79 @@ html.cg-typing .cg-composer { padding: 8px 10px; }
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    min-height: var(--tap);
-    padding: 0 10px;
-    border-radius: 999px;
+    gap: 7px;
+    min-height: 52px;
+    padding: 0 6px;
+    border-radius: 16px;
     font-family: var(--font);
-    font-size: 13.5px;
+    font-size: 13px;
     font-weight: 700;
+    line-height: 1.15;
+    text-align: left;
     letter-spacing: -.005em;
-    color: var(--text-2);
+    color: var(--text-muted);
     text-decoration: none;
-    white-space: nowrap;
+    text-wrap: balance;
     -webkit-tap-highlight-color: transparent;
-    transition: color var(--dur-2) var(--ease);
+    transition: color var(--dur-2) var(--ease), transform var(--dur-1) var(--ease);
 }
-.ms-tab svg {
-    width: 18px; height: 18px; flex: none;
-    fill: none; stroke: currentColor; stroke-width: 1.9;
-    stroke-linecap: round; stroke-linejoin: round;
+.ms-tab:active { transform: scale(.97); }
+.ms-ic {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 9px;
+    background: rgba(150, 170, 255, .10);
+    border: 1px solid rgba(150, 170, 255, .16);
+    transition: background var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease);
 }
-.ms-tab img {
-    width: 20px; height: 20px; flex: none; object-fit: contain;
-    opacity: .72; transition: opacity var(--dur-2) var(--ease);
+.ms-ic img {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+    opacity: .72;
+    transition: opacity var(--dur-2) var(--ease);
 }
-.ms-tab[aria-current="page"] img { opacity: 1; }
+.ms-ic svg.ms-fb { display: none; }
+.ms-ic svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
 .ms-tab[aria-current="page"] { color: #fff; }
+.ms-tab[aria-current="page"] .ms-ic { background: rgba(255, 255, 255, .18); border-color: rgba(255, 255, 255, .30); }
+.ms-tab[aria-current="page"] .ms-ic img { opacity: 1; }
 .ms-tab:focus-visible { outline: 2px solid var(--primary-300); outline-offset: 2px; }
 .ms-pill {
     position: absolute;
     z-index: 0;
-    top: 4px; bottom: 4px; left: 4px;
-    width: calc(50% - 6px);
-    border-radius: 999px;
+    top: 6px;
+    bottom: 6px;
+    left: 6px;
+    width: calc(50% - 9px);
+    border-radius: 16px;
     background: var(--cta-grad);
-    box-shadow: 0 6px 18px var(--primary-glow), 0 1px 0 rgba(255,255,255,.22) inset;
+    box-shadow: 0 8px 22px var(--primary-glow), 0 1px 0 rgba(255, 255, 255, .28) inset, 0 0 0 1px rgba(143, 176, 255, .35);
     pointer-events: none;
 }
 .mode-switch.ms-anim .ms-pill { transition: transform .38s var(--ease-spring); }
-.mode-switch[data-active="tiktok"] .ms-pill { transform: translateX(calc(100% + 4px)); }
+.mode-switch[data-active="tiktok"] .ms-pill { transform: translateX(calc(100% + 6px)); }
 @media (hover: hover) {
     .ms-tab:not([aria-current="page"]):hover { color: var(--text-main); }
+    .ms-tab:not([aria-current="page"]):hover .ms-ic img { opacity: .95; }
+}
+@media (max-width: 340px) {
+    .ms-tab { font-size: 12px; gap: 6px; }
+    .ms-ic { width: 26px; height: 26px; }
+    .ms-ic img { width: 32px; height: 32px; }
 }
 @media (prefers-reduced-motion: reduce) {
     .mode-switch.ms-anim .ms-pill { transition: none; }
+    .ms-tab { transition: color var(--dur-2) var(--ease); }
 }
