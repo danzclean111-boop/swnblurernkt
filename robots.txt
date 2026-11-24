@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /owner
+Disallow: /login
+Disallow: /settingakun
+Disallow: /chatglobal
+Disallow: /customerservice
+Disallow: /Blokirakun
+Disallow: /Diblokir
+Disallow: /maintenance
+
+Sitemap: https://danzclean.arisu.biz.id/sitemap.xml

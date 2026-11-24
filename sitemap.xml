@@ -1,33 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://danzclean.arisu.biz.id/</loc>
-    <lastmod>2026-07-06</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.00</priority>
+    <loc>https://danzclean.arisu.biz.id/danzclean</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://danzclean.arisu.biz.id/tiktokhd</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://danzclean.arisu.biz.id/tiktok</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://danzclean.arisu.biz.id/instagram</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://danzclean.arisu.biz.id/yt</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://danzclean.arisu.biz.id/pinterest</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://danzclean.arisu.biz.id/preset-tamplate</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://danzclean.arisu.biz.id/searchpreset</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://danzclean.arisu.biz.id/creator</loc>
-    <lastmod>2026-07-06</lastmod>
+    <lastmod>2026-11-24</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.80</priority>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://danzclean.arisu.biz.id/stats</loc>
-    <lastmod>2026-07-06</lastmod>
+    <lastmod>2026-11-24</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.80</priority>
+    <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://danzclean.arisu.biz.id/rating.html</loc>
-    <lastmod>2026-07-06</lastmod>
+    <loc>https://danzclean.arisu.biz.id/rating</loc>
+    <lastmod>2026-11-24</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.80</priority>
+    <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://danzclean.arisu.biz.id/maintenance.html</loc>
-    <lastmod>2026-07-06</lastmod>
+    <loc>https://danzclean.arisu.biz.id/donasi</loc>
+    <lastmod>2026-11-24</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.30</priority>
+    <priority>0.5</priority>
   </url>
 </urlset>
