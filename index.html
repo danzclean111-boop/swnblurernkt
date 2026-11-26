@@ -102,8 +102,32 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        .gc-scroll-hint {
+            display: none;
+            flex: none;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #36e2a8;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+        .gc-scroll-hint.is-scrollable { display: flex; }
+        .gc-scroll-hint.at-end { opacity: 0; }
+        .gc-scroll-hint svg { display: block; animation: gcHintBounce 1.2s ease-in-out infinite; }
+        @keyframes gcHintBounce { 0%, 100% { transform: translateY(-1px); } 50% { transform: translateY(3px); } }
+        #groupListContainer.has-more {
+            -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+            mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+        }
+        @media (prefers-reduced-motion: reduce) { .gc-scroll-hint svg { animation: none; } }
+
         .gm-channel {
             position: relative;
+            flex: none;
             overflow: hidden;
             display: flex;
             align-items: center;
@@ -386,6 +410,7 @@
         <div class="group-list-container" id="groupListContainer">
             
         </div>
+        <div class="gc-scroll-hint" id="gcScrollHint" aria-hidden="true"><span>Geser untuk lihat grup lainnya</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
 
         <div class="gc-owner" id="groupOwnerTools" hidden>
             <button type="button" class="gc-add-btn" id="gcAddToggle">+ Tambah Grup</button>
@@ -1384,6 +1409,18 @@ const GROUP_POLL_MS = 12 * 1000;
 
 let groupPollTimer = null;
 
+    const gcScrollHint = document.getElementById("gcScrollHint");
+    function updateGroupScrollHint() {
+        const el = groupListContainer;
+        const scrollable = el.scrollHeight > el.clientHeight + 2;
+        const atEnd = el.scrollTop + el.clientHeight >= el.scrollHeight - 6;
+        gcScrollHint.classList.toggle("is-scrollable", scrollable);
+        gcScrollHint.classList.toggle("at-end", !scrollable || atEnd);
+        el.classList.toggle("has-more", scrollable && !atEnd);
+    }
+    groupListContainer.addEventListener("scroll", updateGroupScrollHint, { passive: true });
+    window.addEventListener("resize", updateGroupScrollHint);
+
     function renderGroupButtons() {
         groupListContainer.innerHTML = "";
         const ownerTools = document.getElementById("groupOwnerTools");
@@ -1394,6 +1431,7 @@ let groupPollTimer = null;
             empty.className = "gc-empty";
             empty.textContent = "Belum ada grup tersedia.";
             groupListContainer.appendChild(empty);
+            updateGroupScrollHint();
             return;
         }
         whatsappGroups.forEach(group => {
@@ -1479,6 +1517,8 @@ item.appendChild(link);
             setGroupStatus(item, "checking");
             checkGroupStatus(group.url).then(st => setGroupStatus(item, st));
         });
+        updateGroupScrollHint();
+        requestAnimationFrame(updateGroupScrollHint);
     }
 
     const groupModalOverlay = document.getElementById("groupModalOverlay");
