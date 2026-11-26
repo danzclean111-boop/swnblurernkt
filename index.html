@@ -103,34 +103,81 @@
         }
 
         .gm-channel {
-            position: absolute;
-            top: 14px;
-            left: 14px;
-            z-index: 2;
-            display: inline-flex;
+            position: relative;
+            overflow: hidden;
+            display: flex;
             align-items: center;
-            gap: 5px;
-            height: 32px;
-            padding: 0 11px;
+            gap: 12px;
+            width: 100%;
+            margin-top: 14px;
+            padding: 12px 14px;
             box-sizing: border-box;
-            border-radius: 999px;
-            border: 1px solid rgba(54, 226, 168, 0.4);
-            background: rgba(54, 226, 168, 0.12);
-            color: #36e2a8;
-            font-size: 11.5px;
-            font-weight: 700;
-            line-height: 1;
-            white-space: nowrap;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #5b78ff, #7a4dff);
+            color: #fff;
             text-decoration: none;
+            box-shadow: 0 6px 18px rgba(91, 120, 255, 0.38);
+            transition: transform 0.2s ease;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             user-select: none;
             -webkit-user-drag: none;
             -webkit-tap-highlight-color: transparent;
-            transition: transform 0.2s ease;
         }
-        .gm-channel:active { transform: scale(0.95); }
-        .gm-channel svg { display: block; flex: none; }
+        .gm-channel:active { transform: scale(0.98); }
+        .gm-channel::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: -60%;
+            width: 40%;
+            background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+            transform: skewX(-18deg);
+            animation: gmShine 3.6s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes gmShine { 0%, 55% { left: -60%; } 100% { left: 130%; } }
+        .gm-channel * { -webkit-user-select: none; user-select: none; }
+        .gm-channel-ico {
+            position: relative;
+            flex: 0 0 42px;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.22);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .gm-channel-ico svg { display: block; transform-origin: 50% 12%; animation: gmRing 3.6s ease-in-out infinite; }
+        @keyframes gmRing {
+            0%, 60%, 100% { transform: rotate(0); }
+            66% { transform: rotate(14deg); }
+            72% { transform: rotate(-12deg); }
+            78% { transform: rotate(8deg); }
+            84% { transform: rotate(-5deg); }
+            90% { transform: rotate(0); }
+        }
+        .gm-channel-dot {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ff4d6a;
+            box-shadow: 0 0 0 2px #6a5cff;
+            animation: gmDot 1.6s ease-in-out infinite;
+        }
+        @keyframes gmDot { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.25); } }
+        .gm-channel-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; text-align: left; }
+        .gm-channel-title { font-size: 16px; font-weight: 800; letter-spacing: 0.2px; line-height: 1.2; }
+        .gm-channel-sub { font-size: 12px; font-weight: 500; opacity: 0.88; line-height: 1.3; }
+        .gm-channel-arrow { flex: none; opacity: 0.9; }
+        @media (prefers-reduced-motion: reduce) {
+            .gm-channel::after, .gm-channel-ico svg, .gm-channel-dot { animation: none; }
+        }
 
         .gc-state {
             flex: 0 0 64px;
@@ -333,7 +380,6 @@
 <div class="group-modal-overlay" id="groupModalOverlay">
     <div class="group-modal-card">
         <button type="button" class="group-modal-close" id="closeGroupModal" aria-label="Tutup"><svg class="close-x" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M6 6L18 18M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
-        <a class="gm-channel" id="gmChannel" href="https://whatsapp.com/channel/0029VbCPkeX2UPBEbTumgG2Y" target="_blank" rel="noopener" draggable="false"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 6a9 9 0 0 1 0 12"/></svg><span>Info Saluran</span></a>
         <div class="group-modal-title">PILIH GROUP WHATSAPP</div>
         <p class="group-modal-sub">Pilih salah satu grup di bawah untuk bergabung:</p>
         
@@ -353,6 +399,11 @@
             </div>
             <div class="gc-owner-msg" id="gcOwnerMsg" role="status" aria-live="polite"></div>
         </div>
+        <a class="gm-channel" id="gmChannel" href="https://whatsapp.com/channel/0029VbCPkeX2UPBEbTumgG2Y" target="_blank" rel="noopener" draggable="false">
+            <span class="gm-channel-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><i class="gm-channel-dot"></i></span>
+            <span class="gm-channel-body"><span class="gm-channel-title">Info Saluran</span><span class="gm-channel-sub">Update &amp; info terbaru DanzClean</span></span>
+            <svg class="gm-channel-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </a>
     </div>
 </div>
 
