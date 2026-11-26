@@ -102,6 +102,36 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        .gm-channel {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            height: 32px;
+            padding: 0 11px;
+            box-sizing: border-box;
+            border-radius: 999px;
+            border: 1px solid rgba(54, 226, 168, 0.4);
+            background: rgba(54, 226, 168, 0.12);
+            color: #36e2a8;
+            font-size: 11.5px;
+            font-weight: 700;
+            line-height: 1;
+            white-space: nowrap;
+            text-decoration: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-user-drag: none;
+            -webkit-tap-highlight-color: transparent;
+            transition: transform 0.2s ease;
+        }
+        .gm-channel:active { transform: scale(0.95); }
+        .gm-channel svg { display: block; flex: none; }
+
         .gc-state {
             flex: 0 0 64px;
             margin: 10px 0;
@@ -303,6 +333,7 @@
 <div class="group-modal-overlay" id="groupModalOverlay">
     <div class="group-modal-card">
         <button type="button" class="group-modal-close" id="closeGroupModal" aria-label="Tutup"><svg class="close-x" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M6 6L18 18M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+        <a class="gm-channel" id="gmChannel" href="https://whatsapp.com/channel/0029VbCPkeX2UPBEbTumgG2Y" target="_blank" rel="noopener" draggable="false"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 6a9 9 0 0 1 0 12"/></svg><span>Info Saluran</span></a>
         <div class="group-modal-title">PILIH GROUP WHATSAPP</div>
         <p class="group-modal-sub">Pilih salah satu grup di bawah untuk bergabung:</p>
         
@@ -1410,6 +1441,15 @@ groupPollTimer = open ? setInterval(refreshGroupStatuses, GROUP_POLL_MS) : null;
     }).observe(groupModalOverlay, { attributes: true, attributeFilter: ["class"] });
 const joinGroupTrigger = document.getElementById("joinGroupTrigger");
 const closeGroupModal = document.getElementById("closeGroupModal");
+const gmChannel = document.getElementById("gmChannel");
+gmChannel.addEventListener("contextmenu", (e) => e.preventDefault());
+gmChannel.addEventListener("dragstart", (e) => e.preventDefault());
+gmChannel.addEventListener("click", (e) => {
+    if (!/Android/i.test(navigator.userAgent)) return;
+    e.preventDefault();
+    const ch = "0029VbCPkeX2UPBEbTumgG2Y";
+    location.href = "intent://channel/" + ch + "#Intent;scheme=whatsapp;S.browser_fallback_url=" + encodeURIComponent("https://whatsapp.com/channel/" + ch) + ";end";
+});
 
 function openGroupModal() {
     renderGroupButtons();
