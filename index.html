@@ -1326,6 +1326,19 @@ let groupPollTimer = null;
             link.draggable = false;
             link.addEventListener("contextmenu", (e) => e.preventDefault());
             link.addEventListener("dragstart", (e) => e.preventDefault());
+            link.addEventListener("click", (e) => {
+                const code = getInviteCode(group.url);
+                if (!code || !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) return;
+                e.preventDefault();
+                let left = false;
+                const onHide = () => { if (document.hidden) left = true; };
+                document.addEventListener("visibilitychange", onHide);
+                location.href = "whatsapp://chat?code=" + code;
+                setTimeout(() => {
+                    document.removeEventListener("visibilitychange", onHide);
+                    if (!left && !document.hidden) location.href = cleanGroupUrl(group.url);
+                }, 2000);
+            });
             const parts = group.name.match(/^(.*?)\s*\((.*)\)\s*$/);
             const title = parts ? parts[1] : group.name;
             const sub = parts ? parts[2] : "";
